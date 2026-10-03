@@ -1664,7 +1664,8 @@ function renderZ(d,S,A,prog,dst,scr){const {W,H,id}=S,Zs=zonesOf(scr,id),zs=A.Z[
     if(style==="overlay"){let stop=clockX;for(let j=i+1;j<Zs.length;j++){const b=zs[j];if(R[j].w&&b&&(taken(j,b.cur)||(b.prev!==undefined&&prog(b,ROLL)<1&&taken(j,b.prev)))){stop=Math.min(stop,R[j].x);break;}}
       return {x:R[i].x,w:Math.max(R[i].w,Math.min(240,stop-R[i].x)),spill:1};}return R[i];};
   const rs=Zs.map((_,i)=>rect(i)),hidden=i=>rs.some((r,j)=>j!==i&&r.spill&&R[i].w&&R[i].x<r.x+r.w&&R[i].x+R[i].w>r.x);
-  if(style==="overlay"){let f=0;zs.forEach((a,i)=>{if(!a||!R[i].w)return;const pc=ease(prog(a,ROLL)),on=taken(i,a.cur),was=a.prev!==undefined&&taken(i,a.prev);f=Math.max(f,on&&was?1:on?pc:was?1-pc:0);});if(f>0)dst.scaleRect(0,0,W,H,1-0.35*f);}
+  // While an event holds a box, the sky dims to 65% under that box (as wide as the event spills), so the card reads without a frame and the rest of the strip stays as it was.
+  if(style==="overlay")zs.forEach((a,i)=>{if(!a||!R[i].w)return;const pc=ease(prog(a,ROLL)),on=taken(i,a.cur),was=a.prev!==undefined&&taken(i,a.prev),f=on&&was?1:on?pc:was?1-pc:0;if(f>0){const r=rs[i];dst.scaleRect(r.x,0,r.w,H,1-0.35*f);}});
   // Effects around a card: the boxes are compared with the sky under them afterwards, so the weather can come in front of the words.
   const fxI=bgOf(scr).type==="sky"?Zs.map((_,i)=>i).filter(i=>zs[i]&&rs[i].w>0&&fxOf(zs[i].cur,def)):[],fxBg=fxI.length?(d.L.fxbg=d.L.fxbg||new FB(W,H)):null;
   if(fxBg)fxBg.d.set(dst.d);
