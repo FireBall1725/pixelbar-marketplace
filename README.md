@@ -13,6 +13,7 @@ The repo is private while it's set up. Contributions come in as pull requests, a
 | `sdk/` | The animation SDK: `pixelbar.h`, a build script, the Hearts example and [its guide](sdk/README.md) |
 | `tools/` | The checks, the preview renderer and the index builder |
 | `tools/vendor/` | The site's simulator and v2 schemas, copied in so previews and checks match the display |
+| `worker/` | The previews site, where a pull request's sounds play in the browser ([setup](worker/README.md)) |
 
 ![The Hearts example animation](sdk/examples/hearts/hearts.gif)
 
@@ -34,7 +35,7 @@ node tools/preview.mjs items/theme/my-theme previews
 
 **Check items** runs on every pull request that touches `items/`. It checks each item's fields, checks every message against the display's own schemas, makes sure it isn't a copy of something already here, compiles animations from their C source and renders previews: an animated GIF on a 256 LED strip and a still at 640.
 
-**Post previews** then puts the GIFs and stills on the `previews` branch and keeps one comment on the pull request up to date with them, so reviewers see what the item draws without installing it. The check never gets write access or secrets; only the posting step does, and it never runs the pull request's code.
+**Post previews** then puts the GIFs, stills, WAVs and MP4s on the `previews` branch and keeps one comment on the pull request up to date with them, so reviewers see what the item draws without installing it. GitHub won't play a linked sound inline, so the comment also links the item's page on the previews site, where sounds play in the browser. The check never gets write access or secrets; only the posting step does, and it never runs the pull request's code.
 
 Merging to `main` rebuilds `index.json`.
 

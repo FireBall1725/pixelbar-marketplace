@@ -45,7 +45,7 @@ for (const d of dirs) {
   blocks.push(lines.join("\n"));
 }
 const ok = bad === 0;
-writeFileSync(join(out, "comment.md"), ["<!-- pixelbar-preview -->", `## ${ok ? "✓ Ready for review" : "✗ Needs changes"}`, "", "| Item | Kind | Check |", "| --- | --- | --- |", ...rows, "", ...blocks.flatMap(b => [b, ""])].join("\n"));
+writeFileSync(join(out, "comment.md"), ["<!-- pixelbar-preview -->", `## ${ok ? "✓ Ready for review" : "✗ Needs changes"}`, "", "{{PAGE}}", "| Item | Kind | Check |", "| --- | --- | --- |", ...rows, "", ...blocks.flatMap(b => [b, ""])].join("\n"));
 writeFileSync(join(out, "result.json"), JSON.stringify({ ok, items: dirs.length, problems: bad }));
 console.log(readFileSync(join(out, "comment.md"), "utf8"));
 process.exit(ok ? 0 : 1);
