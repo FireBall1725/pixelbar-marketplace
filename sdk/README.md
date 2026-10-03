@@ -3,7 +3,7 @@
 A plugin is one C file. It's compiled to WebAssembly, and the same `.wasm` runs in the Marketplace preview, in Home Assistant and on the display. The strip is `W` LEDs wide (128 on the smallest bar, 640 on the largest) by 32 tall, redrawn every frame. There are two kinds:
 
 - An **animation** takes over the whole strip while a notification plays it. Every frame starts black.
-- A **theme** is the scene behind everything, like the built-in holiday skies: it runs all day, the user can turn its parts on and off and recolour them, and the cards and words sit on top. [Spooky Christmas](examples/spooky-christmas/) is a built-in theme ported to the SDK, and the example to start a theme from.
+- A **theme** is the scene behind everything, like the built-in holiday skies: it runs all day, the user can turn its parts on and off and recolour them, and the cards and words sit on top. [Spooky Christmas](examples/spooky-christmas/) is a scene that moved out of PixelBar and into the SDK, and the example to start a theme from.
 
 A plugin can only call the functions in `pixelbar.h`. It can't read files, reach the network or see anything about your home beyond the words, colours and part settings it's handed.
 
@@ -147,7 +147,7 @@ Preview a theme the same way as an animation, with `"kind": "theme"` and `theme.
 
 `params.parts` is only for the preview. The pull request comment then shows the theme as drawn, plus the sweep: every part off, then each part on alone, so a reviewer can see exactly what each one draws.
 
-To check a port against the built-in scene it came from, LED by LED at every width:
+To check a port against the scene it came from, LED by LED at every width (the simulator keeps the original as a reference):
 
 ```sh
 sdk/build.sh sdk/examples/spooky-christmas/theme.c /tmp/spooky.wasm

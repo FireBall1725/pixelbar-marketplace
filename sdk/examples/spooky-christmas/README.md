@@ -1,6 +1,6 @@
 # Spooky Christmas
 
-The built-in Spooky Christmas theme as a plugin: a night sky, a huge moon behind a spiral hill, bats, gravestones, a bent fence, jack-o'-lanterns in Santa hats, striped gifts and snow. `theme.c` draws the same LEDs as the JavaScript scene in the site simulator, so it doubles as the test that the SDK's theme API is complete.
+Spooky Christmas as a plugin, the scene that used to ship inside PixelBar: a night sky, a huge moon behind a spiral hill, bats, gravestones, a bent fence, jack-o'-lanterns in Santa hats, striped gifts and snow. `theme.c` draws the same LEDs as the JavaScript scene the simulator keeps as a reference, so it doubles as the test that the SDK's theme API is complete.
 
 ## Build
 
@@ -10,7 +10,7 @@ sh sdk/build.sh sdk/examples/spooky-christmas/theme.c sdk/examples/spooky-christ
 
 About 9 KB of WebAssembly. It needs clang and wasm-ld (the `lld` package), nothing else.
 
-## Compare it with the built-in
+## Compare it with the reference scene
 
 ```sh
 node tools/test/plugin-compare.mjs sdk/examples/spooky-christmas/theme.wasm spooky_christmas

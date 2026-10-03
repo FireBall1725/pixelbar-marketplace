@@ -5,7 +5,7 @@
 import { performance } from "node:perf_hooks";
 import sim from "./sim.cjs";
 
-export const SIM_NAMES = ["FB", "drawLook", "F5", "fitText", "soundNotes", "rtttlHead", "notesStrip", "loadPlugin", "addPluginTheme", "THEMES", "hash"];
+export const SIM_NAMES = ["FB", "drawLook", "F5", "fitText", "soundNotes", "rtttlHead", "notesStrip", "loadPlugin", "addPluginTheme", "THEMES", "REF_THEMES", "hash"];
 
 export async function loadAnim(bytes, params = {}) {
   const T = sim(SIM_NAMES), plug = await T.loadPlugin(bytes, params);

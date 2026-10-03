@@ -9,8 +9,9 @@ const [wasm, key] = process.argv.slice(2);
 if (!wasm || !key) { console.error("usage: plugin-compare.mjs <plugin.wasm> <theme key>"); process.exit(2); }
 const bytes = readFileSync(wasm);
 const probe = await loadAnim(bytes, {});
-const { T } = probe, built = T.THEMES[key];
-if (!built) { console.error(`no built-in theme ${key}`); process.exit(2); }
+// The scene to compare against: a shipped theme, or one kept in the simulator as a reference after moving to the Marketplace.
+const { T } = probe, built = T.THEMES[key] || (T.REF_THEMES || {})[key];
+if (!built) { console.error(`no theme ${key} to compare against`); process.exit(2); }
 const partNames = Object.keys((probe.manifest && probe.manifest.parts) || {});
 /* Times a float32 holds exactly, so the plugin's float t is the simulator's t. */
 const TIMES = [0, 0.25, 1.5, 3.3125, 7.75, 12.5, 33.0625];
