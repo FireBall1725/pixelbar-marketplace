@@ -63,8 +63,8 @@ jobs:
         run: |
           base="https://github.com/${REPO}/raw/previews/pr-${N}"
           # With the previews site set up (repository variable PREVIEWS_URL), the comment links the page where sounds play.
-          if [ -n "$PREVIEWS_URL" ]; then page="▶ [Watch and listen in the browser](${PREVIEWS_URL%/}/pr-${N}/)"; else page=""; fi
-          sed -e "s#{{BASE}}#${base}#g" -e "s#{{PAGE}}#${page}#" out/comment.md | awk 'NF || !blank++ { if (NF) blank = 0; print }' > body.md
+          if [ -n "$PREVIEWS_URL" ]; then site="${PREVIEWS_URL%/}/pr-${N}"; page="▶ [Watch and listen in the browser](${site}/)"; else site="$base"; page=""; fi
+          sed -e "s#{{BASE}}#${base}#g" -e "s#{{SITE}}#${site}#g" -e "s#{{PAGE}}#${page}#" out/comment.md | awk 'NF || !blank++ { if (NF) blank = 0; print }' > body.md
           printf '\n<sub>For %s. Previews come from the site simulator in tools/vendor.</sub>\n' "$SHA" >> body.md
           id=$(gh api "repos/${REPO}/issues/${N}/comments" --paginate --jq '.[] | select(.user.login == "github-actions[bot]" and (.body | contains("<!-- pixelbar-preview -->"))) | .id' | head -1)
           if [ -n "$id" ]; then gh api -X PATCH "repos/${REPO}/issues/comments/${id}" -F body=@body.md > /dev/null

@@ -2,7 +2,7 @@
 // Copyright (C) 2026 FireBall1725
 // The PR check: validates the items a pull request adds or changes, renders their previews and writes the comment.
 //   node tools/check-pr.mjs <changed paths file> <out dir>
-// out/ gets the preview files, comment.md (with {{BASE}} where the posting workflow puts the previews' address),
+// out/ gets the preview files, comment.md (with {{BASE}} where the posting workflow puts the previews branch address, {{SITE}} the previews site's page, {{PAGE}} its link),
 // and result.json. Exits 1 when an item has a problem, after writing everything, so the comment still goes up.
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -42,8 +42,8 @@ for (const d of dirs) {
   if (p.manifest) lines.push("", `Theme plugin: ${Object.keys(p.manifest.parts || {}).length} parts (${Object.keys(p.manifest.parts || {}).join(", ")}), compiled to ${p.wasm_bytes} bytes.`);
   if (p.notes) {
     lines.push("", `${p.notes.count} notes, ${p.notes.seconds} s: \`${p.notes.names.join(" ")}\``);
-    // GitHub plays only what's uploaded through its own editor, so these are one-click downloads.
-    const hear = [p.video ? `[▶ Watch and listen (MP4)]({{BASE}}/${p.video})` : null, p.audio ? `[Listen (WAV)]({{BASE}}/${p.audio})` : null].filter(Boolean);
+    // GitHub plays only what's uploaded through its own editor, so these point at the previews site ({{SITE}}), which streams them; without one they're downloads from the branch.
+    const hear = [p.video ? `[▶ Watch and listen]({{SITE}}/${p.video})` : null, p.audio ? `[Listen (WAV)]({{SITE}}/${p.audio})` : null].filter(Boolean);
     if (hear.length) lines.push("", hear.join(" · "));
   }
   if (p.ms != null) lines.push("", `Compiled to ${p.wasm_bytes} bytes. ${p.ms} ms a frame at 640 wide in V8; the display runs slower, so keep it light.`);
