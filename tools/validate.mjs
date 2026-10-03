@@ -6,7 +6,7 @@
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
 import { problem, route } from "./lib/schema.mjs";
-import { KINDS, LICENSES, MAX_BYTES, fingerprint, listItems } from "./lib/items.mjs";
+import { KINDS, LICENSES, MAX_BYTES, fingerprint, isPlugin, listItems, sourceOf } from "./lib/items.mjs";
 
 const SLUG = /^[a-z0-9][a-z0-9-]{1,40}$/, LOGIN = /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/, TAG = /^[a-z0-9-]{2,24}$/;
 /* What each kind must hold, by the routes of its messages. */
@@ -36,12 +36,12 @@ export function check(dir, seen = new Map()) {
   const allowed = new Set(["kind", "title", "description", "author", "license", "tags", "msgs", "source", "params"]);
   for (const k of Object.keys(item)) if (!allowed.has(k)) say(`"${k}" isn't a field of an item.`);
   const flags = [];
-  if (kind === "animation") {
-    const src = join(dir, item.source || "anim.c");
-    if (item.msgs) say("An animation has no messages: its source is the item.");
-    if (!existsSync(src)) say(`The animation's source (${item.source || "anim.c"}) is missing.`);
-    else if (statSync(src).size > MAX_BYTES) say("The animation's source is over 64 KB.");
-    if (item.params != null && typeof item.params !== "object") say('"params" holds the title, message and colors the preview plays it with.');
+  if (isPlugin(item)) {
+    const src = join(dir, sourceOf(item)), what = kind === "theme" ? "theme" : "animation";
+    if (item.msgs) say(`A plugin ${what} has no messages: its source is the item.`);
+    if (!existsSync(src)) say(`The ${what}'s source (${sourceOf(item)}) is missing.`);
+    else if (statSync(src).size > MAX_BYTES) say(`The ${what}'s source is over 64 KB.`);
+    if (item.params != null && typeof item.params !== "object") say(kind === "theme" ? '"params" holds the parts the preview shows it with.' : '"params" holds the title, message and colors the preview plays it with.');
   } else if (KINDS.includes(kind)) {
     if (!Array.isArray(item.msgs) || item.msgs.length < 1 || item.msgs.length > 8) say('"msgs" is one to eight messages: { "topic": ..., "payload": ... }.');
     else {

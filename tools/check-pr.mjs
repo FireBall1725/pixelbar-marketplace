@@ -35,7 +35,11 @@ for (const d of dirs) {
   rows.push(`| \`${d}\` | ${r.item.kind} | ✓ |`);
   const lines = [`### ${title}`, `\`${d}\` by @${r.item.author}, ${r.item.license}`, ""];
   if (r.item.description) lines.push(`> ${r.item.description}`, "");
-  for (const f of p.files) if (/\.(gif|png)$/.test(f)) lines.push(`![${f}]({{BASE}}/${f})`);
+  const sweep = new Set(p.sweep || []);
+  for (const f of p.files) if (/\.(gif|png)$/.test(f) && !sweep.has(f)) lines.push(`![${f}]({{BASE}}/${f})`);
+  // The moderation sweep: every part off, then each part on its own, folded away under the main preview.
+  if (sweep.size) lines.push("", "<details><summary>Each part on its own</summary>", "", ...[...sweep].map(f => `**${f.replace(/^.*?-(off|only-)/, "$1").replace(/\.gif$/, "").replace(/^only-/, "")}**  \n![${f}]({{BASE}}/${f})`), "", "</details>");
+  if (p.manifest) lines.push("", `Theme plugin: ${Object.keys(p.manifest.parts || {}).length} parts (${Object.keys(p.manifest.parts || {}).join(", ")}), compiled to ${p.wasm_bytes} bytes.`);
   if (p.notes) {
     lines.push("", `${p.notes.count} notes, ${p.notes.seconds} s: \`${p.notes.names.join(" ")}\``);
     // GitHub plays only what's uploaded through its own editor, so these are one-click downloads.

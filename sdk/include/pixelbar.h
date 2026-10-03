@@ -1,17 +1,25 @@
 /* SPDX-License-Identifier: MIT
    Copyright (C) 2026 FireBall1725 */
-/* PixelBar animation API, version 1.
+/* PixelBar plugin API, version 2.
  *
- * An animation is one C file compiled to WebAssembly (sdk/build.sh). The display runs it full strip: the strip is
- * W x 32 LEDs (W is 128 to 640), every frame starts black, and frame() is called with the seconds since it started.
- * It gets the drawing functions below and nothing else: no files, no network, no clock but t.
+ * A plugin is one C file compiled to WebAssembly (sdk/build.sh). It draws on the strip, W x 32 LEDs (W is 128 to 640),
+ * and gets the drawing functions below and nothing else: no files, no network, no clock but t. Two kinds:
+ *
+ *   animation  takes the strip over while a notification plays it; every frame starts black
+ *   theme      the scene behind the cards, like the built-in holiday themes; drawn every frame, looping forever
  *
  * Write:
- *   void frame(float t, int w, int h);  required, draws one frame
- *   void init(int w, int h);            optional, runs once before the first frame
+ *   void frame(float t, int w, int h);        required: draws one frame, t in seconds since it started
+ *   void init(int w, int h);                  optional: runs once before the first frame
+ *   const char *manifest(void);               optional for an animation, required for a theme: JSON describing it
+ *     {"api":2,"kind":"theme","title":"Spooky Christmas","colors":["#FF8C28","#C8E6F0"],
+ *      "parts":{"moon":{"size":true,"colors":1,"description":"The moon behind the hill"}, ...}}
+ *     Each part lists what it takes: "amount", "speed", "size" (true when it has them) and how many "colors".
+ *     Home Assistant builds the part controls from this, and the Marketplace renders a preview per part.
  *
  * Rules: no C library (the helpers here cover the usual needs), 64 KB of memory in all including an 8 KB stack,
- * and keep a frame cheap: aim for well under 2 ms on the display at the widest strip. Colours are 0xRRGGBB.
+ * and keep a frame cheap. Colours are 0xRRGGBB; alpha is 0 to 255. Coordinates are LEDs; the float versions
+ * floor to the LED like the display does, so sub-LED motion works the way it does in the built-in scenes.
  */
 #pragma once
 #include <stdint.h>
@@ -27,6 +35,7 @@
 /* ---------- what you write ---------- */
 PB_EXPORT("frame") void frame(float t, int w, int h);
 PB_EXPORT("init") void init(int w, int h);
+PB_EXPORT("manifest") const char *manifest(void);
 
 /* ---------- what the display gives you ---------- */
 /* One pixel, blended over what's there: alpha 255 covers it, 128 is half. Off the strip is ignored. */
@@ -43,6 +52,50 @@ PB_IMPORT("text_width") int pb_text_width(const char *s, int len, int size);
 PB_IMPORT("param") int pb_param(const char *key, int key_len, char *buf, int cap);
 /* The notification's colors[i] as 0xRRGGBB, or -1 past the end (or when it sent none). */
 PB_IMPORT("color") int pb_color(int i);
+
+/* ---------- version 2: drawing with LED positions as doubles, like the built-in scenes ---------- */
+/* A pixel, and a pixel added (lights up on top of what's there, for sparkles and glows). */
+PB_IMPORT("pxf") void pb_pxf(double x, double y, int rgb, int alpha);
+PB_IMPORT("add") void pb_add(double x, double y, int rgb, int alpha);
+PB_IMPORT("rectf") void pb_rectf(double x, double y, double w, double h, int rgb, int alpha);
+/* A vertical gradient from rgb0 at the top to rgb1 at the bottom. */
+PB_IMPORT("vgrad") void pb_vgrad(double x, double y, double w, double h, int rgb0, int rgb1, int alpha);
+/* The outline of a rectangle, corners (x0, y0) and (x1, y1) inclusive. */
+PB_IMPORT("frame_rect") void pb_frame(double x0, double y0, double x1, double y1, int rgb, int alpha);
+PB_IMPORT("disc") void pb_disc(double cx, double cy, double r, int rgb, int alpha);
+/* A ring of radius r and thickness w. */
+PB_IMPORT("ring") void pb_ring(double cx, double cy, double r, double w, int rgb, int alpha);
+/* A line, alpha0 at the start fading to alpha1 at the end. */
+PB_IMPORT("line") void pb_line(double x0, double y0, double x1, double y1, int rgb, int alpha0, int alpha1);
+/* A filled polygon: n points as x0, y0, x1, y1, ... */
+PB_IMPORT("poly") void pb_poly(const double *xy, int n, int rgb, int alpha);
+/* Drawing stays inside this box until pb_unclip (they nest). */
+PB_IMPORT("clip") void pb_clip(double x, double y, double w, double h);
+PB_IMPORT("unclip") void pb_unclip(void);
+/* One of PixelBar's built-in icons (bell, tree, pumpkin, gift, snowflake ...) centred on cx, cy, 23 LEDs tall. */
+PB_IMPORT("icon") void pb_icon(const char *name, int len, double cx, double cy, int rgb);
+
+/* ---------- version 2: what a theme is told ---------- */
+/* Whether a part is on, its amount/speed/size as a percentage (100 is as drawn), and its colours. name is the part's
+   key from your manifest; key is "amount", "speed" or "size". Defaults come back when the user hasn't set one. */
+PB_IMPORT("part_on") int pb_part_on(const char *name, int len);
+PB_IMPORT("part_num") int pb_part_num(const char *name, int len, const char *key, int key_len, int dflt);
+PB_IMPORT("part_color") int pb_part_color(const char *name, int len, int i, int dflt);
+/* Where the theme's centrepiece goes: the host keeps it clear of a notification's words. */
+PB_IMPORT("hero_x") int pb_hero_x(void);
+/* The theme message's "night" number (Hanukkah sends 1 to 8), 0 when it sent none. */
+PB_IMPORT("night") int pb_night(void);
+/* The host's own double-precision maths: the same pseudo-random and trig the built-in scenes use, so a port lands every
+   particle where the original does. The float helpers further down are cheaper when that doesn't matter. */
+PB_IMPORT("hashd") double pb_hashd(double n);
+PB_IMPORT("sind") double pb_sind(double a);
+PB_IMPORT("cosd") double pb_cosd(double a);
+PB_IMPORT("powd") double pb_powd(double a, double b);
+
+#define PB_ON(part) pb_part_on((part), pb_strlen(part))
+#define PB_NUM(part, key, dflt) pb_part_num((part), pb_strlen(part), (key), pb_strlen(key), (dflt))
+#define PB_COLOR(part, i, dflt) pb_part_color((part), pb_strlen(part), (i), (dflt))
+#define PB_ICON(name, cx, cy, rgb) pb_icon((name), pb_strlen(name), (cx), (cy), (rgb))
 
 /* ---------- the three library functions the compiler may call on its own ---------- */
 /* Clang turns some loops and copies into strlen, memcpy and memset calls; with no C library, these stand in. */

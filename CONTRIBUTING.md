@@ -37,17 +37,17 @@ The whole file stays under 64 KB. The easiest way to get the messages right is t
 | `notification` | A notification, `pixelbar/all/notify/<key>`, plus any data it uses |
 | `card` | A box message with the card, `pixelbar/all/box/<name>` |
 | `sensor` | A box message and the data it shows, `pixelbar/all/data/<key>`, with example values |
-| `theme` | One theme message, `pixelbar/all/theme`, usually a built-in theme with its parts tuned |
+| `theme` | One theme message, `pixelbar/all/theme`, a built-in theme with its parts tuned; or no messages and `theme.c`, a whole scene of your own built with the SDK (see [the plugin guide](sdk/README.md#writing-a-theme)) |
 | `sound` | One saved tune, `pixelbar/all/asset/sound/<name>`, as `rtttl` or `steps` |
 | `picture` | One picture, `pixelbar/all/asset/image/<name>`, up to 64 x 32 in rgb565 |
-| `animation` | No messages: `anim.c` is the item, plus optional `params` (the `title`, `message` and `colors` the preview plays it with). See [the animation guide](sdk/README.md) |
+| `animation` | No messages: `anim.c` is the item, plus optional `params` (the `title`, `message` and `colors` the preview plays it with). See [the plugin guide](sdk/README.md) |
 
 ## What gets turned away
 
 - Anything you didn't make or don't have the rights to share. A melody from a song is the composer's, so an RTTTL version of a chart hit doesn't belong here; a tune you wrote does.
 - Logos, brands and pictures of real people.
 - Personal details: names, addresses, phone numbers, plates.
-- Copies of something already here. The check compares messages and animation source, so a renamed copy is caught.
+- Copies of something already here. The check compares messages and plugin source, so a renamed copy is caught.
 
 The licence you pick applies to everything in your folder. CC-BY-4.0 is the default suggestion: anyone can use and change it, and your name stays on it.
 

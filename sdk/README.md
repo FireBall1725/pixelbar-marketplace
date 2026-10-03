@@ -1,10 +1,13 @@
-# Writing a PixelBar animation
+# Writing a PixelBar plugin
 
-An animation is one C file. It's compiled to WebAssembly, and the same `.wasm` runs in the Marketplace preview and on the display. It takes over the whole strip when a notification plays it: `W` LEDs wide (128 on the smallest bar, 640 on the largest) by 32 tall, redrawn every frame.
+A plugin is one C file. It's compiled to WebAssembly, and the same `.wasm` runs in the Marketplace preview, in Home Assistant and on the display. The strip is `W` LEDs wide (128 on the smallest bar, 640 on the largest) by 32 tall, redrawn every frame. There are two kinds:
 
-It can only call the drawing functions in `pixelbar.h`. It can't read files, reach the network or see anything about your home beyond the words and colours the notification hands it.
+- An **animation** takes over the whole strip while a notification plays it. Every frame starts black.
+- A **theme** is the scene behind everything, like the built-in holiday skies: it runs all day, the user can turn its parts on and off and recolour them, and the cards and words sit on top. [Spooky Christmas](examples/spooky-christmas/) is a built-in theme ported to the SDK, and the example to start a theme from.
 
-> **Where this stands:** the Marketplace previews run animations today. The display firmware's support is in progress, so an animation you write now is ready for it, but it won't play on a bar yet.
+A plugin can only call the functions in `pixelbar.h`. It can't read files, reach the network or see anything about your home beyond the words, colours and part settings it's handed.
+
+> **Where this stands:** the Marketplace previews and the Home Assistant Marketplace tab run plugins today. The display firmware's support is in progress, so a plugin you write now is ready for it, but it won't play on a bar yet.
 
 ![Hearts on a 256 LED strip](examples/hearts/hearts.gif)
 
@@ -69,6 +72,8 @@ Every frame starts black, so you draw the whole picture each time from `t`, the 
 
 ## What the display gives you
 
+The integer calls, enough for most animations:
+
 | Function | What it does |
 | --- | --- |
 | `pb_px(x, y, rgb, alpha)` | One pixel, blended over what's there. `alpha` 255 covers it, 128 is half. Off the strip is ignored. |
@@ -79,6 +84,75 @@ Every frame starts black, so you draw the whole picture each time from `t`, the 
 | `pb_color(i)` | The notification's `colors[i]` as `0xRRGGBB`, or -1 past the end. |
 
 Colours are `0xRRGGBB` throughout. `PB_TEXT(s, x, y, rgb, size, outline)` and `PB_PARAM(key, buf)` save writing the lengths out.
+
+The same shapes the built-in scenes are drawn with, taking positions as doubles (the host floors to the LED, so half-LED motion works the way it does in the built-ins):
+
+| Function | What it does |
+| --- | --- |
+| `pb_pxf(x, y, rgb, alpha)`, `pb_rectf(x, y, w, h, rgb, alpha)` | Pixel and rectangle at double positions |
+| `pb_add(x, y, rgb, alpha)` | A pixel added to what's there: glows and sparkles |
+| `pb_vgrad(x, y, w, h, rgb0, rgb1, alpha)` | A vertical gradient, `rgb0` at the top |
+| `pb_frame(x0, y0, x1, y1, rgb, alpha)` | The outline of a rectangle |
+| `pb_disc(cx, cy, r, rgb, alpha)`, `pb_ring(cx, cy, r, w, rgb, alpha)` | Filled disc and ring, soft-edged |
+| `pb_line(x0, y0, x1, y1, rgb, alpha0, alpha1)` | A line fading from `alpha0` to `alpha1` |
+| `pb_poly(xy, n, rgb, alpha)` | A filled polygon from `n` points in `xy` (`x0, y0, x1, y1, ...`) |
+| `pb_clip(x, y, w, h)`, `pb_unclip()` | Drawing stays inside the box until `pb_unclip`; they nest |
+| `pb_icon(name, len, cx, cy, rgb)` | A built-in icon (`bell`, `tree`, `pumpkin`, `gift`, `snowflake` ...), 23 LEDs tall. `PB_ICON(name, cx, cy, rgb)` fills the length in |
+| `pb_hashd(n)`, `pb_sind(a)`, `pb_cosd(a)`, `pb_powd(a, b)` | The host's own double-precision pseudo-random, sine, cosine and power, for a port that should land every particle where the original does |
+
+## Writing a theme
+
+A theme is an animation with a manifest and parts. Three things change:
+
+**It exports `manifest()`**, a JSON string describing it:
+
+```c
+const char *manifest(void) {
+  return "{\"api\":2,\"kind\":\"theme\",\"title\":\"Spooky Christmas\",\"banner\":\"MERRY SPOOKY CHRISTMAS\","
+         "\"colors\":[\"#FF8C28\",\"#C8E6F0\"],"
+         "\"parts\":{\"moon\":{\"size\":true,\"colors\":1,\"description\":\"The huge pale moon behind the hill's curl.\"},"
+         "\"snow\":{\"amount\":true,\"speed\":true,\"colors\":2,\"description\":\"Snow falling.\"}}}";
+}
+```
+
+`title` is its name, `banner` the words its notification drops in (the title in capitals when left out), `colors` the colours those words cycle through. Each part says what it takes: `"amount"`, `"speed"` and `"size"` when it has them, how many `"colors"`, and a one-line description. Home Assistant builds the part controls from this, and the Marketplace renders a preview of every part on its own.
+
+**It reads its parts** instead of hard-coding them. `PB_ON("moon")` says whether the user left it on; `PB_NUM("snow", "amount", 100)` gives the amount, speed or size as a percentage where 100 is as you drew it (the default when they haven't set one); `PB_COLOR("moon", 0, 0xECECD6)` gives the first colour they picked, or your default. Draw nothing for a part that's off, and scale what you draw by the numbers:
+
+```c
+if (PB_ON("snow")) {
+  const int n = 70 * PB_NUM("snow", "amount", 100) / 100;      /* flakes */
+  const double speed = PB_NUM("snow", "speed", 100) / 100.0;
+  ...
+}
+```
+
+`pb_hero_x()` is where the centrepiece goes: the host moves it aside when a notification's words would land on it, so put your moon, tree or menorah there rather than at `w / 2`. `pb_night()` is the theme message's night number (Hanukkah sends 1 to 8), 0 when none was sent.
+
+**Brightness is the host's job.** Draw at full brightness every frame; when the theme shows behind a faint screen the host dims the whole picture and halves every part's amount for you.
+
+Preview a theme the same way as an animation, with `"kind": "theme"` and `theme.c`:
+
+```json
+{
+  "kind": "theme",
+  "title": "Spooky Christmas",
+  "description": "A pale moon over a spiral hill, bats, gravestones and jack-o'-lanterns in Santa hats, under snow.",
+  "author": "your-github-username",
+  "license": "MIT",
+  "source": "theme.c",
+  "params": { "parts": { "snow": { "amount": 150 } } }
+}
+```
+
+`params.parts` is only for the preview. The pull request comment then shows the theme as drawn, plus the sweep: every part off, then each part on alone, so a reviewer can see exactly what each one draws.
+
+To check a port against the built-in scene it came from, LED by LED at every width:
+
+```sh
+sdk/build.sh sdk/examples/spooky-christmas/theme.c /tmp/spooky.wasm
+node tools/test/plugin-compare.mjs /tmp/spooky.wasm spooky_christmas
+```
 
 ## Helpers in pixelbar.h
 
@@ -122,4 +196,4 @@ What keeps it fast:
 
 ## Sending it in
 
-Commit `items/animation/<name>/anim.c` and `item.json`, and open a pull request. Don't commit the `.wasm`: CI builds it from your source, so what runs is always what was reviewed. The pull request comment shows the GIF, the still, the compiled size and the frame time.
+Commit `items/animation/<name>/anim.c` (or `items/theme/<name>/theme.c`) and `item.json`, and open a pull request. Don't commit the `.wasm`: CI builds it from your source, so what runs is always what was reviewed. The pull request comment shows the GIF, the still, the compiled size and the frame time, and a theme's part sweep.

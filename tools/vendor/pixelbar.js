@@ -1223,6 +1223,34 @@ const THEMES={new_year:{name:"New Year's",title:"HAPPY NEW YEAR",tc:[255,215,110
   thanksgiving:{name:"Thanksgiving",title:"HAPPY THANKSGIVING",tc:[255,170,60],bg:thThanks},halloween:{name:"Halloween",title:"HAPPY HALLOWEEN",tc:[255,140,30],bg:thHalloween},
   dia_de_muertos:{name:"Día de los Muertos",title:"DIA DE LOS MUERTOS",tc:[[255,60,140],[255,150,30],[80,200,255],[255,220,60]],bg:thMuertos},diwali:{name:"Diwali",title:"HAPPY DIWALI",tc:[255,200,80],bg:thDiwali},remembrance:{name:"Remembrance Day",title:"LEST WE FORGET",tc:[235,230,230],bg:thPoppy,quiet:1},
   hanukkah:{name:"Hanukkah",title:"HAPPY HANUKKAH",tc:[170,200,255],bg:thHanukkah},spooky_christmas:{name:"Spooky Christmas",title:"MERRY SPOOKY CHRISTMAS",tc:[[255,140,40],[200,230,240]],bg:thSpookyXmas},christmas:{name:"Christmas",title:"MERRY CHRISTMAS",tc:[[255,70,70],[255,255,255]],bg:thChristmas}};
+/* ---------- Marketplace plugins: themes and animations compiled to WebAssembly with the SDK ---------- */
+/* What a plugin may import. It draws on st.fb and reads the notification or theme in P ({title, message, detail, colors, parts, faint, night, hx}); st.mem is set once it's instantiated. */
+function pluginImports(P,st){const dec=new TextDecoder(),enc=new TextEncoder(),rgb=c=>[(c>>16)&255,(c>>8)&255,c&255],A=a=>clamp(a,0,255)/255,fit=s=>fitText(s,F5,false),hex=h=>{const m=/^#?([0-9a-f]{6})$/i.exec(String(h||""));return m?parseInt(m[1],16):null;};
+  const str=(p,n)=>dec.decode(new Uint8Array(st.mem.buffer,p,n)),fb=()=>st.fb,part=k=>(P.parts&&P.parts[k])||{},pct=(v,lo,hi,d)=>{const x=+v;return v!==null&&v!==undefined&&isFinite(x)?clamp(x,lo,hi):d;};
+  return {px:(x,y,c,a)=>fb().px(x,y,rgb(c),A(a)),rect:(x,y,w,h,c,a)=>fb().rect(x,y,w,h,rgb(c),A(a)),
+    text:(p,n,x,y,c,size,outline)=>{const s=fit(str(p,n)),sc=size===2?2:1;if(outline)fb().textO(F5,s,x,y,rgb(c),sc);else fb().text(F5,s,x,y,rgb(c),sc);return fb().tw(F5,s,sc);},
+    text_width:(p,n,size)=>fb().tw(F5,fit(str(p,n)),size===2?2:1),
+    param:(kp,kn,bp,cap)=>{const v=P[str(kp,kn)];if(typeof v!=="string"||cap<1)return -1;const b=enc.encode(v).subarray(0,cap-1),o=new Uint8Array(st.mem.buffer,bp,b.length+1);o.set(b);o[b.length]=0;return b.length;},
+    color:i=>{const c=hex((P.colors||[])[i]);return c===null?-1:c;},
+    pxf:(x,y,c,a)=>fb().px(x,y,rgb(c),A(a)),add:(x,y,c,a)=>fb().add(x,y,rgb(c),A(a)),rectf:(x,y,w,h,c,a)=>fb().rect(x,y,w,h,rgb(c),A(a)),
+    vgrad:(x,y,w,h,c0,c1,a)=>fb().vgrad(x,y,w,h,rgb(c0),rgb(c1),A(a)),frame_rect:(x0,y0,x1,y1,c,a)=>fb().frame(x0,y0,x1,y1,rgb(c),A(a)),
+    disc:(cx,cy,r,c,a)=>fb().disc(cx,cy,r,rgb(c),A(a)),ring:(cx,cy,r,w,c,a)=>fb().ring(cx,cy,r,w,rgb(c),A(a)),line:(x0,y0,x1,y1,c,a0,a1)=>fb().line(x0,y0,x1,y1,rgb(c),A(a0),A(a1)),
+    poly:(p,n,c,a)=>{const f=new Float64Array(st.mem.buffer,p,n*2),Q=[];for(let i=0;i<n;i++)Q.push([f[i*2],f[i*2+1]]);fb().poly(Q,rgb(c),A(a));},
+    clip:(x,y,w,h)=>fb().pushClip(x,y,w,h),unclip:()=>fb().popClip(),icon:(p,n,cx,cy,c)=>{const d=ICONS[str(p,n)];if(d)d(fb(),cx,cy,st.t,rgb(c));},
+    part_on:(p,n)=>part(str(p,n)).on===false?0:1,
+    part_num:(p,n,kp,kn,d)=>{const k=str(kp,kn),lo=k==="size"?25:0,hi=k==="size"?300:500;let r=pct(part(str(p,n))[k],lo,hi,d);if(k==="amount"&&P.faint)r=Math.round(r*THEME_FAINT_N);return r;},
+    part_color:(p,n,i,d)=>{const cs=part(str(p,n)).colors,c=Array.isArray(cs)?hex(cs[i]):null;return c===null?d:c;},
+    hero_x:()=>heroX({hx:P.hx,W:fb().W}),night:()=>Math.round(+P.night)||0,hashd:hash,sind:Math.sin,cosd:Math.cos,powd:Math.pow};}
+/* Loads a plugin's .wasm: { manifest, frame(fb, t), bg(fb, S, k) }. frame clears fb and draws one frame (an animation); bg draws it as a theme's sky,
+   reading parts, faint, night and hx from S like a built-in theme, k bright. A plugin that traps goes dark instead of taking the page down. */
+async function loadPlugin(bytes,P={}){const st={fb:null,mem:null,t:0},pb=pluginImports(P,st),{instance}=await WebAssembly.instantiate(bytes,{pb}),X=instance.exports;st.mem=X.memory;
+  let manifest=null;if(X.manifest){try{const p=X.manifest(),m=new Uint8Array(X.memory.buffer);let n=0;while(m[p+n]&&n<65536)n++;manifest=JSON.parse(new TextDecoder().decode(m.subarray(p,p+n)));}catch(e){manifest={error:String(e&&e.message||e)};}}
+  let inited=false,scratch=null;const run=(fb,t)=>{st.fb=fb;st.t=t;if(!inited){inited=true;if(X.init)X.init(fb.W,32);}try{X.frame(t,fb.W,32);}catch(e){}};
+  return {manifest,frame(fb,t){fb.noClip();fb.clear();run(fb,t);},
+    bg(fb,S,k){Object.assign(P,{parts:S.parts,faint:S.faint,night:S.night,hx:S.hx});if(k>=1){run(fb,S.t);return;}if(!scratch||scratch.W!==fb.W)scratch=new FB(fb.W,fb.H);scratch.clear();run(scratch,S.t);fb.mixFrom(scratch,k);}};}
+/* A plugin theme joins THEMES under key, so theme messages, previews and the catalogue treat it like a built-in one. */
+function addPluginTheme(key,plug){const m=plug.manifest||{},tc=(m.colors||[]).map(rgbOf).filter(Boolean);
+  THEMES[key]={name:m.title||key,title:fitText(m.banner||m.title||key,F5),tc:tc.length>1?tc:tc[0]||[255,255,255],bg:plug.bg,plugin:plug};return THEMES[key];}
 /* The notification version: the scene, a little dimmer, with the title dropping in (remembrance fades in instead). */
 function sHoliday(fb,S,o){const th=THEMES[o.theme],t=S.ft!=null?S.ft:S.t%10,{W}=S;th.bg(fb,Object.assign({},S,{t:t+2,flags:o.flags,night:o.night,hx:W>=256?W-(o.theme==="canada_day"?46:o.theme==="fourth_of_july"?38:24):undefined}),0.8);
   const ttl=o.title||th.title,sc=W>=256&&fb.tw(F5,ttl,2)<=W-8?2:1,tw=fb.tw(F5,ttl,sc),tx=Math.round((W-tw)/2),drop=th.quiet||t>=0.7?1:easeBounce(t/0.7),a=th.quiet?Math.min(1,t/1.5):1;
