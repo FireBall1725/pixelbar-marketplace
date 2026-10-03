@@ -1,0 +1,11 @@
+{
+  "kind": "sound",
+  "title": "Ding dong",
+  "description": "Two notes a third apart, like a doorbell.",
+  "author": "FireBall1725",
+  "license": "CC0-1.0",
+  "tags": ["doorbell"],
+  "msgs": [
+    { "topic": "pixelbar/all/asset/sound/ding_dong", "payload": { "v": 2, "rtttl": "dingdong:d=4,o=5,b=100:e6,2c.6" } }
+  ]
+}

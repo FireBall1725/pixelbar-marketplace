@@ -1,0 +1,11 @@
+{
+  "kind": "theme",
+  "title": "Snowy Christmas",
+  "description": "The Christmas scene with twice the snow and a bigger snowman.",
+  "author": "FireBall1725",
+  "license": "CC-BY-4.0",
+  "tags": ["christmas", "snow"],
+  "msgs": [
+    { "topic": "pixelbar/all/theme", "payload": { "v": 2, "theme": "christmas", "parts": { "snow": { "amount": 200 }, "snowman": { "size": 120 } } } }
+  ]
+}
