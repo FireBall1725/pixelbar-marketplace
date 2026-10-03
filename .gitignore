@@ -3,3 +3,4 @@ out/
 previews/
 changed.txt
 *.wasm
+!sdk/examples/*/*.wasm

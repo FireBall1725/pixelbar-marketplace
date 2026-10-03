@@ -33,8 +33,13 @@ for (const d of dirs) {
   rows.push(`| \`${d}\` | ${r.item.kind} | ✓ |`);
   const lines = [`### ${title}`, `\`${d}\` by @${r.item.author}, ${r.item.license}`, ""];
   if (r.item.description) lines.push(`> ${r.item.description}`, "");
-  for (const f of p.files) lines.push(`![${f}]({{BASE}}/${f})`);
-  if (p.notes) lines.push("", `${p.notes.count} notes, ${p.notes.seconds} s: \`${p.notes.names.join(" ")}\``);
+  for (const f of p.files) if (/\.(gif|png)$/.test(f)) lines.push(`![${f}]({{BASE}}/${f})`);
+  if (p.notes) {
+    lines.push("", `${p.notes.count} notes, ${p.notes.seconds} s: \`${p.notes.names.join(" ")}\``);
+    // GitHub plays only what's uploaded through its own editor, so these are one-click downloads.
+    const hear = [p.video ? `[▶ Watch and listen (MP4)]({{BASE}}/${p.video})` : null, p.audio ? `[Listen (WAV)]({{BASE}}/${p.audio})` : null].filter(Boolean);
+    if (hear.length) lines.push("", hear.join(" · "));
+  }
   if (p.ms != null) lines.push("", `Compiled to ${p.wasm_bytes} bytes. ${p.ms} ms a frame at 640 wide in V8; the display runs slower, so keep it light.`);
   if (r.flags.includes("pictures")) lines.push("", "**Has pictures:** check them before merging.");
   blocks.push(lines.join("\n"));

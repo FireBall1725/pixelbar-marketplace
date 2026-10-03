@@ -9,13 +9,15 @@ import { basename, join, resolve } from "node:path";
 import sim from "./lib/sim.cjs";
 import { SIM_NAMES, loadAnim } from "./lib/anim.mjs";
 import { gif, leds, png } from "./lib/image.mjs";
+import { synth, wav } from "./lib/audio.mjs";
+import { video } from "./lib/video.mjs";
 
 const NOW = new Date("2026-10-03T14:25:00"), FPS = 15, SECONDS = 6, ROOT = resolve(new URL("..", import.meta.url).pathname);
 
 export async function preview(dir, out) {
   const item = JSON.parse(readFileSync(join(dir, "item.json"), "utf8")), slug = basename(resolve(dir)), T = sim(SIM_NAMES);
   mkdirSync(out, { recursive: true });
-  const res = { slug, kind: item.kind, title: item.title, files: [], notes: null, ms: null };
+  const res = { slug, kind: item.kind, title: item.title, files: [], notes: null, ms: null, audio: null, video: null };
   const strip = (W, draw) => { const fb = new T.FB(W, 32); draw(fb); return leds(fb.d, W, 32, 3); };
   const anim = async (W, frames, draw) => { const fs = []; for (let i = 0; i < frames; i++) fs.push(await draw(i / FPS, W)); return fs; };
 
@@ -38,6 +40,14 @@ export async function preview(dir, out) {
     res.notes = { count: notes.filter(x => x.f).length, seconds: +notes.reduce((a, x) => a + x.d, 0).toFixed(2), names: notes.map(x => x.name) };
     png(join(out, slug + ".png"), strip(256, fb => T.notesStrip(fb, { W: 256, H: 32, t: 0 }, { title: item.title, notes: res.notes.names, at: -1 })));
     res.files.push(slug + ".png");
+    // The tune to listen to, and a video of the notes lighting up as it plays when ffmpeg is about.
+    wav(join(out, slug + ".wav"), synth(notes)); res.audio = slug + ".wav";
+    const starts = []; let acc = 0; for (const n of notes) { starts.push(acc); acc += n.d; }
+    const o = { title: `Playing ${item.title}`, notes: res.notes.names, at: -1 }, total = acc + 0.6;
+    const frames = []; for (let i = 0; i < Math.ceil(total * FPS); i++) { const t = i / FPS; let at = -1; for (let k = 0; k < notes.length; k++) if (t >= starts[k] && t < starts[k] + notes[k].d) at = k; o.at = at; o.title = at >= 0 ? `Playing ${item.title}` : item.title; frames.push(strip(256, fb => T.notesStrip(fb, { W: 256, H: 32, t }, o))); }
+    const mp4 = video(join(out, slug + ".mp4"), frames, FPS, join(out, slug + ".wav"));
+    if (mp4) res.video = slug + ".mp4";
+    res.files.push(res.audio); if (res.video) res.files.push(res.video);
     return res;
   }
   if (item.kind === "picture") {

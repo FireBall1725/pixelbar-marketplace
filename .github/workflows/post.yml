@@ -39,7 +39,7 @@ jobs:
             echo "Preview images for pull requests, written by the Post previews workflow." > previews/README.md
           fi
           rm -rf "previews/pr-${N}" && mkdir -p "previews/pr-${N}"
-          find out -maxdepth 1 \( -name '*.gif' -o -name '*.png' \) -exec cp {} "previews/pr-${N}/" \;
+          find out -maxdepth 1 \( -name '*.gif' -o -name '*.png' -o -name '*.wav' -o -name '*.mp4' \) -exec cp {} "previews/pr-${N}/" \;
           git -C previews add -A
           git -C previews commit -q -m "Previews for #${N}" || echo "no change"
           git -C previews push -q origin previews

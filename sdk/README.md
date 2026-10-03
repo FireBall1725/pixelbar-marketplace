@@ -6,6 +6,12 @@ It can only call the drawing functions in `pixelbar.h`. It can't read files, rea
 
 > **Where this stands:** the Marketplace previews run animations today. The display firmware's support is in progress, so an animation you write now is ready for it, but it won't play on a bar yet.
 
+![Hearts on a 256 LED strip](examples/hearts/hearts.gif)
+
+The Hearts example at medium size, as the Marketplace previews it. On the widest strip it looks like this:
+
+![Hearts at 640 LEDs](examples/hearts/hearts-xxl.png)
+
 ## Quick start
 
 You need clang and `wasm-ld`. On macOS, Xcode's clang plus `brew install lld`; on Debian or Ubuntu, `apt install clang lld`.

@@ -14,6 +14,8 @@ The repo is private while it's set up. Contributions come in as pull requests, a
 | `tools/` | The checks, the preview renderer and the index builder |
 | `tools/vendor/` | The site's simulator and v2 schemas, copied in so previews and checks match the display |
 
+![The Hearts example animation](sdk/examples/hearts/hearts.gif)
+
 The kinds are `notification`, `card`, `sensor`, `theme`, `sound`, `picture` and `animation`. [CONTRIBUTING.md](CONTRIBUTING.md) has the format of each.
 
 ## Adding something
