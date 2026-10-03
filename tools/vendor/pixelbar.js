@@ -1665,7 +1665,7 @@ function renderZ(d,S,A,prog,dst,scr){const {W,H,id}=S,Zs=zonesOf(scr,id),zs=A.Z[
       return {x:R[i].x,w:Math.max(R[i].w,Math.min(240,stop-R[i].x)),spill:1};}return R[i];};
   const rs=Zs.map((_,i)=>rect(i)),hidden=i=>rs.some((r,j)=>j!==i&&r.spill&&R[i].w&&R[i].x<r.x+r.w&&R[i].x+R[i].w>r.x);
   // While an event holds a box, the sky dims to 65% under that box (as wide as the event spills), so the card reads without a frame and the rest of the strip stays as it was.
-  if(style==="overlay")zs.forEach((a,i)=>{if(!a||!R[i].w)return;const pc=ease(prog(a,ROLL)),on=taken(i,a.cur),was=a.prev!==undefined&&taken(i,a.prev),f=on&&was?1:on?pc:was?1-pc:0;if(f>0){const r=rs[i];dst.scaleRect(r.x,0,r.w,H,1-0.35*f);}});
+  if(style==="overlay")zs.forEach((a,i)=>{if(!a||!R[i].w)return;const pc=ease(prog(a,ROLL)),on=taken(i,a.cur),was=a.prev!==undefined&&taken(i,a.prev),f=on&&was?1:on?pc:was?1-pc:0;if(f>0){const r=rs[i],dim=(def&&def.dim!=null?clamp(+def.dim,0,100):35)/100;if(dim>0)dst.scaleRect(r.x,0,r.w,H,1-dim*f);}});
   // Effects around a card: the boxes are compared with the sky under them afterwards, so the weather can come in front of the words.
   const fxI=bgOf(scr).type==="sky"?Zs.map((_,i)=>i).filter(i=>zs[i]&&rs[i].w>0&&fxOf(zs[i].cur,def)):[],fxBg=fxI.length?(d.L.fxbg=d.L.fxbg||new FB(W,H)):null;
   if(fxBg)fxBg.d.set(dst.d);
@@ -2796,7 +2796,7 @@ function applyBox(target,name,b){layerSet(BOXES,name,target,b===null?null:{cards
 /* A layout's screens as a list. Layouts from before the list named active, idle and sleep; those keep their old looks. */
 function screensList(b){if(Array.isArray(b.screens))return b.screens;
   return ["sleep","active","idle"].filter(n=>b.screens[n]).map(n=>Object.assign({name:n},SDEF_DEFAULT[n],b.screens[n].background?{background:b.screens[n].background}:{},{boxes:b.screens[n].boxes}));}
-const SCR_KEYS=["when","style","outline","effects","background","tint","filter","brightness","quiet","clock_style"];
+const SCR_KEYS=["when","style","outline","effects","background","tint","filter","brightness","dim","quiet","clock_style"];
 function applyLayout2(b){if(b===null){resetScreens(simSize);live.mode=layScr="demo";laySel=0;renderScreens();renderLay();return "No layout, so the demo screen.";}
   const list=screensList(b),names=list.map(x=>x.name);if(new Set(names).size!==names.length)throw new Error("Two screens have the same name. Each needs its own.");if(names.includes("demo"))throw new Error('"demo" is the screen a display shows before it has a layout. Call yours something else.');
   SCREENS.splice(0,SCREENS.length,...names);DEMO=false;SDEF={};
