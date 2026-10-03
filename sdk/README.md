@@ -43,7 +43,7 @@ That writes `previews/my-anim.gif` (6 seconds on a 256 LED strip) and `previews/
   "author": "your-github-username",
   "license": "CC-BY-4.0",
   "source": "anim.c",
-  "params": { "title": "HAPPY BIRTHDAY", "message": "SAM", "colors": ["#FF7C45", "#48C28A"] }
+  "params": { "title": "HAPPY BIRTHDAY", "message": "ADALÉA", "colors": ["#FF7C45", "#48C28A"] }
 }
 ```
 
