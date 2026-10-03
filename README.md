@@ -9,7 +9,7 @@ The repo is private while it's set up. Contributions come in as pull requests, a
 | Path | What it holds |
 | --- | --- |
 | `items/<kind>/<name>/` | One folder per item: `item.json`, plus `anim.c` for an animation |
-| `index.json` | The list Home Assistant reads, rebuilt on every merge |
+| `dist` branch | What Home Assistant reads: `index.json` with every item, plus each animation compiled, rebuilt on every merge |
 | `sdk/` | The animation SDK: `pixelbar.h`, a build script, the Hearts example and [its guide](sdk/README.md) |
 | `tools/` | The checks, the preview renderer and the index builder |
 | `tools/vendor/` | The site's simulator and v2 schemas, copied in so previews and checks match the display |
@@ -37,7 +37,7 @@ node tools/preview.mjs items/theme/my-theme previews
 
 **Post previews** then puts the GIFs, stills, WAVs and MP4s on the `previews` branch and keeps one comment on the pull request up to date with them, so reviewers see what the item draws without installing it. GitHub won't play a linked sound inline, so the comment also links the item's page on the previews site, where sounds play in the browser. The check never gets write access or secrets; only the posting step does, and it never runs the pull request's code.
 
-Merging to `main` rebuilds `index.json`.
+Merging to `main` rebuilds the `dist` branch: `index.json` with every item in full and each animation compiled to `.wasm`. Home Assistant reads it through jsDelivr at `https://cdn.jsdelivr.net/gh/FireBall1725/pixelbar-marketplace@dist/`.
 
 ## Keeping the copied site files current
 

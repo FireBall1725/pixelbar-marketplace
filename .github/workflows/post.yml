@@ -43,6 +43,16 @@ jobs:
           git -C previews add -A
           git -C previews commit -q -m "Previews for #${N}" || echo "no change"
           git -C previews push -q origin previews
+      - name: Label
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          N: ${{ steps.pr.outputs.n }}
+        run: |
+          want=$(python3 -c 'import json; print("\n".join(json.load(open("out/result.json")).get("labels", [])))')
+          have=$(gh api "repos/${REPO}/issues/${N}/labels" --jq '.[].name')
+          for l in $(echo "$have" | grep -E '^(kind:|has pictures|needs changes)' || true); do echo "$want" | grep -qxF "$l" || gh api -X DELETE "repos/${REPO}/issues/${N}/labels/$(python3 -c 'import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1]))' "$l")" > /dev/null; done
+          echo "$want" | while IFS= read -r l; do [ -n "$l" ] && ! echo "$have" | grep -qxF "$l" && gh api -X POST "repos/${REPO}/issues/${N}/labels" -f "labels[]=$l" > /dev/null; done || true
       - name: Comment
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

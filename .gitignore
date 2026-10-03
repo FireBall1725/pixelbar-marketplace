@@ -4,3 +4,5 @@ previews/
 changed.txt
 *.wasm
 !sdk/examples/*/*.wasm
+dist/
+pub/

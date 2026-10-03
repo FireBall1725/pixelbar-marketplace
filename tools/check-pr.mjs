@@ -17,12 +17,14 @@ const dirs = [...new Set(changed.filter(p => p.startsWith("items/")).map(p => p.
 const all = listItems(), seen = new Map();
 for (const d of all) if (!dirs.includes(d)) { try { seen.set(fingerprint(d, JSON.parse(readFileSync(join(d, "item.json"), "utf8"))), d); } catch { /* not ours to check */ } }
 
-const rows = [], blocks = [];
+const rows = [], blocks = [], kinds = new Set(), flags = new Set();
 let bad = 0;
 if (!dirs.length) blocks.push("This pull request doesn't add or change any items, so there's nothing to preview.");
 for (const d of dirs) {
   if (!existsSync(d)) { rows.push(`| \`${d}\` | | removed |`); continue; }
   const r = check(d, seen), title = r.item && r.item.title ? r.item.title : d;
+  if (r.item && r.item.kind) kinds.add(r.item.kind);
+  for (const f of r.flags || []) flags.add(f);
   if (r.problems.length) {
     bad++; rows.push(`| \`${d}\` | ${r.item ? r.item.kind : ""} | ✗ ${r.problems.length} problem${r.problems.length > 1 ? "s" : ""} |`);
     blocks.push(`### ${title}\n\`${d}\`\n\n${r.problems.map(p => `- ${p}`).join("\n")}`);
@@ -46,6 +48,7 @@ for (const d of dirs) {
 }
 const ok = bad === 0;
 writeFileSync(join(out, "comment.md"), ["<!-- pixelbar-preview -->", `## ${ok ? "✓ Ready for review" : "✗ Needs changes"}`, "", "{{PAGE}}", "| Item | Kind | Check |", "| --- | --- | --- |", ...rows, "", ...blocks.flatMap(b => [b, ""])].join("\n"));
-writeFileSync(join(out, "result.json"), JSON.stringify({ ok, items: dirs.length, problems: bad }));
+// kinds and flags become labels on the pull request (post.yml).
+writeFileSync(join(out, "result.json"), JSON.stringify({ ok, items: dirs.length, problems: bad, labels: [...[...kinds].map(k => `kind:${k}`), ...(flags.has("pictures") ? ["has pictures"] : []), ...(ok ? [] : ["needs changes"])] }));
 console.log(readFileSync(join(out, "comment.md"), "utf8"));
 process.exit(ok ? 0 : 1);
