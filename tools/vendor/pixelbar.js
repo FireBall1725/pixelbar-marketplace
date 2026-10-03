@@ -1658,10 +1658,11 @@ function renderZ(d,S,A,prog,dst,scr){const {W,H,id}=S,Zs=zonesOf(scr,id),zs=A.Z[
   Zs.forEach((z,i)=>{const w=has(zs[i])?(z.w==="*"?each:Math.min(z.w,Math.max(0,right-x))):0;R.push({x,w});x+=w;});
   const taken=(i,k)=>k!=null&&!String(k).startsWith("bx:")&&!Zs[i].show.includes(k),bc=k=>String(k).startsWith("bx:")?boxCard(k):null;
   let clockX=right;Zs.forEach((z,i)=>{if(R[i].w&&(z.show.includes("clock")||(bc(zs[i]&&zs[i].cur)||{}).card==="clock")&&R[i].x>0)clockX=Math.min(clockX,R[i].x);});
-  /* An event can spill over its neighbours: across the whole width when the zone allows it, or on idle up to 240 px, stopping at the clock. */
+  /* An event can spill over its neighbours: across the whole width when the zone allows it, or on idle up to 240 px, stopping at the clock or at the next box that's showing an event of its own. */
   /* a.prev sticks after the roll ends, so a gone event only counts while it's still rolling out. */
   const rect=i=>{const a=zs[i];if(!a||!R[i].w||!(taken(i,a.cur)||(a.prev!==undefined&&prog(a,ROLL)<1&&taken(i,a.prev))))return R[i];if(Zs[i].wide)return {x:0,w:right,spill:1};
-    if(style==="overlay")return {x:R[i].x,w:Math.max(R[i].w,Math.min(240,clockX-R[i].x)),spill:1};return R[i];};
+    if(style==="overlay"){let stop=clockX;for(let j=i+1;j<Zs.length;j++){const b=zs[j];if(R[j].w&&b&&(taken(j,b.cur)||(b.prev!==undefined&&prog(b,ROLL)<1&&taken(j,b.prev)))){stop=Math.min(stop,R[j].x);break;}}
+      return {x:R[i].x,w:Math.max(R[i].w,Math.min(240,stop-R[i].x)),spill:1};}return R[i];};
   const rs=Zs.map((_,i)=>rect(i)),hidden=i=>rs.some((r,j)=>j!==i&&r.spill&&R[i].w&&R[i].x<r.x+r.w&&R[i].x+R[i].w>r.x);
   if(style==="overlay"){let f=0;zs.forEach((a,i)=>{if(!a||!R[i].w)return;const pc=ease(prog(a,ROLL)),on=taken(i,a.cur),was=a.prev!==undefined&&taken(i,a.prev);f=Math.max(f,on&&was?1:on?pc:was?1-pc:0);});if(f>0)dst.scaleRect(0,0,W,H,1-0.35*f);}
   // Effects around a card: the boxes are compared with the sky under them afterwards, so the weather can come in front of the words.
@@ -2905,7 +2906,10 @@ function applyNotify(key,b,x={}){const ik="json:"+key;
   const t=b.tier,ongoing=t!=="alert"&&!(t==="notice"&&b.tray!=="until_cleared"),d={tier:t,icon,key,raw:1,card:ik,tray:"mini:"+icon+":"+hex(col),ctl:ongoing?["send","clear"]:["send"]};
   if(t==="critical"||t==="warning"){d.adv=ik;d.full=ik;}else if(t==="advisory")d.adv=ik;else if(t==="alert"){d.full=ik;if(anim){d.notray=1;d.dur=b.animation==="weather"?clamp(Math.round(+b.seconds||60),5,3600):b.animation==="countdown"?secs+4:THEMES[b.animation]||b.animation==="live"||b.animation==="fireworks"||b.animation==="flag"?10:8;}}
   if(t==="notice"&&b.tray==="until_cleared")d.keep=1;
-  Object.assign(d,x);DEF[ik]=d;if(b.sound!==undefined)SOUND_OF[ik]=b.sound;else delete SOUND_OF[ik];
+  Object.assign(d,x);
+  // An animation that runs to a time (a countdown, a weather round-up) holds the strip that long, unless the message set its own takeover.
+  if(d.dur&&d.dl&&b.takeover===undefined)d.dl=Object.assign({},d.dl,{takeover:d.dur});
+  DEF[ik]=d;if(b.sound!==undefined)SOUND_OF[ik]=b.sound;else delete SOUND_OF[ik];
   if(Array.isArray(b.screens))SCR.n.set(ik,new Set(b.screens.filter(x=>SCREENS.includes(x))));else SCR.n.delete(ik);
   const note=missing.length?` The display doesn't have ${missing.join(" or ")} yet, so it's drawn without ${missing.length>1?"them":"it"}.`:"";
   if(key.startsWith("__"))return note;if(live.E.has(ik)&&!b.renotify)return "Updated "+key+" in place."+note;
