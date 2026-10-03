@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pixelbar.fireball1725.ca/schema/v2/weather.schema.json",
+  "title": "Weather",
+  "description": "pixelbar/<target>/weather, retained. The sky and its words. Temperatures and forecasts are data.",
+  "type": "object",
+  "required": [
+    "v",
+    "condition"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "v": {
+      "$ref": "common.schema.json#/$defs/v"
+    },
+    "condition": {
+      "$ref": "common.schema.json#/$defs/condition"
+    },
+    "is_day": {
+      "type": "boolean",
+      "description": "sun.sun is above the horizon."
+    },
+    "extra": {
+      "enum": [
+        "heavysnow",
+        "hot",
+        "cold",
+        "smoke",
+        "freezing",
+        "blizzard",
+        "drizzle",
+        "rainbow",
+        "aurora"
+      ],
+      "description": "A PixelBar sky beyond Home Assistant's conditions. Keep condition as the real state."
+    },
+    "caption": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 3,
+      "description": "Up to three lines of words, built in the automation."
+    }
+  }
+}

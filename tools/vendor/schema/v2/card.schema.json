@@ -1,0 +1,2015 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pixelbar.fireball1725.ca/schema/v2/card.schema.json",
+  "title": "Card",
+  "description": "Something drawn in a box or a notification: a type, where its data comes from, and how it looks.",
+  "type": "object",
+  "required": [
+    "card"
+  ],
+  "properties": {
+    "card": {
+      "enum": [
+        "clock",
+        "date",
+        "weather",
+        "caption",
+        "text",
+        "value",
+        "temperature",
+        "climate",
+        "gauge",
+        "chart",
+        "forecast",
+        "ticker",
+        "list",
+        "departures",
+        "sun",
+        "image",
+        "lights",
+        "media",
+        "animation"
+      ],
+      "description": "How it's drawn."
+    },
+    "show_for": {
+      "$ref": "common.schema.json#/$defs/seconds",
+      "description": "Seconds this card stays before the next one in its box."
+    },
+    "when": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Only show while this holds. Without data or entity it tests the card's own data.",
+      "properties": {
+        "data": {
+          "$ref": "common.schema.json#/$defs/key"
+        },
+        "entity": {
+          "$ref": "common.schema.json#/$defs/key"
+        },
+        "above": {
+          "type": "number",
+          "description": "Holds while the value is above this number."
+        },
+        "below": {
+          "type": "number",
+          "description": "Holds while the value is below this number."
+        },
+        "equals": {
+          "description": "Holds while the value is exactly this, like \"playing\" or 0."
+        },
+        "not": {
+          "description": "Holds while the value is anything but this."
+        },
+        "weather": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "common.schema.json#/$defs/condition"
+              },
+              {
+                "const": "wet"
+              }
+            ]
+          },
+          "description": "Weather conditions, or wet for any rain or snow."
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "card": {
+            "const": "clock"
+          }
+        },
+        "required": [
+          "card"
+        ]
+      },
+      "then": {
+        "properties": {
+          "style": {
+            "$ref": "#/$defs/clock_style"
+          },
+          "hours": {
+            "$ref": "#/$defs/clock_hours"
+          },
+          "outline": {
+            "$ref": "#/$defs/outline"
+          },
+          "effects": {
+            "$ref": "#/$defs/effects"
+          }
+        }
+      },
+      "description": "The time. Needs no data."
+    },
+    {
+      "if": {
+        "properties": {
+          "card": {
+            "const": "date"
+          }
+        },
+        "required": [
+          "card"
+        ]
+      },
+      "then": {
+        "properties": {
+          "outline": {
+            "$ref": "#/$defs/outline"
+          },
+          "effects": {
+            "$ref": "#/$defs/effects"
+          }
+        }
+      },
+      "description": "The date."
+    },
+    {
+      "if": {
+        "properties": {
+          "card": {
+            "const": "weather"
+          }
+        },
+        "required": [
+          "card"
+        ]
+      },
+      "then": {
+        "properties": {
+          "outline": {
+            "$ref": "#/$defs/outline"
+          },
+          "effects": {
+            "$ref": "#/$defs/effects"
+          }
+        }
+      },
+      "description": "The weather icon and its name, from the weather topic."
+    },
+    {
+      "if": {
+        "properties": {
+          "card": {
+            "const": "caption"
+          }
+        },
+        "required": [
+          "card"
+        ]
+      },
+      "then": {
+        "properties": {
+          "outline": {
+            "$ref": "#/$defs/outline"
+          },
+          "effects": {
+            "$ref": "#/$defs/effects"
+          }
+        }
+      },
+      "description": "The weather's lines of words, from the weather topic."
+    },
+    {
+      "if": {
+        "properties": {
+          "card": {
+            "const": "text"
+          }
+        },
+        "required": [
+          "card"
+        ]
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "$ref": "#/$defs/data"
+          },
+          "entity": {
+            "$ref": "#/$defs/entity"
+          },
+          "value": {
+            "$ref": "#/$defs/value"
+          },
+          "attributes": {
+            "$ref": "#/$defs/attributes"
+          },
+          "label": {
+            "$ref": "#/$defs/label"
+          },
+          "font": {
+            "$ref": "#/$defs/font"
+          },
+          "case": {
+            "$ref": "#/$defs/case"
+          },
+          "icon": {
+            "$ref": "#/$defs/icon"
+          },
+          "color": {
+            "$ref": "#/$defs/color",
+            "description": "The title and the icon."
+          },
+          "title": {
+            "$ref": "#/$defs/text_title"
+          },
+          "message": {
+            "$ref": "#/$defs/text_message"
+          },
+          "detail": {
+            "$ref": "#/$defs/text_detail"
+          },
+          "big": {
+            "$ref": "#/$defs/text_big"
+          },
+          "progress": {
+            "$ref": "#/$defs/text_progress"
+          },
+          "images": {
+            "$ref": "#/$defs/text_images"
+          },
+          "since": {
+            "$ref": "#/$defs/text_since"
+          },
+          "until": {
+            "$ref": "#/$defs/text_until"
+          },
+          "outline": {
+            "$ref": "#/$defs/outline"
+          },
+          "effects": {
+            "$ref": "#/$defs/effects"
+          },
+          "speed": {
+            "$ref": "#/$defs/speed"
+          },
+          "palette": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Your own colour for each part of this card, as #RRGGBB; any part left out keeps its usual colour.",
+            "properties": {
+              "title": {
+                "$ref": "#/$defs/palette_roles/properties/title"
+              },
+              "text": {
+                "$ref": "#/$defs/palette_roles/properties/text"
+              },
+              "detail": {
+                "$ref": "#/$defs/palette_roles/properties/detail"
+              },
+              "value": {
+                "$ref": "#/$defs/palette_roles/properties/value"
+              },
+              "unit": {
+                "$ref": "#/$defs/palette_roles/properties/unit"
+              }
+            }
+          }
+        }
+      },
+      "description": "Words: a title, a message and a detail, with an optional big number or bar. Bound to data, the message is the data's value."
+    },
+    {
+      "if": {
+        "properties": {
+          "card": {
+            "const": "value"
+          }
+        },
+        "required": [
+          "card"
+        ]
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "$ref": "#/$defs/data"
+          },
+          "entity": {
+            "$ref": "#/$defs/entity"
+          },
+          "value": {
+            "$ref": "#/$defs/value"
+          },
+          "unit": {
+            "$ref": "#/$defs/unit"
+          },
+          "attributes": {
+            "$ref": "#/$defs/attributes"
+          },
+          "label": {
+            "$ref": "#/$defs/label"
+          },
+          "icon": {
+            "$ref": "#/$defs/icon"
+          },
+          "color": {
+            "$ref": "#/$defs/color",
+            "description": "The value, in place of the one that goes with a temperature."
+          },
+          "font": {
+            "$ref": "#/$defs/font"
+          },
+          "trend": {
+            "$ref": "#/$defs/value_trend"
+          },
+          "detail": {
+            "$ref": "#/$defs/value_detail"
+          },
+          "decimals": {
+            "$ref": "#/$defs/value_decimals"
+          },
+          "outline": {
+            "$ref": "#/$defs/outline"
+          },
+          "effects": {
+            "$ref": "#/$defs/effects"
+          },
+          "palette": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Your own colour for each part of this card, as #RRGGBB; any part left out keeps its usual colour.",
+            "properties": {
+              "label": {
+                "$ref": "#/$defs/palette_roles/properties/label"
+              },
+              "icon": {
+                "$ref": "#/$defs/palette_roles/properties/icon"
+              },
+              "value": {
+                "$ref": "#/$defs/palette_roles/properties/value"
+              },
+              "unit": {
+                "$ref": "#/$defs/palette_roles/properties/unit"
+              },
+              "up": {
+                "$ref": "#/$defs/palette_roles/properties/up"
+              },
+              "down": {
+                "$ref": "#/$defs/palette_roles/properties/down"
+              },
+              "detail": {
+                "$ref": "#/$defs/palette_roles/properties/detail"
+              }
+            }
+          }
+        }
+      },
+      "description": "One reading with its unit and a trend arrow."
+    },
+    {
+      "if": {
+        "properties": {
+          "card": {
+            "const": "temperature"
+          }
+        },
+        "required": [
+          "card"
+        ]
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "$ref": "#/$defs/data"
+          },
+          "entity": {
+            "$ref": "#/$defs/entity"
+          },
+          "value": {
+            "$ref": "#/$defs/value"
+          },
+          "attributes": {
+            "$ref": "#/$defs/attributes"
+          },
+          "label": {
+            "$ref": "#/$defs/label"
+          },
+          "color": {
+            "$ref": "#/$defs/color",
+            "description": "The temperature, in place of the one that goes with how warm it is."
+          },
+          "font": {
+            "$ref": "#/$defs/font"
+          },
+          "outline": {
+            "$ref": "#/$defs/outline"
+          },
+          "effects": {
+            "$ref": "#/$defs/effects"
+          },
+          "palette": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Your own colour for each part of this card, as #RRGGBB; any part left out keeps its usual colour.",
+            "properties": {
+              "label": {
+                "$ref": "#/$defs/palette_roles/properties/label"
+              },
+              "value": {
+                "$ref": "#/$defs/palette_roles/properties/value"
+              },
+              "text": {
+                "$ref": "#/$defs/palette_roles/properties/text"
+              },
+              "detail": {
+                "$ref": "#/$defs/palette_roles/properties/detail"
+              }
+            }
+          }
+        }
+      },
+      "description": "A temperature with feels like, high and low; the icon follows the weather. Reads attributes apparent_temperature, high and low, or attributes.temperature when the value is a weather condition."
+    },
+    {
+      "if": {
+        "properties": {
+          "card": {
+            "const": "climate"
+          }
+        },
+        "required": [
+          "card"
+        ]
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "$ref": "#/$defs/data"
+          },
+          "entity": {
+            "$ref": "#/$defs/entity"
+          },
+          "value": {
+            "$ref": "#/$defs/value"
+          },
+          "attributes": {
+            "$ref": "#/$defs/attributes"
+          },
+          "label": {
+            "$ref": "#/$defs/label"
+          },
+          "icon": {
+            "$ref": "#/$defs/icon"
+          },
+          "color": {
+            "$ref": "#/$defs/color",
+            "description": "The temperature, in place of the one that goes with how warm it is."
+          },
+          "font": {
+            "$ref": "#/$defs/font"
+          },
+          "outline": {
+            "$ref": "#/$defs/outline"
+          },
+          "effects": {
+            "$ref": "#/$defs/effects"
+          },
+          "palette": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Your own colour for each part of this card, as #RRGGBB; any part left out keeps its usual colour.",
+            "properties": {
+              "label": {
+                "$ref": "#/$defs/palette_roles/properties/label"
+              },
+              "icon": {
+                "$ref": "#/$defs/palette_roles/properties/icon"
+              },
+              "value": {
+                "$ref": "#/$defs/palette_roles/properties/value"
+              },
+              "humidity": {
+                "$ref": "#/$defs/palette_roles/properties/humidity"
+              }
+            }
+          }
+        }
+      },
+      "description": "Temperature, humidity and a 24-hour line. Reads attributes humidity and history."
+    },
+    {
+      "if": {
+        "properties": {
+          "card": {
+            "const": "gauge"
+          }
+        },
+        "required": [
+          "card"
+        ]
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "$ref": "#/$defs/data"
+          },
+          "entity": {
+            "$ref": "#/$defs/entity"
+          },
+          "value": {
+            "$ref": "#/$defs/value"
+          },
+          "unit": {
+            "$ref": "#/$defs/unit"
+          },
+          "attributes": {
+            "$ref": "#/$defs/attributes"
+          },
+          "label": {
+            "$ref": "#/$defs/label"
+          },
+          "icon": {
+            "$ref": "#/$defs/icon"
+          },
+          "color": {
+            "$ref": "#/$defs/color",
+            "description": "The bar, when there are no bands."
+          },
+          "min": {
+            "$ref": "#/$defs/gauge_min"
+          },
+          "max": {
+            "$ref": "#/$defs/gauge_max"
+          },
+          "bands": {
+            "$ref": "#/$defs/gauge_bands"
+          },
+          "outline": {
+            "$ref": "#/$defs/outline"
+          },
+          "effects": {
+            "$ref": "#/$defs/effects"
+          },
+          "palette": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Your own colour for each part of this card, as #RRGGBB; any part left out keeps its usual colour.",
+            "properties": {
+              "label": {
+                "$ref": "#/$defs/palette_roles/properties/label"
+              },
+              "icon": {
+                "$ref": "#/$defs/palette_roles/properties/icon"
+              },
+              "value": {
+                "$ref": "#/$defs/palette_roles/properties/value"
+              },
+              "unit": {
+                "$ref": "#/$defs/palette_roles/properties/unit"
+              },
+              "bar": {
+                "$ref": "#/$defs/palette_roles/properties/bar"
+              },
+              "detail": {
+                "$ref": "#/$defs/palette_roles/properties/detail"
+              }
+            }
+          }
+        }
+      },
+      "description": "A bar with coloured bands."
+    },
+    {
+      "if": {
+        "properties": {
+          "card": {
+            "const": "chart"
+          }
+        },
+        "required": [
+          "card"
+        ]
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "$ref": "#/$defs/data"
+          },
+          "entity": {
+            "$ref": "#/$defs/entity"
+          },
+          "value": {
+            "$ref": "#/$defs/value"
+          },
+          "unit": {
+            "$ref": "#/$defs/unit"
+          },
+          "attributes": {
+            "$ref": "#/$defs/attributes"
+          },
+          "label": {
+            "$ref": "#/$defs/label"
+          },
+          "icon": {
+            "$ref": "#/$defs/icon"
+          },
+          "style": {
+            "$ref": "#/$defs/chart_style"
+          },
+          "interval": {
+            "$ref": "#/$defs/chart_interval"
+          },
+          "labels": {
+            "$ref": "#/$defs/chart_labels"
+          },
+          "max": {
+            "$ref": "#/$defs/chart_max"
+          },
+          "outline": {
+            "$ref": "#/$defs/outline"
+          },
+          "effects": {
+            "$ref": "#/$defs/effects"
+          },
+          "palette": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Your own colour for each part of this card, as #RRGGBB; any part left out keeps its usual colour.",
+            "properties": {
+              "label": {
+                "$ref": "#/$defs/palette_roles/properties/label"
+              },
+              "icon": {
+                "$ref": "#/$defs/palette_roles/properties/icon"
+              },
+              "unit": {
+                "$ref": "#/$defs/palette_roles/properties/unit"
+              }
+            }
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "style": {
+                  "enum": [
+                    "area",
+                    "line",
+                    "bars",
+                    "smooth"
+                  ]
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "color": {
+                  "$ref": "#/$defs/color",
+                  "description": "The line, area or bars."
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "style": {
+                  "enum": [
+                    "area",
+                    "line"
+                  ]
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "smooth": {
+                  "$ref": "#/$defs/chart_smooth"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "description": "A series as an area or bars. The value is a list of numbers, oldest or soonest first."
+    },
+    {
+      "if": {
+        "properties": {
+          "card": {
+            "const": "forecast"
+          }
+        },
+        "required": [
+          "card"
+        ]
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "$ref": "#/$defs/data"
+          },
+          "entity": {
+            "$ref": "#/$defs/entity"
+          },
+          "value": {
+            "$ref": "#/$defs/forecast_value"
+          },
+          "period": {
+            "$ref": "#/$defs/forecast_period"
+          },
+          "count": {
+            "$ref": "#/$defs/forecast_count"
+          },
+          "outline": {
+            "$ref": "#/$defs/outline"
+          },
+          "effects": {
+            "$ref": "#/$defs/effects"
+          }
+        }
+      },
+      "description": "Hours, or days, each with a weather icon. The value is a list shaped like Home Assistant's weather.get_forecasts."
+    },
+    {
+      "if": {
+        "properties": {
+          "card": {
+            "const": "ticker"
+          }
+        },
+        "required": [
+          "card"
+        ]
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "$ref": "#/$defs/data"
+          },
+          "entity": {
+            "$ref": "#/$defs/entity"
+          },
+          "value": {
+            "$ref": "#/$defs/ticker_value"
+          },
+          "label": {
+            "$ref": "#/$defs/label"
+          },
+          "case": {
+            "$ref": "#/$defs/case"
+          },
+          "icon": {
+            "$ref": "#/$defs/icon"
+          },
+          "color": {
+            "$ref": "#/$defs/color",
+            "description": "The values."
+          },
+          "change_unit": {
+            "$ref": "#/$defs/ticker_change_unit"
+          },
+          "detail": {
+            "$ref": "#/$defs/ticker_detail"
+          },
+          "outline": {
+            "$ref": "#/$defs/outline"
+          },
+          "effects": {
+            "$ref": "#/$defs/effects"
+          },
+          "speed": {
+            "$ref": "#/$defs/speed"
+          },
+          "palette": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Your own colour for each part of this card, as #RRGGBB; any part left out keeps its usual colour.",
+            "properties": {
+              "label": {
+                "$ref": "#/$defs/palette_roles/properties/label"
+              },
+              "icon": {
+                "$ref": "#/$defs/palette_roles/properties/icon"
+              },
+              "name": {
+                "$ref": "#/$defs/palette_roles/properties/name"
+              },
+              "value": {
+                "$ref": "#/$defs/palette_roles/properties/value"
+              },
+              "up": {
+                "$ref": "#/$defs/palette_roles/properties/up"
+              },
+              "down": {
+                "$ref": "#/$defs/palette_roles/properties/down"
+              },
+              "detail": {
+                "$ref": "#/$defs/palette_roles/properties/detail"
+              }
+            }
+          }
+        }
+      },
+      "description": "A scrolling line of items with their change. The value is a list."
+    },
+    {
+      "if": {
+        "properties": {
+          "card": {
+            "const": "list"
+          }
+        },
+        "required": [
+          "card"
+        ]
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "$ref": "#/$defs/data"
+          },
+          "entity": {
+            "$ref": "#/$defs/entity"
+          },
+          "value": {
+            "$ref": "#/$defs/list_value"
+          },
+          "unit": {
+            "$ref": "#/$defs/unit"
+          },
+          "label": {
+            "$ref": "#/$defs/label"
+          },
+          "icon": {
+            "$ref": "#/$defs/icon"
+          },
+          "color": {
+            "$ref": "#/$defs/color",
+            "description": "The values, where an item has no colour of its own."
+          },
+          "outline": {
+            "$ref": "#/$defs/outline"
+          },
+          "effects": {
+            "$ref": "#/$defs/effects"
+          },
+          "palette": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Your own colour for each part of this card, as #RRGGBB; any part left out keeps its usual colour.",
+            "properties": {
+              "label": {
+                "$ref": "#/$defs/palette_roles/properties/label"
+              },
+              "icon": {
+                "$ref": "#/$defs/palette_roles/properties/icon"
+              },
+              "name": {
+                "$ref": "#/$defs/palette_roles/properties/name"
+              },
+              "value": {
+                "$ref": "#/$defs/palette_roles/properties/value"
+              }
+            }
+          }
+        }
+      },
+      "description": "Many readings on one card. The value is a list."
+    },
+    {
+      "if": {
+        "properties": {
+          "card": {
+            "const": "departures"
+          }
+        },
+        "required": [
+          "card"
+        ]
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "$ref": "#/$defs/data"
+          },
+          "entity": {
+            "$ref": "#/$defs/entity"
+          },
+          "value": {
+            "$ref": "#/$defs/departures_value"
+          },
+          "case": {
+            "$ref": "#/$defs/case"
+          },
+          "color": {
+            "$ref": "#/$defs/color",
+            "description": "The words, on a board."
+          },
+          "style": {
+            "$ref": "#/$defs/departures_style"
+          },
+          "every": {
+            "$ref": "#/$defs/departures_every"
+          },
+          "outline": {
+            "$ref": "#/$defs/outline"
+          },
+          "effects": {
+            "$ref": "#/$defs/effects"
+          },
+          "speed": {
+            "$ref": "#/$defs/speed"
+          },
+          "palette": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Your own colour for each part of this card, as #RRGGBB; any part left out keeps its usual colour.",
+            "properties": {
+              "name": {
+                "$ref": "#/$defs/palette_roles/properties/name"
+              },
+              "value": {
+                "$ref": "#/$defs/palette_roles/properties/value"
+              },
+              "unit": {
+                "$ref": "#/$defs/palette_roles/properties/unit"
+              },
+              "detail": {
+                "$ref": "#/$defs/palette_roles/properties/detail"
+              }
+            }
+          }
+        }
+      },
+      "description": "Transit rows: route, destination and minutes. The value is a list."
+    },
+    {
+      "if": {
+        "properties": {
+          "card": {
+            "const": "sun"
+          }
+        },
+        "required": [
+          "card"
+        ]
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "$ref": "#/$defs/data"
+          },
+          "entity": {
+            "$ref": "#/$defs/entity"
+          },
+          "value": {
+            "$ref": "#/$defs/value"
+          },
+          "attributes": {
+            "$ref": "#/$defs/attributes"
+          },
+          "color": {
+            "$ref": "#/$defs/color",
+            "description": "The time."
+          },
+          "font": {
+            "$ref": "#/$defs/font"
+          },
+          "outline": {
+            "$ref": "#/$defs/outline"
+          },
+          "effects": {
+            "$ref": "#/$defs/effects"
+          },
+          "palette": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Your own colour for each part of this card, as #RRGGBB; any part left out keeps its usual colour.",
+            "properties": {
+              "label": {
+                "$ref": "#/$defs/palette_roles/properties/label"
+              },
+              "value": {
+                "$ref": "#/$defs/palette_roles/properties/value"
+              },
+              "detail": {
+                "$ref": "#/$defs/palette_roles/properties/detail"
+              }
+            }
+          }
+        }
+      },
+      "description": "The next sunrise or sunset. Reads attributes next_rising and next_setting, as on sun.sun."
+    },
+    {
+      "if": {
+        "properties": {
+          "card": {
+            "const": "image"
+          }
+        },
+        "required": [
+          "card"
+        ]
+      },
+      "then": {
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/image_id"
+          },
+          "effects": {
+            "$ref": "#/$defs/effects"
+          }
+        }
+      },
+      "description": "A picture sent earlier as an asset."
+    },
+    {
+      "if": {
+        "properties": {
+          "card": {
+            "const": "lights"
+          }
+        },
+        "required": [
+          "card"
+        ]
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "$ref": "#/$defs/data"
+          },
+          "entity": {
+            "$ref": "#/$defs/entity"
+          },
+          "entities": {
+            "$ref": "#/$defs/lights_entities"
+          },
+          "area": {
+            "$ref": "#/$defs/lights_area"
+          },
+          "value": {
+            "$ref": "#/$defs/lights_value"
+          },
+          "label": {
+            "$ref": "#/$defs/label"
+          },
+          "icon": {
+            "$ref": "#/$defs/icon"
+          },
+          "color": {
+            "$ref": "#/$defs/color",
+            "description": "How many are on."
+          },
+          "outline": {
+            "$ref": "#/$defs/outline"
+          },
+          "effects": {
+            "$ref": "#/$defs/effects"
+          },
+          "palette": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Your own colour for each part of this card, as #RRGGBB; any part left out keeps its usual colour.",
+            "properties": {
+              "label": {
+                "$ref": "#/$defs/palette_roles/properties/label"
+              },
+              "icon": {
+                "$ref": "#/$defs/palette_roles/properties/icon"
+              },
+              "name": {
+                "$ref": "#/$defs/palette_roles/properties/name"
+              },
+              "value": {
+                "$ref": "#/$defs/palette_roles/properties/value"
+              }
+            }
+          }
+        }
+      },
+      "description": "Lights in their own colours. Use entities or an area with the Home Assistant integration, or data whose value is a list."
+    },
+    {
+      "if": {
+        "properties": {
+          "card": {
+            "const": "media"
+          }
+        },
+        "required": [
+          "card"
+        ]
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "$ref": "#/$defs/data"
+          },
+          "entity": {
+            "$ref": "#/$defs/entity"
+          },
+          "value": {
+            "$ref": "#/$defs/value"
+          },
+          "attributes": {
+            "$ref": "#/$defs/attributes"
+          },
+          "case": {
+            "$ref": "#/$defs/case"
+          },
+          "icon": {
+            "$ref": "#/$defs/icon"
+          },
+          "color": {
+            "$ref": "#/$defs/color",
+            "description": "The title."
+          },
+          "outline": {
+            "$ref": "#/$defs/outline"
+          },
+          "effects": {
+            "$ref": "#/$defs/effects"
+          },
+          "speed": {
+            "$ref": "#/$defs/speed"
+          },
+          "palette": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Your own colour for each part of this card, as #RRGGBB; any part left out keeps its usual colour.",
+            "properties": {
+              "title": {
+                "$ref": "#/$defs/palette_roles/properties/title"
+              },
+              "text": {
+                "$ref": "#/$defs/palette_roles/properties/text"
+              },
+              "detail": {
+                "$ref": "#/$defs/palette_roles/properties/detail"
+              }
+            }
+          }
+        }
+      },
+      "description": "What a media player is playing: title, artist, progress. Reads attributes media_title, media_artist, media_duration, media_position and media_position_updated_at."
+    },
+    {
+      "if": {
+        "properties": {
+          "card": {
+            "const": "animation"
+          }
+        },
+        "required": [
+          "card"
+        ]
+      },
+      "then": {
+        "properties": {
+          "name": {
+            "$ref": "#/$defs/animation_name"
+          },
+          "title": {
+            "$ref": "#/$defs/animation_title"
+          },
+          "icon": {
+            "$ref": "#/$defs/animation_icon"
+          },
+          "outline": {
+            "$ref": "#/$defs/outline"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "name": {
+                  "const": "goal"
+                }
+              },
+              "required": [
+                "name"
+              ]
+            },
+            "then": {
+              "properties": {
+                "message": {
+                  "$ref": "#/$defs/animation_message"
+                },
+                "detail": {
+                  "$ref": "#/$defs/animation_detail"
+                },
+                "colors": {
+                  "$ref": "#/$defs/animation_colors"
+                },
+                "images": {
+                  "$ref": "#/$defs/animation_images"
+                },
+                "score": {
+                  "$ref": "#/$defs/animation_score"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "name": {
+                  "const": "weather"
+                }
+              },
+              "required": [
+                "name"
+              ]
+            },
+            "then": {
+              "properties": {
+                "cards": {
+                  "$ref": "#/$defs/animation_cards"
+                },
+                "seconds": {
+                  "$ref": "#/$defs/animation_seconds"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "name": {
+                  "enum": [
+                    "fireworks",
+                    "confetti",
+                    "red_alert"
+                  ]
+                }
+              },
+              "required": [
+                "name"
+              ]
+            },
+            "then": {
+              "properties": {
+                "message": {
+                  "$ref": "#/$defs/animation_message"
+                },
+                "detail": {
+                  "$ref": "#/$defs/animation_detail"
+                },
+                "colors": {
+                  "$ref": "#/$defs/animation_colors"
+                },
+                "images": {
+                  "$ref": "#/$defs/animation_images"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "name": {
+                  "enum": [
+                    "live",
+                    "raid",
+                    "new_year",
+                    "valentines",
+                    "lunar_new_year",
+                    "pancake_day",
+                    "st_patricks",
+                    "holi",
+                    "easter",
+                    "eid",
+                    "canada_day",
+                    "fourth_of_july",
+                    "thanksgiving",
+                    "halloween",
+                    "dia_de_muertos",
+                    "diwali",
+                    "remembrance",
+                    "christmas"
+                  ]
+                }
+              },
+              "required": [
+                "name"
+              ]
+            },
+            "then": {
+              "properties": {
+                "message": {
+                  "$ref": "#/$defs/animation_message"
+                },
+                "detail": {
+                  "$ref": "#/$defs/animation_detail"
+                },
+                "colors": {
+                  "$ref": "#/$defs/animation_colors"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "name": {
+                  "const": "countdown"
+                }
+              },
+              "required": [
+                "name"
+              ]
+            },
+            "then": {
+              "properties": {
+                "message": {
+                  "$ref": "#/$defs/animation_message"
+                },
+                "detail": {
+                  "$ref": "#/$defs/animation_detail"
+                },
+                "colors": {
+                  "$ref": "#/$defs/animation_colors"
+                },
+                "seconds": {
+                  "$ref": "#/$defs/animation_seconds"
+                },
+                "until": {
+                  "$ref": "#/$defs/animation_until"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "name": {
+                  "const": "flag"
+                }
+              },
+              "required": [
+                "name"
+              ]
+            },
+            "then": {
+              "properties": {
+                "message": {
+                  "$ref": "#/$defs/animation_message"
+                },
+                "detail": {
+                  "$ref": "#/$defs/animation_detail"
+                },
+                "flag": {
+                  "$ref": "#/$defs/animation_flag"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "name": {
+                  "const": "pride"
+                }
+              },
+              "required": [
+                "name"
+              ]
+            },
+            "then": {
+              "properties": {
+                "message": {
+                  "$ref": "#/$defs/animation_message"
+                },
+                "detail": {
+                  "$ref": "#/$defs/animation_detail"
+                },
+                "colors": {
+                  "$ref": "#/$defs/animation_colors"
+                },
+                "flags": {
+                  "$ref": "#/$defs/animation_flags"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "name": {
+                  "const": "hanukkah"
+                }
+              },
+              "required": [
+                "name"
+              ]
+            },
+            "then": {
+              "properties": {
+                "message": {
+                  "$ref": "#/$defs/animation_message"
+                },
+                "detail": {
+                  "$ref": "#/$defs/animation_detail"
+                },
+                "colors": {
+                  "$ref": "#/$defs/animation_colors"
+                },
+                "night": {
+                  "$ref": "#/$defs/animation_night"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "description": "A full-strip animation. Notifications only."
+    }
+  ],
+  "not": {
+    "anyOf": [
+      {
+        "required": [
+          "data",
+          "entity"
+        ]
+      }
+    ]
+  },
+  "unevaluatedProperties": false,
+  "$comment": "Card types and what each reads: clock: The time. Needs no data.; date: The date.; weather: The weather icon and its name, from the weather topic.; caption: The weather's lines of words, from the weather topic.; text: Words: a title, a message and a detail, with an optional big number or bar. Bound to data, the message is the data's value.; value: One reading with its unit and a trend arrow.; temperature: A temperature with feels like, high and low; the icon follows the weather. Reads attributes apparent_temperature, high and low, or attributes.temperature when the value is a weather condition.; climate: Temperature, humidity and a 24-hour line. Reads attributes humidity and history.; gauge: A bar with coloured bands.; chart: A series as an area or bars. The value is a list of numbers, oldest or soonest first.; forecast: Hours, or days, each with a weather icon. The value is a list shaped like Home Assistant's weather.get_forecasts.; ticker: A scrolling line of items with their change. The value is a list.; list: Many readings on one card. The value is a list.; departures: Transit rows: route, destination and minutes. The value is a list.; sun: The next sunrise or sunset. Reads attributes next_rising and next_setting, as on sun.sun.; image: A picture sent earlier as an asset.; lights: Lights in their own colours. Use entities or an area with the Home Assistant integration, or data whose value is a list.; media: What a media player is playing: title, artist, progress. Reads attributes media_title, media_artist, media_duration, media_position and media_position_updated_at.; animation: A full-strip animation. Notifications only.",
+  "$defs": {
+    "data": {
+      "$ref": "common.schema.json#/$defs/key",
+      "description": "Read value, unit and attributes from this key in the pool."
+    },
+    "entity": {
+      "$ref": "common.schema.json#/$defs/key",
+      "description": "A Home Assistant entity. The integration keeps a data key of the same name filled in, so this reads like data."
+    },
+    "value": {
+      "description": "Inline data: the reading, words, or a list."
+    },
+    "unit": {
+      "type": "string",
+      "description": "Shown after the value, as Home Assistant writes it."
+    },
+    "attributes": {
+      "type": "object",
+      "description": "Inline data: everything else the card reads, like high and low."
+    },
+    "label": {
+      "type": "string",
+      "description": "The small heading."
+    },
+    "icon": {
+      "$ref": "common.schema.json#/$defs/icon"
+    },
+    "color": {
+      "$ref": "common.schema.json#/$defs/color"
+    },
+    "font": {
+      "$ref": "common.schema.json#/$defs/font"
+    },
+    "outline": {
+      "$ref": "common.schema.json#/$defs/outline",
+      "description": "This card's outline, over its screen's: a colour all round, { color, at } on one side like a shadow below, or none. On a notification it's used for its card and its takeover."
+    },
+    "effects": {
+      "$ref": "common.schema.json#/$defs/effects",
+      "description": "This card's place in the weather, over its screen's: behind, or around so rain and snow land on its words. Only on the weather sky."
+    },
+    "speed": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 200,
+      "description": "How fast this card scrolls, in LEDs a second: a ticker, or any words too long for their space. 0 holds them still; without it a ticker runs at 18 and long words at 16."
+    },
+    "clock_style": {
+      "$ref": "common.schema.json#/$defs/font"
+    },
+    "clock_hours": {
+      "enum": [
+        12,
+        24
+      ],
+      "description": "Overrides the display's setting."
+    },
+    "text_title": {
+      "type": "string",
+      "description": "The big first line."
+    },
+    "text_message": {
+      "type": "string",
+      "description": "The second line. Can use tokens like {elapsed_min} or {since_time}, which the display keeps current."
+    },
+    "text_detail": {
+      "type": "string",
+      "description": "A small third line, shown on the card in a box or the tray, not on a whole-strip takeover. Takes the same tokens as message."
+    },
+    "text_big": {
+      "$ref": "common.schema.json#/$defs/big"
+    },
+    "text_progress": {
+      "$ref": "common.schema.json#/$defs/progress"
+    },
+    "text_images": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/image_ref"
+      },
+      "maxItems": 2,
+      "description": "Up to two pictures by id (sent once on pixelbar/all/asset/image/<id>), drawn left of the words, like team crests."
+    },
+    "text_since": {
+      "$ref": "common.schema.json#/$defs/time",
+      "description": "When it happened, as an ISO time. {since_time} and {elapsed_min} in message, detail and big.value count from it; in an automation, {{ now().isoformat() }}."
+    },
+    "text_until": {
+      "$ref": "common.schema.json#/$defs/time",
+      "description": "When it ends, as an ISO time. {until_time} and {remaining_min} count to it."
+    },
+    "palette_roles": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "$ref": "common.schema.json#/$defs/color",
+          "description": "A title or the big first line."
+        },
+        "text": {
+          "$ref": "common.schema.json#/$defs/color",
+          "description": "The second line of words."
+        },
+        "detail": {
+          "$ref": "common.schema.json#/$defs/color",
+          "description": "The small print: details, times, minimum and maximum."
+        },
+        "value": {
+          "$ref": "common.schema.json#/$defs/color",
+          "description": "The value or the big number."
+        },
+        "unit": {
+          "$ref": "common.schema.json#/$defs/color",
+          "description": "The unit after a value."
+        },
+        "label": {
+          "$ref": "common.schema.json#/$defs/color",
+          "description": "The small label at the top."
+        },
+        "icon": {
+          "$ref": "common.schema.json#/$defs/color",
+          "description": "The icon, where it takes a colour."
+        },
+        "up": {
+          "$ref": "common.schema.json#/$defs/color",
+          "description": "Up: a rising change, a ticker's up arrow."
+        },
+        "down": {
+          "$ref": "common.schema.json#/$defs/color",
+          "description": "Down: a falling change, a ticker's down arrow."
+        },
+        "humidity": {
+          "$ref": "common.schema.json#/$defs/color",
+          "description": "A climate card's humidity."
+        },
+        "bar": {
+          "$ref": "common.schema.json#/$defs/color",
+          "description": "A gauge's bar."
+        },
+        "name": {
+          "$ref": "common.schema.json#/$defs/color",
+          "description": "Names in a list, a ticker's symbols, a board's destinations."
+        }
+      }
+    },
+    "value_trend": {
+      "enum": [
+        "up",
+        "down"
+      ],
+      "description": "An arrow beside the value: up or down."
+    },
+    "value_detail": {
+      "type": "string",
+      "description": "A small line under the value."
+    },
+    "value_decimals": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4,
+      "description": "How many decimal places to show, 0 to 4."
+    },
+    "gauge_min": {
+      "type": "number",
+      "description": "The left end of the bar. 0 by default."
+    },
+    "gauge_max": {
+      "type": "number",
+      "description": "The right end of the bar."
+    },
+    "gauge_bands": {
+      "type": "array",
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "required": [
+          "to",
+          "color"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "to": {
+            "type": "number",
+            "description": "Where this band ends."
+          },
+          "color": {
+            "$ref": "common.schema.json#/$defs/color"
+          },
+          "label": {
+            "type": "string",
+            "description": "A word shown while the value is in this band, like GOOD."
+          }
+        }
+      },
+      "description": "Up to 8 coloured stretches of the bar, in order, each up to a value, with an optional word shown while the value is in it."
+    },
+    "chart_style": {
+      "enum": [
+        "area",
+        "bars",
+        "line",
+        "smooth",
+        "rain",
+        "snow"
+      ],
+      "description": "area fills under the values, bars draws a bar per value, line is the line alone; add smooth to curve area or line. smooth as a style is the older way to say line with smooth. rain and snow are the nowcast styles."
+    },
+    "chart_interval": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Minutes between values."
+    },
+    "chart_labels": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 3,
+      "description": "Left, middle and right labels under the chart. NOW, then the time ahead, by default (a forecast); history charts send their own, oldest on the left."
+    },
+    "chart_max": {
+      "type": "number",
+      "description": "The top of the scale. Without it the chart fits its highest value."
+    },
+    "chart_smooth": {
+      "type": "boolean",
+      "description": "Curve the area or line through the values instead of straight segments. false by default."
+    },
+    "forecast_period": {
+      "enum": [
+        "hourly",
+        "daily"
+      ],
+      "description": "hourly or daily, as weather.get_forecasts returns them."
+    },
+    "forecast_count": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 12,
+      "description": "How many to show, 1 to 12. As many as fit by default."
+    },
+    "ticker_change_unit": {
+      "type": "string",
+      "description": "What follows each change. % by default; an empty string shows a count."
+    },
+    "ticker_detail": {
+      "type": "string",
+      "description": "Small print under the scroll, like TODAY'S CHANGE."
+    },
+    "departures_style": {
+      "enum": [
+        "bullets",
+        "board"
+      ],
+      "description": "bullets: a coloured route badge per line. board: a dark departures board."
+    },
+    "image_id": {
+      "$ref": "common.schema.json#/$defs/name"
+    },
+    "lights_entities": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/key"
+      },
+      "maxItems": 16,
+      "description": "The entities to show, up to 16. The integration fills value from an area or this list."
+    },
+    "lights_area": {
+      "$ref": "common.schema.json#/$defs/name"
+    },
+    "animation_name": {
+      "type": "string",
+      "description": "goal, fireworks, confetti, red_alert, countdown, live, raid, weather, flag, or any holiday theme.",
+      "enum": [
+        "goal",
+        "weather",
+        "fireworks",
+        "confetti",
+        "live",
+        "raid",
+        "red_alert",
+        "countdown",
+        "flag",
+        "new_year",
+        "valentines",
+        "lunar_new_year",
+        "pancake_day",
+        "st_patricks",
+        "holi",
+        "easter",
+        "eid",
+        "pride",
+        "canada_day",
+        "fourth_of_july",
+        "thanksgiving",
+        "halloween",
+        "dia_de_muertos",
+        "diwali",
+        "remembrance",
+        "hanukkah",
+        "christmas"
+      ]
+    },
+    "animation_title": {
+      "type": "string",
+      "description": "The words the animation shows, large."
+    },
+    "animation_message": {
+      "type": "string",
+      "description": "A second line, where the animation has room for one."
+    },
+    "animation_detail": {
+      "type": "string",
+      "description": "A small line, where the animation has room for one."
+    },
+    "animation_colors": {
+      "$ref": "common.schema.json#/$defs/colors"
+    },
+    "animation_images": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/image_ref"
+      },
+      "maxItems": 2,
+      "description": "Up to two pictures by id, like the team crests for a goal."
+    },
+    "animation_seconds": {
+      "$ref": "common.schema.json#/$defs/seconds"
+    },
+    "animation_until": {
+      "$ref": "common.schema.json#/$defs/time"
+    },
+    "animation_cards": {
+      "type": "array",
+      "items": {
+        "$ref": "#"
+      },
+      "maxItems": 4,
+      "description": "For weather: the cards to show after the sky."
+    },
+    "animation_flag": {
+      "type": "string",
+      "description": "For flag: canada (the default), usa, or a pride flag."
+    },
+    "animation_flags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "For pride: the flags to cycle."
+    },
+    "animation_night": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 8,
+      "description": "For hanukkah: how many candles."
+    },
+    "animation_score": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "minItems": 2,
+      "maxItems": 2,
+      "description": "For goal: home and away."
+    },
+    "forecast_value": {
+      "type": "array",
+      "description": "Inline: the list.",
+      "items": {
+        "type": "object",
+        "required": [
+          "datetime"
+        ],
+        "additionalProperties": true,
+        "properties": {
+          "datetime": {
+            "$ref": "common.schema.json#/$defs/time"
+          },
+          "condition": {
+            "$ref": "common.schema.json#/$defs/condition"
+          },
+          "temperature": {
+            "type": "number",
+            "description": "The temperature, or the high for a day."
+          },
+          "templow": {
+            "type": "number",
+            "description": "The low for a day."
+          },
+          "precipitation_probability": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "The chance of rain, 0 to 100."
+          },
+          "precipitation": {
+            "type": "number",
+            "minimum": 0,
+            "description": "How much rain, in the unit of the forecast."
+          }
+        }
+      },
+      "maxItems": 24
+    },
+    "ticker_value": {
+      "type": "array",
+      "description": "Inline: the list.",
+      "items": {
+        "type": "object",
+        "required": [
+          "label"
+        ],
+        "additionalProperties": true,
+        "properties": {
+          "label": {
+            "type": "string",
+            "description": "A short name, like SHOP or BTC."
+          },
+          "value": {
+            "type": [
+              "number",
+              "string"
+            ],
+            "description": "The number shown."
+          },
+          "change": {
+            "type": "number",
+            "description": "Green up, red down."
+          },
+          "icon": {
+            "$ref": "common.schema.json#/$defs/icon",
+            "description": "An icon before the label."
+          }
+        }
+      },
+      "maxItems": 24
+    },
+    "list_value": {
+      "type": "array",
+      "description": "Inline: the list.",
+      "items": {
+        "type": "object",
+        "required": [
+          "label"
+        ],
+        "additionalProperties": true,
+        "properties": {
+          "label": {
+            "type": "string",
+            "description": "The name on the left."
+          },
+          "value": {
+            "type": [
+              "number",
+              "string"
+            ],
+            "description": "The value on the right."
+          },
+          "unit": {
+            "type": "string",
+            "description": "A unit after the value."
+          },
+          "icon": {
+            "$ref": "common.schema.json#/$defs/icon",
+            "description": "An icon before the name."
+          },
+          "color": {
+            "$ref": "common.schema.json#/$defs/color"
+          }
+        }
+      },
+      "maxItems": 24
+    },
+    "departures_value": {
+      "type": "array",
+      "description": "Inline: the list.",
+      "items": {
+        "type": "object",
+        "required": [
+          "route",
+          "minutes"
+        ],
+        "additionalProperties": true,
+        "properties": {
+          "route": {
+            "type": "string",
+            "description": "The route or line, like 7 or KW."
+          },
+          "destination": {
+            "type": "string",
+            "description": "Where it goes."
+          },
+          "minutes": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Minutes until it leaves."
+          },
+          "color": {
+            "$ref": "common.schema.json#/$defs/color"
+          },
+          "detail": {
+            "type": "string",
+            "description": "A short note before the minutes, like 10 car or platform 2. Shown when there's room."
+          }
+        }
+      },
+      "maxItems": 24
+    },
+    "lights_value": {
+      "type": "array",
+      "description": "Inline: the list.",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "state"
+        ],
+        "additionalProperties": true,
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The entity's name."
+          },
+          "state": {
+            "enum": [
+              "on",
+              "off",
+              "unavailable"
+            ],
+            "description": "on, off or unavailable."
+          },
+          "rgb_color": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 255
+            },
+            "minItems": 3,
+            "maxItems": 3,
+            "description": "Its colour as [r, g, b], 0 to 255."
+          },
+          "brightness": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255,
+            "description": "0 to 255."
+          }
+        }
+      },
+      "maxItems": 24
+    },
+    "animation_icon": {
+      "$ref": "#/$defs/icon",
+      "description": "The tray's icon after it plays."
+    },
+    "departures_every": {
+      "type": "integer",
+      "minimum": 2,
+      "maximum": 60,
+      "default": 6,
+      "description": "Seconds a page of three rows shows before the next, when there are more than three. 6 by default."
+    },
+    "case": {
+      "$ref": "common.schema.json#/$defs/case"
+    }
+  }
+}

@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pixelbar.fireball1725.ca/schema/v2/notify.schema.json",
+  "title": "Notification",
+  "description": "pixelbar/<target>/notify/<key>. A card plus delivery, or a screen to show while it lasts. Retained for ongoing conditions (with expires), not retained for one-offs. An empty retained payload clears it.",
+  "type": "object",
+  "required": [
+    "v",
+    "tier"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "v": {
+      "$ref": "common.schema.json#/$defs/v"
+    },
+    "tier": {
+      "$ref": "common.schema.json#/$defs/tier"
+    },
+    "card": {
+      "$ref": "card.schema.json"
+    },
+    "case": {
+      "$ref": "common.schema.json#/$defs/case"
+    },
+    "box": {
+      "$ref": "common.schema.json#/$defs/name",
+      "description": "Show it in this box. A display without a box by this name skips it, unless fallback is true."
+    },
+    "fallback": {
+      "type": "boolean",
+      "description": "With box: on a display without that box, fall back to the tier rules. false by default."
+    },
+    "rank": {
+      "type": "integer",
+      "minimum": -100,
+      "maximum": 100,
+      "description": "Order inside a tier, higher first."
+    },
+    "takeover": {
+      "oneOf": [
+        {
+          "$ref": "common.schema.json#/$defs/seconds"
+        },
+        {
+          "const": "until_cleared"
+        }
+      ],
+      "description": "Take the whole strip for this long, in seconds; set it to a tune's length to keep the animation up while it plays. 0 never, until_cleared until it's cleared."
+    },
+    "slot": {
+      "$ref": "common.schema.json#/$defs/seconds",
+      "description": "Borrow a box for this long. 0 goes straight to the tray."
+    },
+    "rotate": {
+      "type": "boolean",
+      "description": "Join the box's rotation while active."
+    },
+    "tray": {
+      "oneOf": [
+        {
+          "$ref": "common.schema.json#/$defs/seconds"
+        },
+        {
+          "enum": [
+            "until_cleared",
+            "none"
+          ]
+        }
+      ],
+      "description": "How long its icon stays in the tray."
+    },
+    "edge": {
+      "type": "boolean",
+      "description": "Draw the alert bar along the bottom while active."
+    },
+    "repeat": {
+      "$ref": "common.schema.json#/$defs/seconds",
+      "description": "Come back this often while active."
+    },
+    "renotify": {
+      "type": "boolean",
+      "description": "On an update, show it again instead of changing the words quietly."
+    },
+    "screens": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/screen"
+      },
+      "uniqueItems": true,
+      "description": "The screens it may show on. Every screen that isn't quiet by default; critical ignores this."
+    },
+    "sound": {
+      "$ref": "common.schema.json#/$defs/sound",
+      "description": "What the buzzer plays when it arrives: a built-in pattern or saved tune by name, or { rtttl }, { steps } or { pattern, repeat }. Nothing on a quiet screen."
+    },
+    "since": {
+      "$ref": "common.schema.json#/$defs/time"
+    },
+    "until": {
+      "$ref": "common.schema.json#/$defs/time"
+    },
+    "expires": {
+      "$ref": "common.schema.json#/$defs/time",
+      "description": "Drop it at this time even if nothing clears it. Every retained notification should set this."
+    },
+    "screen": {
+      "$ref": "common.schema.json#/$defs/name",
+      "description": "Show this screen while the notification lasts, unless the state topic picks one; the newest notification with a screen wins. Its boxes keep reading live data, so a ticker screen stays current. A display without a screen by this name ignores it."
+    }
+  },
+  "anyOf": [
+    {
+      "required": [
+        "card"
+      ]
+    },
+    {
+      "required": [
+        "screen"
+      ]
+    }
+  ]
+}

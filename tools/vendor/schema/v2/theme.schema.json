@@ -1,0 +1,2148 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pixelbar.fireball1725.ca/schema/v2/theme.schema.json",
+  "title": "Theme",
+  "description": "pixelbar/<target>/theme, retained. A holiday scene in place of the idle sky. An empty payload goes back to the weather.",
+  "type": "object",
+  "required": [
+    "v",
+    "theme"
+  ],
+  "unevaluatedProperties": false,
+  "properties": {
+    "v": {
+      "$ref": "common.schema.json#/$defs/v"
+    },
+    "theme": {
+      "type": "string",
+      "pattern": "^[a-z_]+$",
+      "description": "A holiday scene in place of the weather sky. An empty message goes back to the weather."
+    },
+    "parts": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Tunes the scene, part by part: { \"leaves\": { \"amount\": 200, \"speed\": 50 }, \"fireworks\": { \"on\": false } }. Which parts there are depends on the theme.",
+      "properties": {
+        "banners": {
+          "$ref": "#/$defs/part"
+        },
+        "bats": {
+          "$ref": "#/$defs/part"
+        },
+        "bunny": {
+          "$ref": "#/$defs/part"
+        },
+        "candles": {
+          "$ref": "#/$defs/part"
+        },
+        "clouds": {
+          "$ref": "#/$defs/part"
+        },
+        "confetti": {
+          "$ref": "#/$defs/part"
+        },
+        "diyas": {
+          "$ref": "#/$defs/part"
+        },
+        "eggs": {
+          "$ref": "#/$defs/part"
+        },
+        "fence": {
+          "$ref": "#/$defs/part"
+        },
+        "fireworks": {
+          "$ref": "#/$defs/part"
+        },
+        "flag": {
+          "$ref": "#/$defs/part"
+        },
+        "flames": {
+          "$ref": "#/$defs/part"
+        },
+        "ghosts": {
+          "$ref": "#/$defs/part"
+        },
+        "gifts": {
+          "$ref": "#/$defs/part"
+        },
+        "grass": {
+          "$ref": "#/$defs/part"
+        },
+        "graves": {
+          "$ref": "#/$defs/part"
+        },
+        "ground": {
+          "$ref": "#/$defs/part"
+        },
+        "heart": {
+          "$ref": "#/$defs/part"
+        },
+        "hearts": {
+          "$ref": "#/$defs/part"
+        },
+        "hill": {
+          "$ref": "#/$defs/part"
+        },
+        "hills": {
+          "$ref": "#/$defs/part"
+        },
+        "lanterns": {
+          "$ref": "#/$defs/part"
+        },
+        "leaves": {
+          "$ref": "#/$defs/part"
+        },
+        "lights": {
+          "$ref": "#/$defs/part"
+        },
+        "menorah": {
+          "$ref": "#/$defs/part"
+        },
+        "mist": {
+          "$ref": "#/$defs/part"
+        },
+        "moon": {
+          "$ref": "#/$defs/part"
+        },
+        "pan": {
+          "$ref": "#/$defs/part"
+        },
+        "petals": {
+          "$ref": "#/$defs/part"
+        },
+        "poppy": {
+          "$ref": "#/$defs/part"
+        },
+        "pot": {
+          "$ref": "#/$defs/part"
+        },
+        "powder": {
+          "$ref": "#/$defs/part"
+        },
+        "pumpkins": {
+          "$ref": "#/$defs/part"
+        },
+        "rainbow": {
+          "$ref": "#/$defs/part"
+        },
+        "shamrocks": {
+          "$ref": "#/$defs/part"
+        },
+        "skull": {
+          "$ref": "#/$defs/part"
+        },
+        "sky": {
+          "$ref": "#/$defs/part"
+        },
+        "snow": {
+          "$ref": "#/$defs/part"
+        },
+        "snowman": {
+          "$ref": "#/$defs/part"
+        },
+        "sparkles": {
+          "$ref": "#/$defs/part"
+        },
+        "stack": {
+          "$ref": "#/$defs/part"
+        },
+        "stars": {
+          "$ref": "#/$defs/part"
+        },
+        "sun": {
+          "$ref": "#/$defs/part"
+        },
+        "tree": {
+          "$ref": "#/$defs/part"
+        },
+        "trees": {
+          "$ref": "#/$defs/part"
+        },
+        "tulips": {
+          "$ref": "#/$defs/part"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "on": {
+      "type": "boolean",
+      "description": "false leaves this part out."
+    },
+    "amount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 500,
+      "default": 100,
+      "description": "How many, as a percentage of the usual: 50 is half as many, 200 twice as many, 0 none."
+    },
+    "speed": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 500,
+      "default": 100,
+      "description": "How fast it moves, as a percentage of the usual: 0 holds it still."
+    },
+    "size": {
+      "type": "integer",
+      "minimum": 25,
+      "maximum": 300,
+      "default": 100,
+      "description": "How big, as a percentage of the usual."
+    },
+    "colors": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/color"
+      },
+      "minItems": 1,
+      "maxItems": 8,
+      "description": "Its own colours as #RRGGBB, used in turn, in place of the theme's."
+    },
+    "part": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One part of the scene.",
+      "properties": {
+        "on": {
+          "$ref": "#/$defs/on"
+        },
+        "amount": {
+          "$ref": "#/$defs/amount"
+        },
+        "speed": {
+          "$ref": "#/$defs/speed"
+        },
+        "size": {
+          "$ref": "#/$defs/size"
+        },
+        "colors": {
+          "$ref": "#/$defs/colors"
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "theme": {
+            "const": "new_year"
+          }
+        },
+        "required": [
+          "theme"
+        ]
+      },
+      "then": {
+        "properties": {
+          "parts": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "sky": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The sky behind everything, top colour then bottom. One colour for a flat sky; off for black.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "confetti": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Gold and silver confetti twinkling down.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "amount": {
+                    "$ref": "#/$defs/amount"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  },
+                  "size": {
+                    "$ref": "#/$defs/size"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "fireworks": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Fireworks bursting.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "amount": {
+                    "$ref": "#/$defs/amount"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  },
+                  "size": {
+                    "$ref": "#/$defs/size"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "theme": {
+            "const": "valentines"
+          }
+        },
+        "required": [
+          "theme"
+        ]
+      },
+      "then": {
+        "properties": {
+          "parts": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "sky": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The sky behind everything, top colour then bottom. One colour for a flat sky; off for black.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "sparkles": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Pink sparkles.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "amount": {
+                    "$ref": "#/$defs/amount"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "hearts": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Little hearts rising.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "amount": {
+                    "$ref": "#/$defs/amount"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "heart": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The big heart, beating.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  },
+                  "size": {
+                    "$ref": "#/$defs/size"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "theme": {
+            "const": "lunar_new_year"
+          }
+        },
+        "required": [
+          "theme"
+        ]
+      },
+      "then": {
+        "properties": {
+          "parts": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "sky": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The sky behind everything, top colour then bottom. One colour for a flat sky; off for black.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "sparkles": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Gold sparkles.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "amount": {
+                    "$ref": "#/$defs/amount"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "fireworks": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Fireworks bursting.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "amount": {
+                    "$ref": "#/$defs/amount"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  },
+                  "size": {
+                    "$ref": "#/$defs/size"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "lanterns": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Red lanterns hanging and swaying.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "amount": {
+                    "$ref": "#/$defs/amount"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  },
+                  "size": {
+                    "$ref": "#/$defs/size"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "theme": {
+            "const": "pancake_day"
+          }
+        },
+        "required": [
+          "theme"
+        ]
+      },
+      "then": {
+        "properties": {
+          "parts": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "sky": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The sky behind everything, top colour then bottom. One colour for a flat sky; off for black.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "sparkles": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Sparkles.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "amount": {
+                    "$ref": "#/$defs/amount"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "pan": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The pancake flipping in the pan.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  }
+                }
+              },
+              "stack": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The stack with syrup and lemon.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "theme": {
+            "const": "st_patricks"
+          }
+        },
+        "required": [
+          "theme"
+        ]
+      },
+      "then": {
+        "properties": {
+          "parts": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "sky": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The sky behind everything, top colour then bottom. One colour for a flat sky; off for black.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "sparkles": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Gold and green sparkles.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "amount": {
+                    "$ref": "#/$defs/amount"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "shamrocks": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Shamrocks falling.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "amount": {
+                    "$ref": "#/$defs/amount"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  },
+                  "size": {
+                    "$ref": "#/$defs/size"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "rainbow": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The rainbow, outside band first.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "pot": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The pot of gold.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "theme": {
+            "const": "holi"
+          }
+        },
+        "required": [
+          "theme"
+        ]
+      },
+      "then": {
+        "properties": {
+          "parts": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "sky": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The sky behind everything, top colour then bottom. One colour for a flat sky; off for black.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "powder": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Clouds of coloured powder bursting.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "amount": {
+                    "$ref": "#/$defs/amount"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  },
+                  "size": {
+                    "$ref": "#/$defs/size"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "ground": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The coloured ground.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "theme": {
+            "const": "easter"
+          }
+        },
+        "required": [
+          "theme"
+        ]
+      },
+      "then": {
+        "properties": {
+          "parts": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "sky": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The sky behind everything, top colour then bottom. One colour for a flat sky; off for black.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "clouds": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Clouds drifting.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "amount": {
+                    "$ref": "#/$defs/amount"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "tulips": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Tulips.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "amount": {
+                    "$ref": "#/$defs/amount"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "grass": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The grass, base colour then tips.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "eggs": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The painted eggs.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  }
+                }
+              },
+              "bunny": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The bunny hopping.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "theme": {
+            "const": "eid"
+          }
+        },
+        "required": [
+          "theme"
+        ]
+      },
+      "then": {
+        "properties": {
+          "parts": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "sky": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The sky behind everything, top colour then bottom. One colour for a flat sky; off for black.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "stars": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Stars twinkling.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "amount": {
+                    "$ref": "#/$defs/amount"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "moon": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The crescent moon and star.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "size": {
+                    "$ref": "#/$defs/size"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "lanterns": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Lanterns hanging and glowing.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "amount": {
+                    "$ref": "#/$defs/amount"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "theme": {
+            "const": "pride"
+          }
+        },
+        "required": [
+          "theme"
+        ]
+      },
+      "then": {
+        "properties": {
+          "flags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Which flags, in order."
+          },
+          "parts": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "flag": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The flag waving across the strip. \"flags\" picks which.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  }
+                }
+              },
+              "sparkles": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Sparkles.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "amount": {
+                    "$ref": "#/$defs/amount"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "theme": {
+            "const": "canada_day"
+          }
+        },
+        "required": [
+          "theme"
+        ]
+      },
+      "then": {
+        "properties": {
+          "parts": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "sky": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The sky behind everything, top colour then bottom. One colour for a flat sky; off for black.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "stars": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Stars twinkling.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "amount": {
+                    "$ref": "#/$defs/amount"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "fireworks": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Fireworks bursting.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "amount": {
+                    "$ref": "#/$defs/amount"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  },
+                  "size": {
+                    "$ref": "#/$defs/size"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "leaves": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Maple leaves falling.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "amount": {
+                    "$ref": "#/$defs/amount"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  },
+                  "size": {
+                    "$ref": "#/$defs/size"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "flag": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The flag waving on its pole.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  },
+                  "size": {
+                    "$ref": "#/$defs/size"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "theme": {
+            "const": "fourth_of_july"
+          }
+        },
+        "required": [
+          "theme"
+        ]
+      },
+      "then": {
+        "properties": {
+          "parts": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "sky": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The sky behind everything, top colour then bottom. One colour for a flat sky; off for black.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "stars": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Stars twinkling.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "amount": {
+                    "$ref": "#/$defs/amount"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "fireworks": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Fireworks bursting.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "amount": {
+                    "$ref": "#/$defs/amount"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  },
+                  "size": {
+                    "$ref": "#/$defs/size"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "flag": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The flag waving on its pole.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  },
+                  "size": {
+                    "$ref": "#/$defs/size"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "theme": {
+            "const": "thanksgiving"
+          }
+        },
+        "required": [
+          "theme"
+        ]
+      },
+      "then": {
+        "properties": {
+          "parts": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "sky": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The sky behind everything, top colour then bottom. One colour for a flat sky; off for black.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "sun": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The setting sun.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "size": {
+                    "$ref": "#/$defs/size"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "hills": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The hills.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "pumpkins": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The pumpkins and hay bale.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  }
+                }
+              },
+              "leaves": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Autumn leaves tumbling.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "amount": {
+                    "$ref": "#/$defs/amount"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  },
+                  "size": {
+                    "$ref": "#/$defs/size"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "theme": {
+            "const": "halloween"
+          }
+        },
+        "required": [
+          "theme"
+        ]
+      },
+      "then": {
+        "properties": {
+          "parts": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "sky": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The sky behind everything, top colour then bottom. One colour for a flat sky; off for black.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "stars": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Stars twinkling.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "amount": {
+                    "$ref": "#/$defs/amount"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "moon": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The full moon.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "size": {
+                    "$ref": "#/$defs/size"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "ghosts": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Ghosts drifting by.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "amount": {
+                    "$ref": "#/$defs/amount"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  },
+                  "size": {
+                    "$ref": "#/$defs/size"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "bats": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Bats flapping.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "amount": {
+                    "$ref": "#/$defs/amount"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "hills": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The hills.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "mist": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Mist along the ground.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "pumpkins": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The jack-o'-lanterns.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "theme": {
+            "const": "dia_de_muertos"
+          }
+        },
+        "required": [
+          "theme"
+        ]
+      },
+      "then": {
+        "properties": {
+          "parts": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "sky": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The sky behind everything, top colour then bottom. One colour for a flat sky; off for black.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "stars": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Stars twinkling.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "amount": {
+                    "$ref": "#/$defs/amount"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "banners": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The papel picado along the top.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "petals": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Marigold petals falling.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "amount": {
+                    "$ref": "#/$defs/amount"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "candles": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Candles flickering.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  }
+                }
+              },
+              "skull": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The sugar skull.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "theme": {
+            "const": "diwali"
+          }
+        },
+        "required": [
+          "theme"
+        ]
+      },
+      "then": {
+        "properties": {
+          "parts": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "sky": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The sky behind everything, top colour then bottom. One colour for a flat sky; off for black.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "sparkles": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Sparkles.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "amount": {
+                    "$ref": "#/$defs/amount"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "fireworks": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Fireworks bursting.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "amount": {
+                    "$ref": "#/$defs/amount"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  },
+                  "size": {
+                    "$ref": "#/$defs/size"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "diyas": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The lamps along the bottom, flickering.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "amount": {
+                    "$ref": "#/$defs/amount"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "theme": {
+            "const": "remembrance"
+          }
+        },
+        "required": [
+          "theme"
+        ]
+      },
+      "then": {
+        "properties": {
+          "parts": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "sky": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The sky behind everything, top colour then bottom. One colour for a flat sky; off for black.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "petals": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Poppy petals falling.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "amount": {
+                    "$ref": "#/$defs/amount"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  },
+                  "size": {
+                    "$ref": "#/$defs/size"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "poppy": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The poppy.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "size": {
+                    "$ref": "#/$defs/size"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "theme": {
+            "const": "hanukkah"
+          }
+        },
+        "required": [
+          "theme"
+        ]
+      },
+      "then": {
+        "properties": {
+          "night": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 8,
+            "description": "Which night, 1 to 8, so the right number of candles are lit."
+          },
+          "parts": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "sky": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The sky behind everything, top colour then bottom. One colour for a flat sky; off for black.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "stars": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Stars twinkling.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "amount": {
+                    "$ref": "#/$defs/amount"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "menorah": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The menorah: its colour and size. \"night\" says how many candles are lit.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "size": {
+                    "$ref": "#/$defs/size"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "candles": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The candles, in turn from these colours (blue and white by default); off leaves them out.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "flames": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The flames: their colours (the flame, then its tip), how fast they flicker (speed) and how hard (amount); off leaves the candles unlit.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  },
+                  "amount": {
+                    "$ref": "#/$defs/amount"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "theme": {
+            "const": "spooky_christmas"
+          }
+        },
+        "required": [
+          "theme"
+        ]
+      },
+      "then": {
+        "properties": {
+          "parts": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "sky": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The sky behind everything, top colour then bottom: teal to purple. One colour for a flat sky; off for black.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "stars": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Stars.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "amount": {
+                    "$ref": "#/$defs/amount"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "moon": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The huge pale moon behind the hill's curl.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "size": {
+                    "$ref": "#/$defs/size"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "hill": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The hill whose crest curls into a spiral, black against the moon.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "size": {
+                    "$ref": "#/$defs/size"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "bats": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Bats flitting across.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "amount": {
+                    "$ref": "#/$defs/amount"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "graves": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Crooked gravestones.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "amount": {
+                    "$ref": "#/$defs/amount"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "fence": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "A bent iron fence along the ground.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "pumpkins": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Jack-o'-lanterns in Santa hats.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "size": {
+                    "$ref": "#/$defs/size"
+                  }
+                }
+              },
+              "gifts": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Gifts wrapped in stripes (these colours in turn) with lopsided bows.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "snow": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Snow falling.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "amount": {
+                    "$ref": "#/$defs/amount"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "theme": {
+            "const": "christmas"
+          }
+        },
+        "required": [
+          "theme"
+        ]
+      },
+      "then": {
+        "properties": {
+          "parts": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "sky": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The sky behind everything, top colour then bottom. One colour for a flat sky; off for black.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "snow": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Snow falling.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "amount": {
+                    "$ref": "#/$defs/amount"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "trees": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The trees at the back.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  }
+                }
+              },
+              "tree": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The lit tree and its presents.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  }
+                }
+              },
+              "snowman": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The snowman beside the tree, waving; colours: his scarf and hat band.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  },
+                  "size": {
+                    "$ref": "#/$defs/size"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "lights": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The string of lights along the top.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "speed": {
+                    "$ref": "#/$defs/speed"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              },
+              "ground": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The snow on the ground.",
+                "properties": {
+                  "on": {
+                    "$ref": "#/$defs/on"
+                  },
+                  "colors": {
+                    "$ref": "#/$defs/colors"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

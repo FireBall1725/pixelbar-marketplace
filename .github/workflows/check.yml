@@ -1,0 +1,38 @@
+# Checks a pull request's items and renders their previews. It runs the pull request's own code, so it gets no write
+# access and no secrets; post.yml puts the results on the pull request afterwards.
+name: Check items
+on:
+  pull_request:
+    paths: ["items/**"]
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install clang and wasm-ld
+        run: sudo apt-get update -q && sudo apt-get install -y -q clang lld
+      - run: npm ci
+      - name: What changed
+        run: git diff --name-only "origin/${{ github.base_ref }}...HEAD" > changed.txt && cat changed.txt
+      - name: Check and preview
+        id: check
+        run: node tools/check-pr.mjs changed.txt out
+        continue-on-error: true
+      - name: Remember the pull request
+        run: echo "${{ github.event.pull_request.number }}" > out/pr.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: preview
+          path: out/
+          retention-days: 14
+      - name: Fail when an item has problems
+        if: steps.check.outcome == 'failure'
+        run: exit 1

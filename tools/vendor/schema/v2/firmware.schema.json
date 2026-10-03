@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pixelbar.fireball1725.ca/schema/v2/firmware.schema.json",
+  "title": "Firmware release",
+  "description": "pixelbar/all/firmware, retained. The newest firmware; Home Assistant offers it to every display on an older version.",
+  "type": "object",
+  "required": [
+    "v",
+    "version",
+    "url"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "v": {
+      "$ref": "common.schema.json#/$defs/v"
+    },
+    "version": {
+      "type": "string",
+      "maxLength": 32
+    },
+    "url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "size": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "notes": {
+      "type": "string",
+      "maxLength": 2000,
+      "description": "What changed, shown in Home Assistant."
+    },
+    "notes_url": {
+      "type": "string",
+      "format": "uri"
+    }
+  }
+}

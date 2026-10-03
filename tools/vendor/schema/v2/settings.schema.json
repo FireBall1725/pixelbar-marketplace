@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pixelbar.fireball1725.ca/schema/v2/settings.schema.json",
+  "title": "Settings",
+  "description": "pixelbar/<display>/settings, retained. The display's own options; Home Assistant shows them as controls through MQTT discovery.",
+  "type": "object",
+  "required": [
+    "v"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "v": {
+      "$ref": "common.schema.json#/$defs/v"
+    },
+    "name": {
+      "type": "string",
+      "maxLength": 32,
+      "description": "Shown in Home Assistant and on the boot screen."
+    },
+    "clock_style": {
+      "$ref": "common.schema.json#/$defs/font"
+    },
+    "hours": {
+      "enum": [
+        12,
+        24
+      ],
+      "description": "12 or 24 hour clock."
+    },
+    "brightness": {
+      "oneOf": [
+        {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        {
+          "const": "auto"
+        }
+      ],
+      "description": "Percent, or auto from the light sensor. A screen can override it."
+    },
+    "buzzer": {
+      "type": "boolean",
+      "description": "Off by default."
+    },
+    "sensors": {
+      "type": "object",
+      "maxProperties": 16,
+      "propertyNames": {
+        "$ref": "common.schema.json#/$defs/name"
+      },
+      "description": "Per sensor on the display, by its id: whether it reads it, and whether Home Assistant shows it as an entity.",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether the display reads this sensor."
+          },
+          "expose": {
+            "type": "boolean",
+            "description": "Whether Home Assistant shows it as an entity."
+          }
+        }
+      }
+    },
+    "auto_brightness": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "How auto brightness follows the light sensor.",
+      "properties": {
+        "min": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "description": "Brightness in the dark, 1 to 100."
+        },
+        "max": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "description": "Brightness in bright light, 1 to 100."
+        },
+        "dark_lux": {
+          "type": "number",
+          "minimum": 0,
+          "description": "At or below this it runs at min."
+        },
+        "bright_lux": {
+          "type": "number",
+          "minimum": 1,
+          "description": "At or above this it runs at max."
+        }
+      }
+    }
+  }
+}

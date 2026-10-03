@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pixelbar.fireball1725.ca/schema/v2/state.schema.json",
+  "title": "State",
+  "description": "pixelbar/<target>/state, retained. What the room is doing; screens' media and presence rules read it.",
+  "type": "object",
+  "required": [
+    "v"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "v": {
+      "$ref": "common.schema.json#/$defs/v"
+    },
+    "media": {
+      "enum": [
+        "playing",
+        "paused",
+        "off"
+      ],
+      "description": "What the media player is doing: playing, paused or off. Screens can follow it."
+    },
+    "presence": {
+      "type": "boolean",
+      "description": "Whether someone is in the room. Screens can follow it."
+    },
+    "sleep": {
+      "type": "boolean",
+      "description": "Older form of screen: \"sleep\". Shows the screen called sleep, if the layout has one."
+    },
+    "screen": {
+      "anyOf": [
+        {
+          "const": "auto"
+        },
+        {
+          "$ref": "common.schema.json#/$defs/name"
+        }
+      ],
+      "description": "Show this screen whatever the rules say. auto (the default) follows the rules."
+    }
+  }
+}

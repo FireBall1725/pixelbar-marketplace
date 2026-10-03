@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pixelbar.fireball1725.ca/schema/v2/info.schema.json",
+  "title": "Display info",
+  "description": "pixelbar/<display>/info, retained, from the display. What it is and what it can do.",
+  "type": "object",
+  "required": [
+    "v",
+    "id",
+    "firmware",
+    "size",
+    "protocols"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "v": {
+      "$ref": "common.schema.json#/$defs/v"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9A-F]{6}$",
+      "description": "The last three bytes of the MAC address."
+    },
+    "name": {
+      "$ref": "common.schema.json#/$defs/name"
+    },
+    "firmware": {
+      "type": "string"
+    },
+    "size": {
+      "enum": [
+        "1x2",
+        "1x4",
+        "1x6",
+        "1x8",
+        "1x10"
+      ]
+    },
+    "width": {
+      "type": "integer"
+    },
+    "protocols": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      }
+    },
+    "cards": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "boxes": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/name"
+      }
+    },
+    "pool": {
+      "type": "object",
+      "properties": {
+        "used": {
+          "type": "integer"
+        },
+        "max": {
+          "type": "integer"
+        }
+      }
+    },
+    "ip": {
+      "type": "string"
+    },
+    "network": {
+      "enum": [
+        "wifi",
+        "ethernet"
+      ]
+    },
+    "version": {
+      "type": "string",
+      "maxLength": 32,
+      "description": "The firmware version, compared with pixelbar/all/firmware to offer an update."
+    },
+    "virtual": {
+      "type": "boolean",
+      "description": "true for a display that isn't hardware, like the site's Try it display. Its sensor readings are simulated."
+    },
+    "sensors": {
+      "type": "array",
+      "maxItems": 16,
+      "description": "The sensors on the display's I²C bus that it found and supports.",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "kind"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "common.schema.json#/$defs/name"
+          },
+          "kind": {
+            "enum": [
+              "temperature",
+              "humidity",
+              "illuminance",
+              "pressure",
+              "motion",
+              "other"
+            ]
+          },
+          "unit": {
+            "type": "string",
+            "maxLength": 8
+          },
+          "chip": {
+            "type": "string",
+            "maxLength": 16,
+            "description": "Like SHT40 or VEML7700."
+          },
+          "addr": {
+            "type": "string",
+            "pattern": "^0x[0-9a-f]{2}$",
+            "description": "Its I²C address."
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 32
+          }
+        }
+      }
+    }
+  }
+}

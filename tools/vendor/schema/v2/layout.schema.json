@@ -1,0 +1,289 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pixelbar.fireball1725.ca/schema/v2/layout.schema.json",
+  "title": "Layout",
+  "description": "pixelbar/<display>/layout, retained. The display's screens, in order: it shows the first one whose rules hold, or the last one when none do. Per display, because box widths depend on its size.",
+  "type": "object",
+  "required": [
+    "v",
+    "screens"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "v": {
+      "$ref": "common.schema.json#/$defs/v"
+    },
+    "screens": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "items": {
+        "$ref": "#/$defs/screen"
+      },
+      "description": "Up to 8 screens, tried in order: the first whose when holds is shown, and the last when none does."
+    }
+  },
+  "$defs": {
+    "screen": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "boxes"
+      ],
+      "properties": {
+        "name": {
+          "$ref": "common.schema.json#/$defs/name",
+          "description": "What rules, notifications and the state topic call it. Unique in the list."
+        },
+        "when": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "anyOf": [
+              {
+                "enum": [
+                  "media",
+                  "presence",
+                  "always"
+                ]
+              },
+              {
+                "$ref": "common.schema.json#/$defs/when"
+              }
+            ]
+          },
+          "description": "Show it while any of these holds: media or presence from the state topic, always, a rule, a time window, or a group that must all hold. The last screen in the list needs none; it shows when no other screen's rules hold."
+        },
+        "style": {
+          "enum": [
+            "panel",
+            "overlay",
+            "plain"
+          ],
+          "description": "How the boxes sit on the background. panel: cards side by side with a line between, the clock as a card. overlay: cards outlined over the background, and a notification can spread wider than its box. plain: straight on the background, a big steady clock. overlay by default."
+        },
+        "outline": {
+          "$ref": "common.schema.json#/$defs/outline",
+          "description": "The outline for every card on this screen that doesn't set its own. Without it, overlay is a dark outline and the others none."
+        },
+        "background": {
+          "description": "What's behind the boxes. The weather sky by default, or black on a screen with the night filter.",
+          "anyOf": [
+            {
+              "enum": [
+                "sky",
+                "black"
+              ],
+              "description": "Short for {\"type\": \"sky\"} and {\"type\": \"none\"}."
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "const": "sky",
+                  "description": "The weather sky."
+                },
+                "calm": {
+                  "type": "boolean",
+                  "description": "A quieter sky, half as strong, so busy cards stay readable. false by default."
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "type",
+                "color"
+              ],
+              "properties": {
+                "type": {
+                  "const": "solid",
+                  "description": "One colour."
+                },
+                "color": {
+                  "$ref": "common.schema.json#/$defs/color"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "type",
+                "colors"
+              ],
+              "properties": {
+                "type": {
+                  "const": "gradient",
+                  "description": "Two to four colours, top to bottom."
+                },
+                "colors": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 4,
+                  "items": {
+                    "$ref": "common.schema.json#/$defs/color"
+                  },
+                  "description": "Two to four colours as #RRGGBB."
+                },
+                "direction": {
+                  "enum": [
+                    "across",
+                    "down"
+                  ],
+                  "description": "across runs left to right, down top to bottom. across by default."
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "type",
+                "colors"
+              ],
+              "properties": {
+                "type": {
+                  "const": "animated",
+                  "description": "Two to four colours that move."
+                },
+                "colors": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 4,
+                  "items": {
+                    "$ref": "common.schema.json#/$defs/color"
+                  },
+                  "description": "Two to four colours as #RRGGBB."
+                },
+                "motion": {
+                  "enum": [
+                    "drift",
+                    "cycle"
+                  ],
+                  "description": "drift slides the gradient along the strip; cycle fades the whole strip from one colour to the next. drift by default."
+                },
+                "seconds": {
+                  "type": "number",
+                  "minimum": 2,
+                  "maximum": 600,
+                  "description": "How long one loop takes. 30 by default."
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "const": "none",
+                  "description": "Nothing: black."
+                }
+              }
+            }
+          ]
+        },
+        "tint": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "color",
+            "opacity"
+          ],
+          "description": "A colour laid over the background, under the boxes.",
+          "properties": {
+            "color": {
+              "$ref": "common.schema.json#/$defs/color"
+            },
+            "opacity": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "How strong the tint is, 0 to 1."
+            }
+          }
+        },
+        "filter": {
+          "enum": [
+            "none",
+            "night",
+            "dim"
+          ],
+          "description": "Applied to everything but the tray: night turns it all a dim red that's easy on dark-adapted eyes; dim halves it. none by default."
+        },
+        "brightness": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "description": "Percent, overriding the display's brightness while this screen shows."
+        },
+        "quiet": {
+          "type": "boolean",
+          "description": "Notifications wait in the tray and make no sound, unless they list this screen in their screens; critical ones still show. false by default."
+        },
+        "clock_style": {
+          "$ref": "common.schema.json#/$defs/font",
+          "description": "Overrides the display's clock style on this screen."
+        },
+        "boxes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "box"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "box": {
+                "$ref": "common.schema.json#/$defs/name"
+              },
+              "width": {
+                "oneOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 8,
+                    "maximum": 640
+                  },
+                  {
+                    "const": "fill"
+                  }
+                ],
+                "description": "Width in LEDs, or fill for a share of what's left. fill by default."
+              },
+              "accepts": {
+                "type": "array",
+                "items": {
+                  "$ref": "common.schema.json#/$defs/tier"
+                },
+                "uniqueItems": true,
+                "description": "The notification tiers that may borrow this box when they don't name one. None by default."
+              },
+              "spill": {
+                "enum": [
+                  "box",
+                  "whole"
+                ],
+                "description": "whole lets a notification that lands here cover the strip up to the tray. box by default."
+              }
+            }
+          },
+          "maxItems": 8,
+          "description": "The row of boxes on this screen, left to right."
+        },
+        "effects": {
+          "$ref": "common.schema.json#/$defs/effects",
+          "description": "The effects for every card on this screen that doesn't set its own: behind by default, or around."
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pixelbar.fireball1725.ca/schema/v2/image.schema.json",
+  "title": "Picture",
+  "description": "pixelbar/all/asset/image/<id>, retained. Stored in flash under its id.",
+  "type": "object",
+  "required": [
+    "v",
+    "w",
+    "h",
+    "format",
+    "data"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "v": {
+      "$ref": "common.schema.json#/$defs/v"
+    },
+    "w": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 64,
+      "description": "Width in pixels, up to 64."
+    },
+    "h": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 32,
+      "description": "Height in pixels, up to 32."
+    },
+    "format": {
+      "const": "rgb565",
+      "description": "Two bytes per pixel, high byte first, rows top to bottom."
+    },
+    "data": {
+      "type": "string",
+      "contentEncoding": "base64",
+      "description": "The pixels as rgb565, row by row, base64."
+    }
+  }
+}

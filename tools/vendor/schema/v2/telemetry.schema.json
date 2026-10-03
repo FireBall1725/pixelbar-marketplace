@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pixelbar.fireball1725.ca/schema/v2/telemetry.schema.json",
+  "title": "Telemetry",
+  "description": "pixelbar/<display>/telemetry, from the display, every 15 s or so, retained. Its own readings: the sensors on its I²C bus, and how it's doing.",
+  "type": "object",
+  "required": [
+    "v",
+    "at"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "v": {
+      "$ref": "common.schema.json#/$defs/v"
+    },
+    "sensors": {
+      "type": "object",
+      "maxProperties": 16,
+      "propertyNames": {
+        "$ref": "common.schema.json#/$defs/name"
+      },
+      "additionalProperties": {
+        "type": [
+          "number",
+          "boolean",
+          "null"
+        ]
+      },
+      "description": "Each enabled sensor's reading by its id, in the unit info gives."
+    },
+    "brightness": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "The brightness it's running at now, auto or not."
+    },
+    "rssi": {
+      "type": "integer",
+      "minimum": -120,
+      "maximum": 0,
+      "description": "Wi-Fi signal, dBm."
+    },
+    "uptime": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Seconds since it started."
+    },
+    "heap": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Free memory, bytes."
+    },
+    "simulated": {
+      "type": "boolean",
+      "description": "true when the readings are made up, as on a virtual display."
+    },
+    "at": {
+      "$ref": "common.schema.json#/$defs/time"
+    }
+  }
+}

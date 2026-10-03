@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pixelbar.fireball1725.ca/schema/v2/update.schema.json",
+  "title": "Update command",
+  "description": "pixelbar/<display>/update, not retained. Install this firmware now. The display reports progress as update events, then comes back with the new version in info.",
+  "type": "object",
+  "required": [
+    "v",
+    "version",
+    "url"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "v": {
+      "$ref": "common.schema.json#/$defs/v"
+    },
+    "version": {
+      "type": "string",
+      "maxLength": 32
+    },
+    "url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  }
+}

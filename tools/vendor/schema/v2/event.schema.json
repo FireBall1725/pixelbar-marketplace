@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pixelbar.fireball1725.ca/schema/v2/event.schema.json",
+  "title": "Display event",
+  "description": "pixelbar/<display>/event, from the display. What it did, and anything it rejected and why.",
+  "type": "object",
+  "required": [
+    "v",
+    "event",
+    "at"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "v": {
+      "$ref": "common.schema.json#/$defs/v"
+    },
+    "event": {
+      "enum": [
+        "shown",
+        "queued",
+        "tray",
+        "expired",
+        "cleared",
+        "skipped",
+        "rejected",
+        "pool_full",
+        "update"
+      ]
+    },
+    "key": {
+      "type": "string"
+    },
+    "topic": {
+      "type": "string"
+    },
+    "field": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string"
+    },
+    "at": {
+      "$ref": "common.schema.json#/$defs/time"
+    },
+    "stage": {
+      "enum": [
+        "downloading",
+        "writing",
+        "verifying",
+        "restarting",
+        "done",
+        "failed"
+      ],
+      "description": "For update events: how far it's got."
+    },
+    "progress": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "For update events: percent done."
+    },
+    "version": {
+      "type": "string",
+      "description": "For update events: the version being installed."
+    }
+  }
+}

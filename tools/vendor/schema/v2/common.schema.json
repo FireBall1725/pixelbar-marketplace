@@ -1,0 +1,446 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pixelbar.fireball1725.ca/schema/v2/common.schema.json",
+  "title": "Shared definitions",
+  "$defs": {
+    "v": {
+      "const": 2,
+      "description": "Protocol version. Always 2."
+    },
+    "key": {
+      "type": "string",
+      "pattern": "^[a-z0-9_][a-z0-9_.-]{0,63}$",
+      "description": "A data key: lowercase letters, digits, _, - and dots, up to 64 characters. A Home Assistant entity id is a valid key."
+    },
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z0-9_-]{1,32}$",
+      "description": "A box or display name: lowercase letters, digits, _ and -, up to 32 characters."
+    },
+    "notify_key": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{1,48}$",
+      "description": "A notification key: letters, digits, _ and -, up to 48 characters. It is the topic's last segment."
+    },
+    "color": {
+      "type": "string",
+      "pattern": "^#[0-9A-Fa-f]{6}$",
+      "description": "A colour as #RRGGBB."
+    },
+    "colors": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/color"
+      },
+      "maxItems": 8,
+      "description": "Colours as #RRGGBB, like a team's or a platform's."
+    },
+    "time": {
+      "type": "string",
+      "format": "date-time",
+      "description": "An RFC 3339 time with an offset, like 2026-10-01T07:05:00-04:00."
+    },
+    "seconds": {
+      "type": "number",
+      "minimum": 0,
+      "description": "A duration in seconds."
+    },
+    "tier": {
+      "enum": [
+        "critical",
+        "warning",
+        "alert",
+        "notice",
+        "advisory",
+        "status",
+        "nudge"
+      ],
+      "description": "How loud a notification is: where it shows, for how long, and what it sounds like."
+    },
+    "screen": {
+      "$ref": "common.schema.json#/$defs/name",
+      "description": "A screen's name, as the layout lists it."
+    },
+    "condition": {
+      "enum": [
+        "clear-night",
+        "cloudy",
+        "exceptional",
+        "fog",
+        "hail",
+        "lightning",
+        "lightning-rainy",
+        "partlycloudy",
+        "pouring",
+        "rainy",
+        "snowy",
+        "snowy-rainy",
+        "sunny",
+        "windy",
+        "windy-variant"
+      ],
+      "description": "A Home Assistant weather condition."
+    },
+    "font": {
+      "enum": [
+        "pixel",
+        "flip",
+        "nixie",
+        "segment",
+        "space",
+        "retro64",
+        "alagard",
+        "celtic",
+        "comicoro"
+      ],
+      "description": "The face for a card's number (or a text card's title and big value, or the clock): pixel is the 5 × 7 face, flip split-flap tiles, nixie glowing tubes (digits; anything else an unlit tube), segment a 7-segment display (digits and the letters it can make; anything else an unlit digit), space a heavy rounded face, retro64 an 8 × 8 face in the style of '80s home computers, alagard a medieval blackletter face, celtic rounded brush-stroke capitals, comicoro a slanted comic hand (each by its own designer; credits on the Fonts page)."
+    },
+    "icon": {
+      "oneOf": [
+        {
+          "type": "string",
+          "pattern": "^(mdi:)?[a-z0-9_-]+$",
+          "description": "A PixelBar icon by name, or a Material Design icon as mdi:name, drawn as the nearest PixelBar icon."
+        },
+        {
+          "type": "object",
+          "description": "A custom icon: up to 20 × 20, up to 16 colours, 4 bits per pixel, row-major, base64.",
+          "required": [
+            "w",
+            "h",
+            "palette",
+            "data"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "w": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 20,
+              "description": "Width in pixels, up to 20."
+            },
+            "h": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 20,
+              "description": "Height in pixels, up to 20."
+            },
+            "palette": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/color"
+              },
+              "minItems": 1,
+              "maxItems": 16,
+              "description": "Up to 16 colours; each pixel is an index into this list."
+            },
+            "data": {
+              "type": "string",
+              "contentEncoding": "base64",
+              "description": "The pixels, 4 bits each, row by row, base64."
+            }
+          }
+        }
+      ],
+      "description": "An icon: a PixelBar icon by name, a Material Design icon as mdi:name, or a custom one drawn inline."
+    },
+    "sound": {
+      "oneOf": [
+        {
+          "type": "string",
+          "pattern": "^[a-z0-9_-]+$",
+          "description": "A built-in pattern (beep, double, triple, chime, westminster, rising, falling, done, alert, alarm, siren, beepboop, garage, none) or the id of a sound sent on pixelbar/all/asset/sound/<id>."
+        },
+        {
+          "type": "object",
+          "description": "A pattern with a repeat, or a tune of your own.",
+          "additionalProperties": false,
+          "minProperties": 1,
+          "properties": {
+            "pattern": {
+              "type": "string",
+              "description": "A built-in pattern by name."
+            },
+            "repeat": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10,
+              "description": "How many times to play it, 1 to 10."
+            },
+            "rtttl": {
+              "type": "string",
+              "description": "A Nokia RTTTL tune, name:d=4,o=6,b=120:notes. Cut off at 128 notes."
+            },
+            "steps": {
+              "type": "string",
+              "pattern": "^\\d+:\\d+(,\\d+:\\d+)*$",
+              "description": "frequency:milliseconds pairs, 0 Hz for a rest."
+            }
+          }
+        }
+      ],
+      "description": "What the buzzer plays: a built-in pattern or saved tune by name, or { rtttl }, { steps } or { pattern, repeat }."
+    },
+    "image_ref": {
+      "type": "object",
+      "description": "A picture by id, or the picture itself (stored under its id for later).",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/name"
+        },
+        "w": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 64,
+          "description": "Width in pixels, up to 64."
+        },
+        "h": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 32,
+          "description": "Height in pixels, up to 32."
+        },
+        "format": {
+          "const": "rgb565",
+          "description": "rgb565, the only format."
+        },
+        "data": {
+          "type": "string",
+          "contentEncoding": "base64",
+          "description": "The pixels as rgb565, row by row, base64."
+        }
+      }
+    },
+    "big": {
+      "type": "object",
+      "description": "A large number, beside the title on the right (like 5 MIN) or across the top. Hidden on the right when the box is too narrow.",
+      "required": [
+        "value"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "type": [
+            "string",
+            "number"
+          ],
+          "description": "The number. Digits and a colon; tokens like {elapsed_min} work."
+        },
+        "unit": {
+          "type": "string",
+          "description": "A short word under it."
+        },
+        "font": {
+          "$ref": "#/$defs/font",
+          "description": "The number's font: flip and nixie draw the digits their own way."
+        },
+        "at": {
+          "enum": [
+            "right",
+            "top"
+          ],
+          "description": "right: beside the title, the usual. top: across the card, with the title and the small print under it as far as they fit; a value too wide scrolls."
+        }
+      }
+    },
+    "progress": {
+      "type": "object",
+      "description": "A bar. With playing true and an updated time, the display moves it on its own between updates.",
+      "required": [
+        "value",
+        "max"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "type": "number",
+          "minimum": 0,
+          "description": "How far along, in the same unit as max."
+        },
+        "max": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "The full length, like a song's duration in seconds."
+        },
+        "playing": {
+          "type": "boolean",
+          "description": "While true, the display moves the bar on its own from updated."
+        },
+        "updated": {
+          "$ref": "#/$defs/time"
+        }
+      }
+    },
+    "rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Holds while a value passes the test: above or below a number, equals a value, or not a value. With no test it holds while the value is on, true, playing, home or a number above 0. data names a data key; entity names a Home Assistant entity, which the integration sends under its entity id.",
+      "properties": {
+        "data": {
+          "$ref": "common.schema.json#/$defs/key"
+        },
+        "above": {
+          "type": "number",
+          "description": "Holds while the value is above this number."
+        },
+        "below": {
+          "type": "number",
+          "description": "Holds while the value is below this number."
+        },
+        "equals": {
+          "description": "Holds while the value is exactly this, like \"playing\" or 0."
+        },
+        "not": {
+          "description": "Holds while the value is anything but this."
+        },
+        "entity": {
+          "$ref": "common.schema.json#/$defs/key"
+        }
+      },
+      "anyOf": [
+        {
+          "required": [
+            "data"
+          ]
+        },
+        {
+          "required": [
+            "entity"
+          ]
+        }
+      ]
+    },
+    "when": {
+      "anyOf": [
+        {
+          "$ref": "common.schema.json#/$defs/rule"
+        },
+        {
+          "$ref": "common.schema.json#/$defs/clock_rule"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "all"
+          ],
+          "description": "Holds while every rule in it holds.",
+          "properties": {
+            "all": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 8,
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "common.schema.json#/$defs/rule"
+                  },
+                  {
+                    "$ref": "common.schema.json#/$defs/clock_rule"
+                  }
+                ]
+              },
+              "description": "Up to 8 rules or time windows; the group holds while every one does."
+            }
+          }
+        }
+      ]
+    },
+    "clock_rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "time"
+      ],
+      "description": "Holds during a time of day, on some days of the week, in the display's local time.",
+      "properties": {
+        "time": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "after": {
+              "type": "string",
+              "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$",
+              "description": "From this time (HH:MM). Midnight by default."
+            },
+            "before": {
+              "type": "string",
+              "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$",
+              "description": "Until this time (HH:MM), not including it. If it's earlier than after, the window runs past midnight. Midnight by default."
+            },
+            "days": {
+              "type": "array",
+              "uniqueItems": true,
+              "minItems": 1,
+              "items": {
+                "enum": [
+                  "mon",
+                  "tue",
+                  "wed",
+                  "thu",
+                  "fri",
+                  "sat",
+                  "sun"
+                ]
+              },
+              "description": "Only on these days. Every day by default."
+            }
+          },
+          "description": "A time window: after, before and days."
+        }
+      }
+    },
+    "outline": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/color"
+        },
+        {
+          "const": "none"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "color"
+          ],
+          "properties": {
+            "color": {
+              "$ref": "#/$defs/color"
+            },
+            "at": {
+              "enum": [
+                "around",
+                "above",
+                "below",
+                "left",
+                "right"
+              ],
+              "description": "Where it goes: around (an outline), below (a shadow), above, left or right. around by default."
+            }
+          }
+        }
+      ],
+      "description": "An outline round the words and numbers, so they read over a busy background: a colour as #RRGGBB (all round), { color, at } to put it on one side, like a shadow below, or none."
+    },
+    "effects": {
+      "enum": [
+        "behind",
+        "around"
+      ],
+      "description": "How the words sit in the weather sky: behind (the weather stays behind them) or around (the words are in it: near rain falls in front and splashes on the letters, snow settles on them)."
+    },
+    "case": {
+      "enum": [
+        "upper",
+        "as_written"
+      ],
+      "default": "upper",
+      "description": "How words show: upper, in capitals (the usual LED look), or as_written, keeping lowercase and accents as you typed them, like Adaléa. A font without lowercase (the small one) shows capitals either way."
+    }
+  }
+}

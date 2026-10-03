@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pixelbar.fireball1725.ca/schema/v2/data.schema.json",
+  "title": "Data",
+  "description": "pixelbar/<target>/data/<key>, retained. One value for the pool, shaped like a Home Assistant state. An empty payload removes it.",
+  "type": "object",
+  "required": [
+    "v",
+    "value"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "v": {
+      "$ref": "common.schema.json#/$defs/v"
+    },
+    "value": {
+      "description": "A number, words, true or false, a list, or null when unknown.",
+      "type": [
+        "number",
+        "string",
+        "boolean",
+        "array",
+        "null"
+      ],
+      "maxItems": 24
+    },
+    "unit": {
+      "type": "string",
+      "description": "The unit shown after the value, like °C or kWh."
+    },
+    "attributes": {
+      "type": "object",
+      "description": "Anything else a card can read, like humidity, high and low, or a history list."
+    },
+    "updated": {
+      "$ref": "common.schema.json#/$defs/time"
+    },
+    "stale_after": {
+      "$ref": "common.schema.json#/$defs/seconds",
+      "description": "After this long without an update, cards reading it dim and show a mark."
+    }
+  }
+}

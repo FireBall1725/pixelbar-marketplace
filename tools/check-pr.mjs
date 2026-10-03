@@ -1,0 +1,46 @@
+// SPDX-License-Identifier: AGPL-3.0-only
+// Copyright (C) 2026 FireBall1725
+// The PR check: validates the items a pull request adds or changes, renders their previews and writes the comment.
+//   node tools/check-pr.mjs <changed paths file> <out dir>
+// out/ gets the preview files, comment.md (with {{BASE}} where the posting workflow puts the previews' address),
+// and result.json. Exits 1 when an item has a problem, after writing everything, so the comment still goes up.
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { check } from "./validate.mjs";
+import { preview } from "./preview.mjs";
+import { fingerprint, listItems } from "./lib/items.mjs";
+
+const [, , changedFile, out = "out"] = process.argv;
+mkdirSync(out, { recursive: true });
+const changed = readFileSync(changedFile, "utf8").split("\n").map(s => s.trim()).filter(Boolean);
+const dirs = [...new Set(changed.filter(p => p.startsWith("items/")).map(p => p.split("/").slice(0, 3).join("/")))].filter(d => d.split("/").length === 3);
+const all = listItems(), seen = new Map();
+for (const d of all) if (!dirs.includes(d)) { try { seen.set(fingerprint(d, JSON.parse(readFileSync(join(d, "item.json"), "utf8"))), d); } catch { /* not ours to check */ } }
+
+const rows = [], blocks = [];
+let bad = 0;
+if (!dirs.length) blocks.push("This pull request doesn't add or change any items, so there's nothing to preview.");
+for (const d of dirs) {
+  if (!existsSync(d)) { rows.push(`| \`${d}\` | | removed |`); continue; }
+  const r = check(d, seen), title = r.item && r.item.title ? r.item.title : d;
+  if (r.problems.length) {
+    bad++; rows.push(`| \`${d}\` | ${r.item ? r.item.kind : ""} | ✗ ${r.problems.length} problem${r.problems.length > 1 ? "s" : ""} |`);
+    blocks.push(`### ${title}\n\`${d}\`\n\n${r.problems.map(p => `- ${p}`).join("\n")}`);
+    continue;
+  }
+  let p;
+  try { p = await preview(d, out); } catch (e) { bad++; rows.push(`| \`${d}\` | ${r.item.kind} | ✗ didn't render |`); blocks.push(`### ${title}\n\`${d}\`\n\n- The preview failed: ${String(e.message || e).split("\n")[0]}`); continue; }
+  rows.push(`| \`${d}\` | ${r.item.kind} | ✓ |`);
+  const lines = [`### ${title}`, `\`${d}\` by @${r.item.author}, ${r.item.license}`, ""];
+  if (r.item.description) lines.push(`> ${r.item.description}`, "");
+  for (const f of p.files) lines.push(`![${f}]({{BASE}}/${f})`);
+  if (p.notes) lines.push("", `${p.notes.count} notes, ${p.notes.seconds} s: \`${p.notes.names.join(" ")}\``);
+  if (p.ms != null) lines.push("", `Compiled to ${p.wasm_bytes} bytes. ${p.ms} ms a frame at 640 wide in V8; the display runs slower, so keep it light.`);
+  if (r.flags.includes("pictures")) lines.push("", "**Has pictures:** check them before merging.");
+  blocks.push(lines.join("\n"));
+}
+const ok = bad === 0;
+writeFileSync(join(out, "comment.md"), ["<!-- pixelbar-preview -->", `## ${ok ? "✓ Ready for review" : "✗ Needs changes"}`, "", "| Item | Kind | Check |", "| --- | --- | --- |", ...rows, "", ...blocks.flatMap(b => [b, ""])].join("\n"));
+writeFileSync(join(out, "result.json"), JSON.stringify({ ok, items: dirs.length, problems: bad }));
+console.log(readFileSync(join(out, "comment.md"), "utf8"));
+process.exit(ok ? 0 : 1);

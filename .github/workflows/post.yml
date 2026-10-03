@@ -1,0 +1,58 @@
+# Puts a check's results on its pull request: the preview images go on the previews branch under pr-<number>/, and one
+# comment per pull request is kept up to date. It never runs the pull request's code.
+name: Post previews
+on:
+  workflow_run:
+    workflows: ["Check items"]
+    types: [completed]
+permissions:
+  contents: write
+  pull-requests: write
+  actions: read
+jobs:
+  post:
+    if: github.event.workflow_run.event == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: preview
+          path: out
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Read the pull request number
+        id: pr
+        run: |
+          n=$(tr -cd '0-9' < out/pr.txt)
+          [ -n "$n" ] || { echo "no pull request number"; exit 1; }
+          echo "n=$n" >> "$GITHUB_OUTPUT"
+      - name: Push the previews
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          N: ${{ steps.pr.outputs.n }}
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git clone --depth 1 --branch previews "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" previews 2>/dev/null; then :; else
+            git init -q -b previews previews && git -C previews remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git"
+            echo "Preview images for pull requests, written by the Post previews workflow." > previews/README.md
+          fi
+          rm -rf "previews/pr-${N}" && mkdir -p "previews/pr-${N}"
+          find out -maxdepth 1 \( -name '*.gif' -o -name '*.png' \) -exec cp {} "previews/pr-${N}/" \;
+          git -C previews add -A
+          git -C previews commit -q -m "Previews for #${N}" || echo "no change"
+          git -C previews push -q origin previews
+      - name: Comment
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          N: ${{ steps.pr.outputs.n }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          base="https://github.com/${REPO}/raw/previews/pr-${N}"
+          sed "s#{{BASE}}#${base}#g" out/comment.md > body.md
+          printf '\n<sub>For %s. Previews come from the site simulator in tools/vendor.</sub>\n' "$SHA" >> body.md
+          id=$(gh api "repos/${REPO}/issues/${N}/comments" --paginate --jq '.[] | select(.user.login == "github-actions[bot]" and (.body | contains("<!-- pixelbar-preview -->"))) | .id' | head -1)
+          if [ -n "$id" ]; then gh api -X PATCH "repos/${REPO}/issues/comments/${id}" -F body=@body.md > /dev/null
+          else gh api -X POST "repos/${REPO}/issues/${N}/comments" -F body=@body.md > /dev/null; fi

@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pixelbar.fireball1725.ca/schema/v2/box.schema.json",
+  "title": "Box",
+  "description": "pixelbar/<target>/box/<name>, retained. The cards a box takes turns showing, on every display that has a box by this name. An empty payload empties it.",
+  "type": "object",
+  "required": [
+    "v",
+    "cards"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "v": {
+      "$ref": "common.schema.json#/$defs/v"
+    },
+    "cards": {
+      "type": "array",
+      "items": {
+        "$ref": "card.schema.json"
+      },
+      "maxItems": 12,
+      "description": "Up to 12 cards; the box shows them in turn. An empty list clears the box."
+    },
+    "every": {
+      "$ref": "common.schema.json#/$defs/seconds",
+      "description": "Seconds each card stays, unless the card sets show_for. 10 by default."
+    }
+  }
+}

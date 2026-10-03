@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pixelbar.fireball1725.ca/schema/v2/sound.schema.json",
+  "title": "Sound",
+  "description": "pixelbar/all/asset/sound/<id>, retained. A tune named by id in sound fields.",
+  "type": "object",
+  "required": [
+    "v"
+  ],
+  "additionalProperties": false,
+  "minProperties": 2,
+  "properties": {
+    "v": {
+      "$ref": "common.schema.json#/$defs/v"
+    },
+    "rtttl": {
+      "type": "string",
+      "description": "A Nokia RTTTL tune: name:d=4,o=6,b=120:notes. Up to 128 notes."
+    },
+    "steps": {
+      "type": "string",
+      "pattern": "^\\d+:\\d+(,\\d+:\\d+)*$",
+      "description": "Exact tones as frequency:milliseconds pairs, 0 Hz for a rest."
+    }
+  }
+}

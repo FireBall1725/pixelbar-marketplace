@@ -1,0 +1,16 @@
+{
+  "name": "pixelbar-marketplace",
+  "private": true,
+  "type": "module",
+  "description": "Notifications, cards, themes, sounds, pictures and animations for PixelBar, shared by the people who use it.",
+  "scripts": {
+    "validate": "node tools/validate.mjs",
+    "preview": "node tools/preview.mjs",
+    "index": "node tools/index.mjs"
+  },
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "gifenc": "^1.0.3"
+  }
+}
