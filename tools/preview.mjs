@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-only
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // Copyright (C) 2026 FireBall1725
 // Renders an item's preview the way the Marketplace shows it: an animated GIF on a medium (256 LED) strip, a still at
 // XXL (640), a big LED view of a picture, the notes of a sound. Animations are compiled from their C first.

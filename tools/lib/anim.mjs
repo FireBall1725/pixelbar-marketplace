@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-only
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // Copyright (C) 2026 FireBall1725
 // Runs an animation's .wasm the way the display will: each frame starts black, the API draws with the site's own
 // framebuffer and PixelBar font, and the notification's words and colours come from params.

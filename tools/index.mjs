@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-only
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // Copyright (C) 2026 FireBall1725
 // Builds what Home Assistant reads, into one folder (the dist branch): index.json with every item in full (its messages, or an
 // animation's params), and each animation compiled to <slug>.wasm. CI runs it on every merge to main.

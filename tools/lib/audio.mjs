@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-only
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // Copyright (C) 2026 FireBall1725
 // A sound as the buzzer plays it, written to a WAV: square waves at each note's pitch with the simulator's envelope
 // (a 10 ms rise, then a fade to silence over the note), so the file sounds like the preview in Home Assistant.

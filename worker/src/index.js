@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-only
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // Copyright (C) 2026 FireBall1725
 // previews.pixelbar.fireball1725.ca: the Marketplace's pull request previews as pages you can watch and listen to.
 // The files live on the repo's previews branch (written by the Post previews workflow); this Worker reads them with a

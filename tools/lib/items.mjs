@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-only
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // Copyright (C) 2026 FireBall1725
 // The marketplace's items: one folder per item, items/<kind>/<slug>/item.json, plus anim.c for an animation.
 import { createHash } from "node:crypto";

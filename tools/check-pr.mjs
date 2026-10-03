@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-only
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // Copyright (C) 2026 FireBall1725
 // The PR check: validates the items a pull request adds or changes, renders their previews and writes the comment.
 //   node tools/check-pr.mjs <changed paths file> <out dir>

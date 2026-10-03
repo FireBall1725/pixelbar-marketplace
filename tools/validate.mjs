@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-only
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // Copyright (C) 2026 FireBall1725
 // Checks items before they're merged: the fields every item needs, each message against the display's own schemas,
 // what each kind must carry, size limits, and that nothing is already in the marketplace.

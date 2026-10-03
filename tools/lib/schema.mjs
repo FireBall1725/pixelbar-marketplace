@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-only
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // Copyright (C) 2026 FireBall1725
 // The display's own message check (the site's v2schema.js, vendored), with the schemas read from tools/vendor.
 import { readFileSync, readdirSync } from "node:fs";

@@ -2,7 +2,7 @@
 
 Notifications, cards, sensors, themes, sounds, pictures and animations for [PixelBar](https://pixelbar.fireball1725.ca), made by the people who use it. Home Assistant's PixelBar integration lists what's here in its Marketplace tab, and anything you pick goes into your Catalogue.
 
-The repo is private while it's set up. Contributions come in as pull requests, and every pull request gets checked and previewed before anyone reviews it.
+Contributions come in as pull requests, and every pull request gets checked and previewed before anyone reviews it.
 
 ## What's in here
 
@@ -50,4 +50,4 @@ node tools/test/run.mjs    # good items of every kind pass, broken ones fail for
 
 ## Licences
 
-Each item carries its own licence in its `item.json`. The tools are AGPL-3.0, like the rest of PixelBar (`LICENSE`). The SDK in `sdk/` is MIT (`sdk/LICENSE`), so an animation that includes `pixelbar.h` can use any licence on the list.
+Each item carries its own licence in its `item.json`. The tools here are under the [PolyForm Noncommercial License 1.0.0](LICENSE), like the rest of PixelBar: free for personal use, no selling without permission. The SDK in `sdk/` is [MIT](sdk/LICENSE), so an animation that includes `pixelbar.h` can use any licence on the list. Contributors agree to the [CLA](CLA.md) once, on their first pull request. The PixelBar name and logo are covered in [TRADEMARK.md](TRADEMARK.md).
