@@ -179,7 +179,7 @@ const char *manifest(void) {
 | `{"type": "number", "min": 0, "max": 100, "default": 50}` | a slider | the number, as text |
 | `{"type": "string", "default": ""}` | a text box | the text |
 
-An option that wasn't sent gives -1, so fall back to your default. Don't name an option `title`, `message` or `detail`. The Marketplace renders a preview for every value of a pick list, so each face of your animation is seen. [Football](../items/animation/football/anim.c) uses all of this: an `event` option picks a goal, a plain message, the substitution board, a yellow or red card or a scrolling line-up, the crest comes from the notification's picture, and the board's numbers are drawn in the `segment` face.
+A pick list may carry `"examples": { "<value>": { "message": ..., "detail": ... } }`: the words the Marketplace previews that value with, so a substitution shows shirt numbers rather than a goal's score. An option that wasn't sent gives -1, so fall back to your default. Don't name an option `title`, `message` or `detail`. The Marketplace renders a preview for every value of a pick list, so each face of your animation is seen. [Football](../items/animation/football/anim.c) uses all of this: an `event` option picks a goal, a plain message, the substitution board, a yellow or red card or a scrolling line-up, the crest comes from the notification's picture, and the board's numbers are drawn in the `segment` face.
 
 ## Helpers in pixelbar.h
 
