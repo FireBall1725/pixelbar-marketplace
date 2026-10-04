@@ -1,9 +1,25 @@
 {
   "kind": "animation",
   "title": "West Ham bubbles",
-  "description": "The goal celebration for a club that blows bubbles: rays, confetti in the team colours, the striped title and the score, and bubbles floating up to pop near the top. Amount, speed, size and colours for every part.",
+  "description": "The football card for a club that blows bubbles: every event it has (goal, message, substitution board, yellow or red card, line-up), with bubbles floating up through all of them and popping near the top, in claret and blue unless you send colours.",
   "author": "FireBall1725",
   "license": "MIT",
-  "tags": ["football", "goal", "bubbles", "west-ham"],
-  "params": { "title": "GOAL!", "message": "WHU 1-0 TOT", "detail": "67'", "colors": ["#7A263A", "#1BB1E7"] }
+  "tags": [
+    "football",
+    "west-ham",
+    "bubbles",
+    "goal"
+  ],
+  "params": {
+    "title": "GOAL!",
+    "message": "WHU 1-0 TOT",
+    "detail": "67'",
+    "colors": [
+      "#7A263A",
+      "#1BB1E7"
+    ],
+    "options": {
+      "event": "goal"
+    }
+  }
 }
