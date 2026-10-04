@@ -74,7 +74,9 @@ async function page(env, pr) {
   const names = files.map(f => f.name).sort(), n = pr.slice(3);
   // One block per item: its GIF, still, and for a sound its video and audio, grouped by the file's stem.
   const stem = f => f.replace(/-xxl\.png$/, "").replace(/\.[a-z0-9]+$/, "");
-  const items = [...new Set(names.map(stem))];
+  // An item first, then its part sweep (<item>-off, <item>-only-<part>) under it.
+  const base = s => s.replace(/-(off|only-.+)$/, ""), key = s => base(s) + (base(s) === s ? "" : "~" + s);
+  const items = [...new Set(names.map(stem))].sort((a, b) => key(a).localeCompare(key(b)));
   const block = s => {
     const has = ext => names.find(f => f === `${s}.${ext}`), xxl = has("xxl") || names.find(f => f === `${s}-xxl.png`);
     const parts = [];

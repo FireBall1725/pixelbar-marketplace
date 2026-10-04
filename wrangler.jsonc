@@ -1,0 +1,13 @@
+{
+  // The previews Worker, seen from the repository root: Cloudflare's Workers Builds runs its branch builds here
+  // (`npx wrangler preview`), so this mirrors worker/wrangler.jsonc, which is what `cd worker && wrangler deploy` uses.
+  "$schema": "https://unpkg.com/wrangler/config-schema.json",
+  "name": "pixelbar-previews",
+  "main": "worker/src/index.js",
+  "compatibility_date": "2026-09-01",
+  "vars": { "REPO": "FireBall1725/pixelbar-marketplace", "BRANCH": "previews" },
+  "previews": { "vars": { "REPO": "FireBall1725/pixelbar-marketplace", "BRANCH": "previews" } },
+  "routes": [
+    { "pattern": "previews.pixelbar.fireball1725.ca", "custom_domain": true }
+  ]
+}

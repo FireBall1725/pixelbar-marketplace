@@ -17,8 +17,9 @@ const items = await Promise.all(listItems().map(async d => {
   if (isPlugin(it)) {
     execFileSync(join(ROOT, "sdk/build.sh"), [join(d, sourceOf(it)), join(out, slug + ".wasm")], { stdio: "pipe" });
     row.wasm = slug + ".wasm"; row.params = it.params || {};
-    // A theme's manifest (its title, colours and parts) goes in the index, so Home Assistant can build its controls before fetching the .wasm.
-    if (kind === "theme") row.manifest = (await loadAnim(readFileSync(join(out, slug + ".wasm")), {})).manifest;
+    // A plugin's manifest (its title, colours and parts) goes in the index, so Home Assistant can build its controls before fetching the .wasm.
+    const m = (await loadAnim(readFileSync(join(out, slug + ".wasm")), {})).manifest;
+    if (m && !m.error) row.manifest = m;
   } else row.msgs = it.msgs.map(m => ({ topic: m.topic, payload: m.payload }));
   return row;
 }));
