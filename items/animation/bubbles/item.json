@@ -1,0 +1,9 @@
+{
+  "kind": "animation",
+  "title": "Bubbles",
+  "description": "The goal celebration for a club that blows bubbles: rays, confetti in the team colours, the striped title and the score, and bubbles floating up to pop near the top. Amount, speed, size and colours for every part.",
+  "author": "FireBall1725",
+  "license": "MIT",
+  "tags": ["football", "goal", "bubbles", "west-ham"],
+  "params": { "title": "GOAL!", "message": "WHU 1-0 TOT", "detail": "67'", "colors": ["#7A263A", "#1BB1E7"] }
+}
