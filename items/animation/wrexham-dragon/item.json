@@ -1,0 +1,25 @@
+{
+  "kind": "animation",
+  "title": "Wrexham dragon",
+  "description": "The football card with a red dragon flying through it: every event (goal, message, substitution board, yellow or red card, line-up), the dragon crossing behind the words with its wings beating and its tail whipping, breathing fire every few seconds. Red and white unless you send colours.",
+  "author": "FireBall1725",
+  "license": "MIT",
+  "tags": [
+    "football",
+    "wrexham",
+    "dragon",
+    "goal"
+  ],
+  "params": {
+    "title": "GOAL!",
+    "message": "WRX 1-0 STK",
+    "detail": "67'",
+    "colors": [
+      "#E2001A",
+      "#FFFFFF"
+    ],
+    "options": {
+      "event": "goal"
+    }
+  }
+}
