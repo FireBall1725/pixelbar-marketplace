@@ -1,0 +1,40 @@
+# Takes a pull request's previews down when it closes, and deletes the branch the Share button made for it in this repository.
+# Run it by hand with a number to take down any pull request's previews at once, merged or not.
+name: Clean up a pull request
+on:
+  pull_request_target:
+    types: [closed]
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: "Pull request number whose previews to remove"
+        required: true
+permissions:
+  contents: write
+jobs:
+  clean:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Remove the previews
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          N: ${{ github.event.inputs.pr || github.event.pull_request.number }}
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git clone -q --depth 1 --branch previews "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" previews || { echo "no previews branch"; exit 0; }
+          [ -d "previews/pr-${N}" ] || { echo "no previews for #${N}"; exit 0; }
+          rm -rf "previews/pr-${N}"
+          git -C previews checkout -q --orphan fresh
+          git -C previews add -A
+          git -C previews commit -q -m "Previews without #${N}"
+          git -C previews push -q -f origin fresh:previews
+      # A branch the Share button pushed here (share/...) has done its job once the pull request is closed.
+      - name: Delete the share branch
+        if: github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name == github.repository && startsWith(github.event.pull_request.head.ref, 'share/')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          REF: ${{ github.event.pull_request.head.ref }}
+        run: git push -q "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" --delete "${REF}" || echo "already gone"

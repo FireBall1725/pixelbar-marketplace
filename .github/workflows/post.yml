@@ -40,9 +40,11 @@ jobs:
           fi
           rm -rf "previews/pr-${N}" && mkdir -p "previews/pr-${N}"
           find out -maxdepth 1 \( -name '*.gif' -o -name '*.png' -o -name '*.wav' -o -name '*.mp4' \) -exec cp {} "previews/pr-${N}/" \;
+          # The branch is one commit with no history, so what's removed from it (a closed pull request, something that shouldn't be there) is gone for good.
+          git -C previews checkout -q --orphan fresh
           git -C previews add -A
-          git -C previews commit -q -m "Previews for #${N}" || echo "no change"
-          git -C previews push -q origin previews
+          git -C previews commit -q -m "Previews for #${N}"
+          git -C previews push -q -f origin fresh:previews
       - name: Label
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
