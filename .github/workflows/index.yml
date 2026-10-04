@@ -33,3 +33,8 @@ jobs:
           cp -R dist/. pub/ && echo "Built by the Update index workflow from main. Read index.json; animations are the .wasm files." > pub/README.md
           git -C pub add -A && git -C pub commit -q -m "Index from ${GITHUB_SHA::7}"
           git -C pub push -q -f "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" dist
+      # jsDelivr keeps a branch file for 12 hours; asking it to drop ours makes the new index show up straight away.
+      - name: Purge the jsDelivr cache
+        env:
+          REPO: ${{ github.repository }}
+        run: for f in $(ls dist); do curl -sf "https://purge.jsdelivr.net/gh/${REPO}@dist/${f}" > /dev/null || echo "purge of ${f} failed"; done
