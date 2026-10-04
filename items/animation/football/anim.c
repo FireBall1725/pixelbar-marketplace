@@ -82,6 +82,18 @@ static void two_cells(char *num) {
   else num[2] = 0;
 }
 
+/* The digital disruption a cell goes through before it settles: a new random glyph every 1/20 s until the cell's lock time,
+   0.35 s plus 0.18 s per cell from the left, so the board resolves in a sweep. */
+static void scramble(const char *num, char *out, float t, int first_cell) {
+  static const char POOL[] = "0123456789ABCDEFHJLNPUY-_=";
+  for (int i = 0; i < 2; i++) {
+    const float lock = 0.35f + 0.18f * (first_cell + i);
+    if (t >= lock) out[i] = num[i];
+    else { const int step = (int)(t * 20); out[i] = POOL[(int)(pb_hash(step * 7 + (first_cell + i) * 131 + 3) * (sizeof POOL - 1))]; }
+  }
+  out[2] = 0;
+}
+
 /* ---------- the events ---------- */
 static void confetti(float ft, int w, int h, int c0, int c1) {
   if (!PB_ON("confetti")) return;
@@ -147,14 +159,15 @@ static void substitution(float t, int w, int h, int c0, int c1, const char *mess
   if (has_det) { const int i = shirt(detail, out_no, sizeof out_no); out_name = detail + i; }
   /* The board always has two cells a side, like the real one: a single digit sits in the right cell with the left one unlit. */
   two_cells(out_no); two_cells(in_no);
-  /* The board rises in over the first half second, numbers lighting with a flicker. */
-  const float rise = ft < 0.5f ? 1 - pb_bounce(ft / 0.5f) : 0; const int by = 8 + (int)(rise * 30);
-  const int flick = ft < 0.9f && ((int)(ft * 24) % 3 == 0) ? 0 : 1;
+  /* The board scrambles in: every cell cycles through random segments like a display finding its signal, then locks onto
+     its digit, the red cells first, the green ones after. */
+  const int by = 8;
   int x = tx;
-  const int ow = PB_TEXT_WIDTH_FONT("segment", out_no, 1), iw = PB_TEXT_WIDTH_FONT("segment", in_no, 1);
+  char o2[3], i2[3]; scramble(out_no, o2, ft, 0); scramble(in_no, i2, ft, 2);
+  const int ow = PB_TEXT_WIDTH_FONT("segment", o2, 1), iw = PB_TEXT_WIDTH_FONT("segment", i2, 1);
   pb_rectf(x - 2, by - 2, ow + iw + 8 + 4, 20, 0x14161C, 255);
-  if (flick) PB_TEXT_FONT("segment", out_no, x, by, RED, 1, 0); x += ow + 8;
-  if (flick) PB_TEXT_FONT("segment", in_no, x, by, GREEN, 1, 0); x += iw;
+  PB_TEXT_FONT("segment", o2, x, by, RED, 1, 0); x += ow + 8;
+  PB_TEXT_FONT("segment", i2, x, by, GREEN, 1, 0); x += iw;
   x += 8;
   const int room = w - x - 4;
   if (room < 24) return;
