@@ -29,15 +29,18 @@ export async function preview(dir, out) {
   if (item.kind === "animation") {
     const src = join(dir, sourceOf(item)), wasm = join(out, slug + ".wasm");
     execFileSync(join(ROOT, "sdk/build.sh"), [src, wasm], { stdio: "pipe" });
-    const bytes = readFileSync(wasm), params = item.params || {};
-    let ms = 0, n = 0;
-    for (const W of [256, 640]) {
-      const a = await loadAnim(bytes, params), fb = new T.FB(W, 32), frames = [];
-      for (let i = 0; i < FPS * SECONDS; i++) { const d = a.frame(fb, i / FPS); if (W === 640) { ms += d; n++; } frames.push(leds(fb.d, W, 32, 3)); }
-      if (W === 256) { gif(join(out, slug + ".gif"), frames, FPS); res.files.push(slug + ".gif"); }
-      else { png(join(out, slug + "-xxl.png"), frames[Math.round(FPS * 1.5)]); res.files.push(slug + "-xxl.png"); }
-    }
-    res.ms = +(ms / n).toFixed(3); res.wasm_bytes = bytes.length;
+    const bytes = readFileSync(wasm), params = item.params || {}, m = (await loadAnim(bytes, params)).manifest;
+    // An animation's manifest is optional; one that declares parts gets the same sweep a theme does.
+    if (m && m.error) throw new Error(`The animation's manifest didn't parse: ${m.error}`);
+    if (m && m.kind !== "animation") throw new Error('An animation\'s manifest needs "kind": "animation".');
+    if (m && m.parts && (typeof m.parts !== "object" || Array.isArray(m.parts))) throw new Error('The manifest\'s "parts" is an object keyed by part name.');
+    const render = async (W, seconds, parts) => { const a = await loadAnim(bytes, { ...params, parts }), fb = new T.FB(W, 32), frames = []; let ms = 0; for (let i = 0; i < FPS * seconds; i++) { ms += a.frame(fb, i / FPS); frames.push(leds(fb.d, W, 32, 3)); } return { frames, ms: ms / (FPS * seconds) }; };
+    const d256 = await render(256, SECONDS, params.parts), d640 = await render(640, SECONDS, params.parts);
+    gif(join(out, slug + ".gif"), d256.frames, FPS); res.files.push(slug + ".gif");
+    png(join(out, slug + "-xxl.png"), d640.frames[Math.round(FPS * 1.5)]); res.files.push(slug + "-xxl.png");
+    res.ms = +d640.ms.toFixed(3); res.wasm_bytes = bytes.length;
+    if (m) res.manifest = m;
+    if (m && m.parts) { res.sweep = []; for (const c of sweep(Object.keys(m.parts))) { const f = `${slug}-${c.name}.gif`; gif(join(out, f), (await render(256, SWEEP_SECONDS, c.parts)).frames, FPS); res.files.push(f); res.sweep.push(f); } }
     return res;
   }
   if (item.kind === "theme" && isPlugin(item)) {

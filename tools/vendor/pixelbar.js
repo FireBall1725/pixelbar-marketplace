@@ -80,6 +80,8 @@ const BIG=mkFont(13,{
 /* ---------- framebuffer ---------- */
 /* Where a halo is drawn, as the offsets of its copies: all round, or one side. */
 const HALO_AT={around:[[-1,0],[1,0],[0,-1],[0,1],[-1,-1],[1,1],[-1,1],[1,-1]],below:[[0,1]],above:[[0,-1]],left:[[-1,0]],right:[[1,0]]};
+/* A face without a glyph for an accented letter draws the plain letter (the 3 × 5 face has no room for marks); unknown characters are a space. */
+const gl=(f,ch)=>f.g[ch]||f.g[ch.normalize("NFD")[0]]||f.g[" "];
 class FB{
   constructor(W,H){this.W=W;this.H=H;this.d=new Float32Array(W*H*3);this.noClip();}
   noClip(){this.x0=0;this.y0=0;this.x1=this.W;this.y1=this.H;this.cs=[];}
@@ -98,10 +100,10 @@ class FB{
     const ys=Math.max(this.y0,Math.floor(mny)),ye=Math.min(this.y1-1,Math.ceil(mxy)),xs=Math.max(this.x0,Math.floor(mnx)),xe=Math.min(this.x1-1,Math.ceil(mxx));
     for(let y=ys;y<=ye;y++)for(let x=xs;x<=xe;x++){const X=x+.5,Y=y+.5;let ins=false;for(let i=0,j=P.length-1;i<P.length;j=i++){const [xi,yi]=P[i],[xj,yj]=P[j];if((yi>Y)!==(yj>Y)&&X<(xj-xi)*(Y-yi)/(yj-yi)+xi)ins=!ins;}if(ins)this.px(x,y,c,a);}}
   /* A joining glyph (box drawing, blocks) has no gap after it, so lines and bars meet the next one. */
-  tw(f,s,sc=1){s=fmtT(s);let w=0,gap=0;for(const ch of s){const g=f.g[ch]||f.g[" "];gap=g.j?0:sc;w+=g.w*sc+gap;}return Math.max(0,w-gap);}
+  tw(f,s,sc=1){s=fmtT(s);let w=0,gap=0;for(const ch of s){const g=gl(f,ch);gap=g.j?0:sc;w+=g.w*sc+gap;}return Math.max(0,w-gap);}
   /* halo: unset, text is plain and textO outlines in black; {c, at} outlines all text in colour c, all round or on one side; false draws every outline plain.
      A screen's outline sets it. */
-  text(f,s,x,y,c,sc=1,a=1){if(this.halo&&!this._h)return this.textO(f,s,x,y,c,sc,a);s=fmtT(s);x=Math.round(x);y=Math.round(y);let cx=x,gap=sc;for(const ch of s){const g=f.g[ch]||f.g[" "];if(cx<this.x1&&cx+g.w*sc>=this.x0){for(let r=0;r<f.h;r++){const row=g.rows[r];for(let k=0;k<g.w;k++){if(row[k]!=="#")continue;for(let sy=0;sy<sc;sy++)for(let sx=0;sx<sc;sx++)this.px(cx+k*sc+sx,y+r*sc+sy,c,a);}}}gap=g.j?0:sc;cx+=g.w*sc+gap;}return cx-x-gap;}
+  text(f,s,x,y,c,sc=1,a=1){if(this.halo&&!this._h)return this.textO(f,s,x,y,c,sc,a);s=fmtT(s);x=Math.round(x);y=Math.round(y);let cx=x,gap=sc;for(const ch of s){const g=gl(f,ch);if(cx<this.x1&&cx+g.w*sc>=this.x0){for(let r=0;r<f.h;r++){const row=g.rows[r];for(let k=0;k<g.w;k++){if(row[k]!=="#")continue;for(let sy=0;sy<sc;sy++)for(let sx=0;sx<sc;sx++)this.px(cx+k*sc+sx,y+r*sc+sy,c,a);}}}gap=g.j?0:sc;cx+=g.w*sc+gap;}return cx-x-gap;}
   /* haloTo: where the halo copies go, when this buffer is merged by brightness (a dark halo there would lose to the sky under it). */
   textO(f,s,x,y,c,sc=1,a=1){if(this.halo===false)return this.text(f,s,x,y,c,sc,a);const h=this.halo||{c:[0,0,0],at:"around"},hb=this.haloTo||this;this._h=hb._h=true;
     for(const [dx,dy] of HALO_AT[h.at]||HALO_AT.around)hb.text(f,s,x+dx,y+dy,h.c,sc,0.85*a);const r=this.text(f,s,x,y,c,sc,a);this._h=hb._h=false;return r;}
@@ -988,8 +990,8 @@ function sBirthday(fb,S){const {W,H}=S,ft=S.ft!=null?S.ft:(S.t%10),rk=Math.max(2
     if(ph<0.8){const y=H-ph/0.8*(H*0.7);fb.px(x0,y,[255,230,180]);fb.px(x0,y+1,[255,180,90],0.5);}
     else{const age=(ph-0.8)/(per-0.8),R=age*15,yb=H*0.3;for(let k=0;k<16;k++){const a=k*Math.PI/8;fb.px(x0+Math.cos(a)*R,yb+Math.sin(a)*R*0.8+age*age*7,c,1-age);}}}
   cake(fb,16,19,S.t);const col=(X)=>hsv(X*3-ft*120,0.45,1);
-  if(W<256){fb.textO(F5,"HAPPY",34,3,col);fb.textO(F5,"BIRTHDAY",34,12,col);fb.textO(F3,"SAM",34,23,[230,220,240]);}
-  else{fb.textO(F5,"HAPPY BIRTHDAY",34,3,col,2);fb.textO(F5,"SAM",34,21,[240,230,250]);}}
+  if(W<256){fb.textO(F5,"HAPPY",34,3,col);fb.textO(F5,"BIRTHDAY",34,12,col);fb.textO(F3,"ADALÉA",34,23,[230,220,240]);}
+  else{fb.textO(F5,"HAPPY BIRTHDAY",34,3,col,2);fb.textO(F5,"ADALÉA",34,21,[240,230,250]);}}
 /* ---------- holiday themes ----------
    A theme stands in for the weather sky on idle, with the clock and the weather cards still drawn on top. The same scenes double as notification animations. */
 const unhex=h=>{const c=[0,2,4].map(i=>parseInt(h.substr(i,2),16));return c[0]+c[1]+c[2]<60?[26,24,30]:c;};
@@ -1230,8 +1232,8 @@ const REF_THEMES={spooky_christmas:{name:"Spooky Christmas",title:"MERRY SPOOKY 
 function pluginImports(P,st){const dec=new TextDecoder(),enc=new TextEncoder(),rgb=c=>[(c>>16)&255,(c>>8)&255,c&255],A=a=>clamp(a,0,255)/255,fit=s=>fitText(s,F5,false),hex=h=>{const m=/^#?([0-9a-f]{6})$/i.exec(String(h||""));return m?parseInt(m[1],16):null;};
   const str=(p,n)=>dec.decode(new Uint8Array(st.mem.buffer,p,n)),fb=()=>st.fb,part=k=>(P.parts&&P.parts[k])||{},pct=(v,lo,hi,d)=>{const x=+v;return v!==null&&v!==undefined&&isFinite(x)?clamp(x,lo,hi):d;};
   return {px:(x,y,c,a)=>fb().px(x,y,rgb(c),A(a)),rect:(x,y,w,h,c,a)=>fb().rect(x,y,w,h,rgb(c),A(a)),
-    text:(p,n,x,y,c,size,outline)=>{const s=fit(str(p,n)),sc=size===2?2:1;if(outline)fb().textO(F5,s,x,y,rgb(c),sc);else fb().text(F5,s,x,y,rgb(c),sc);return fb().tw(F5,s,sc);},
-    text_width:(p,n,size)=>fb().tw(F5,fit(str(p,n)),size===2?2:1),
+    text:(p,n,x,y,c,size,outline)=>{const s=fit(str(p,n)),sc=size>=3?3:size===2?2:1;if(outline)fb().textO(F5,s,x,y,rgb(c),sc);else fb().text(F5,s,x,y,rgb(c),sc);return fb().tw(F5,s,sc);},
+    text_width:(p,n,size)=>fb().tw(F5,fit(str(p,n)),size>=3?3:size===2?2:1),
     param:(kp,kn,bp,cap)=>{const v=P[str(kp,kn)];if(typeof v!=="string"||cap<1)return -1;const b=enc.encode(v).subarray(0,cap-1),o=new Uint8Array(st.mem.buffer,bp,b.length+1);o.set(b);o[b.length]=0;return b.length;},
     color:i=>{const c=hex((P.colors||[])[i]);return c===null?-1:c;},
     pxf:(x,y,c,a)=>fb().px(x,y,rgb(c),A(a)),add:(x,y,c,a)=>fb().add(x,y,rgb(c),A(a)),rectf:(x,y,w,h,c,a)=>fb().rect(x,y,w,h,rgb(c),A(a)),
@@ -1567,10 +1569,10 @@ function sTake(fb,S,o){const {W,t}=S;for(let k=0;k<5;k++){const age=((t*0.55)+k/
   else if(W<256){marquee(fb,F5,o.title,31,7,R-31,white,t,1,true);two(F3,18,4,o.det);}else{if(fb.tw(F5,o.title,2)<=R-32)fb.textO(F5,o.title,32,3,white,2);else marquee(fb,F5,o.title,32,6,R-32,white,t,1,true);two(F5,21,8,det);}
   thinBar(fb,x0,S.H-2,R-x0,o.prog,o.c1);}
 const FULL={newyear:(fb,S)=>sCountdown(fb,S,{title:"HAPPY NEW YEAR",message:"2027",seconds:10}),pizza:(fb,S)=>sCountdown(fb,S,{title:"PIZZA IS READY",message:"OVEN IS OFF",seconds:10}),
-  leak:(fb,S)=>sRedAlert(fb,S,{title:"WATER LEAK",message:"UNDER THE LAUNDRY SINK"}),chores:(fb,S)=>sConfetti(fb,S,{title:"CHORES DONE",message:"NICE WORK, SAM"}),redalert:(fb,S)=>sRedAlert(fb,S,{message:"TORNADO WARNING"}),countdown:(fb,S)=>sCountdown(fb,S,{title:"HAPPY NEW YEAR",message:"2027",seconds:10}),confetti:(fb,S)=>sConfetti(fb,S,{title:"YOU DID IT",message:"OFFER ACCEPTED"}),door:sDoor,twarn:(fb,S)=>sAlert(fb,S,ALERTS.twarn),blizzard:(fb,S)=>sAlert(fb,S,ALERTS.blizzard),tswarn:(fb,S)=>sAlert(fb,S,ALERTS.tswarn),smoke:(fb,S)=>sAlert(fb,S,ALERTS.smoke),
-  cry:(fb,S)=>sTake(fb,S,{icon:waveIcon,title:"NURSERY",msg:"CRYING DETECTED",c0:[255,160,200],c1:[170,90,255]}),goal:sGoal,bday:sBirthday,morningwx:(fb,S)=>sWeatherNote(fb,S,{title:"GOOD MORNING",sensors:["today","forecast"]}),golive:(fb,S)=>sLive(fb,S,{title:"SAM IS LIVE",message:"BUILDING AN LED DISPLAY, COME HANG OUT",colors:[TW]}),ytlive:(fb,S)=>sLive(fb,S,{title:"SAM IS LIVE ON YOUTUBE",message:"SOLDERING THE CONTROLLER BOARD",colors:[YT]}),
+  leak:(fb,S)=>sRedAlert(fb,S,{title:"WATER LEAK",message:"UNDER THE LAUNDRY SINK"}),chores:(fb,S)=>sConfetti(fb,S,{title:"CHORES DONE",message:"NICE WORK, ADALÉA"}),redalert:(fb,S)=>sRedAlert(fb,S,{message:"TORNADO WARNING"}),countdown:(fb,S)=>sCountdown(fb,S,{title:"HAPPY NEW YEAR",message:"2027",seconds:10}),confetti:(fb,S)=>sConfetti(fb,S,{title:"YOU DID IT",message:"OFFER ACCEPTED"}),door:sDoor,twarn:(fb,S)=>sAlert(fb,S,ALERTS.twarn),blizzard:(fb,S)=>sAlert(fb,S,ALERTS.blizzard),tswarn:(fb,S)=>sAlert(fb,S,ALERTS.tswarn),smoke:(fb,S)=>sAlert(fb,S,ALERTS.smoke),
+  cry:(fb,S)=>sTake(fb,S,{icon:waveIcon,title:"NURSERY",msg:"CRYING DETECTED",c0:[255,160,200],c1:[170,90,255]}),goal:sGoal,bday:sBirthday,morningwx:(fb,S)=>sWeatherNote(fb,S,{title:"GOOD MORNING",sensors:["today","forecast"]}),golive:(fb,S)=>sLive(fb,S,{title:"FIREBALL1725 IS LIVE",message:"BUILDING AN LED DISPLAY, COME HANG OUT",colors:[TW]}),ytlive:(fb,S)=>sLive(fb,S,{title:"SAM IS LIVE ON YOUTUBE",message:"SOLDERING THE CONTROLLER BOARD",colors:[YT]}),
   sub:(fb,S)=>sConfetti(fb,S,{title:"NEW SUB",message:"PIXELPAL_42, TIER 1, 6 MONTHS",colors:[TW,[191,148,255],[255,255,255]]}),gifts:(fb,S)=>sFireworks(fb,S,{title:"5 GIFT SUBS",message:"FROM PIXELPAL_42",colors:[TW,[191,148,255],[255,214,90]]}),
-  raid:(fb,S)=>sRaid(fb,S,{title:"FROM PIXELPAL_42",message:"42 VIEWERS",colors:[[255,80,70]]}),milestone:(fb,S)=>sConfetti(fb,S,{title:"1,000 FOLLOWERS",message:"ON TWITCH",colors:[TW,[191,148,255],[255,214,90],[255,255,255]]}),boot:(fb,S)=>sBoot(fb,S),boot_eth:(fb,S)=>sBoot(fb,S,{net:"eth"}),update:(fb,S)=>sUpdate(fb,S),setup:(fb,S)=>sSetup(fb,Object.assign({},S,{t:S.ft})),canadaflag:(fb,S)=>sFlag(fb,S,{flag:"canada",title:"HAPPY CANADA DAY",message:"1 JULY"})};
+  raid:(fb,S)=>sRaid(fb,S,{title:"FROM FIREBALL1725",message:"42 VIEWERS",colors:[[255,80,70]]}),milestone:(fb,S)=>sConfetti(fb,S,{title:"1,000 FOLLOWERS",message:"ON TWITCH",colors:[TW,[191,148,255],[255,214,90],[255,255,255]]}),boot:(fb,S)=>sBoot(fb,S),boot_eth:(fb,S)=>sBoot(fb,S,{net:"eth"}),update:(fb,S)=>sUpdate(fb,S),setup:(fb,S)=>sSetup(fb,Object.assign({},S,{t:S.ft})),canadaflag:(fb,S)=>sFlag(fb,S,{flag:"canada",title:"HAPPY CANADA DAY",message:"1 JULY"})};
 /* ---------- display layouts ----------
    A display's screens are a list, in the order they're tried: it shows the first whose rules hold, or the last one. Every screen at
    every size is a row of zones. A zone has a width (pixels, or "*" to share what's left),
@@ -1781,7 +1783,7 @@ const DEF={
   goal:{tier:"alert",full:"goal",dur:8,notray:1,preview:"full:goal",icon:"football",ctl:["send"],key:"goal_newcastle",sound:"chime",
     pay:S=>({animation:"goal",title:"Goal!",message:"NEW "+(S.score||[1,0]).join("-")+" COV",detail:"23'",colors:["#FFFFFF","#F1BE48"],images:[imgPayload("espn-361"),imgPayload("espn-388")]})},
   bday:{tier:"alert",full:"bday",dur:10,notray:1,preview:"full:bday",icon:"cake",ctl:["send"],key:"birthday_sam",sound:"chime",
-    pay:S=>({animation:"fireworks",title:"Happy birthday",message:"Sam"})},
+    pay:S=>({animation:"fireworks",title:"Happy birthday",message:"Adaléa"})},
   recycling:{tier:"notice",keep:1,repeat:1,card:"recycling",tray:"mini:recycling",icon:"recycling",ctl:["set","clear"],key:"recycling_night",sound:"double"},
   garbage:{tier:"notice",keep:1,repeat:1,card:"garbage",tray:"mini:bins",icon:"bins",ctl:["set","clear"],key:"garbage_night",sound:"double"},
   newyear:{tier:"alert",full:"newyear",dur:14,notray:1,preview:"full:newyear",icon:"star",ctl:["send"],key:"new_year",sound:"done",
@@ -1791,13 +1793,13 @@ const DEF={
   leak:{tier:"critical",full:"leak",preview:"full:leak",icon:"leak",ctl:["set","clear"],key:"water_leak",sound:"siren",
     pay:()=>({animation:"red_alert",title:"Water leak",message:"Under the laundry sink"})},
   chores:{tier:"alert",full:"chores",dur:8,notray:1,preview:"full:chores",icon:"star",ctl:["send"],key:"chores_done",sound:"done",
-    pay:()=>({animation:"confetti",title:"Chores done",message:"Nice work, Sam",colors:["#FF7C45","#48C28A","#5AA2F5","#E8B53A"]})},
+    pay:()=>({animation:"confetti",title:"Chores done",message:"Nice work, Adaléa",colors:["#FF7C45","#48C28A","#5AA2F5","#E8B53A"]})},
   morningwx:{tier:"alert",full:"morningwx",dur:12,notray:1,preview:"full:morningwx",icon:"sun",ctl:["send"],key:"morning_weather",sound:"chime",
     pay:()=>({animation:"weather",title:"Good morning",sensors:["today","forecast"],seconds:300})},
   golive:{tier:"alert",full:"golive",dur:10,notray:1,preview:"full:golive",icon:"twitch",ctl:["send"],key:"twitch_live",sound:"rising",
-    pay:()=>({animation:"live",title:"Sam is live",message:"Building an LED display, come hang out",colors:["#9146FF"]})},
+    pay:()=>({animation:"live",title:"FireBall1725 is live",message:"Building an LED display, come hang out",colors:["#9146FF"]})},
   ytlive:{tier:"alert",full:"ytlive",dur:10,notray:1,preview:"full:ytlive",icon:"youtube",ctl:["send"],key:"youtube_live",sound:"rising",
-    pay:()=>({animation:"live",title:"Sam is live on YouTube",message:"Soldering the controller board",colors:["#FF1E28"]})},
+    pay:()=>({animation:"live",title:"FireBall1725 is live on YouTube",message:"Soldering the controller board",colors:["#FF1E28"]})},
   onair:{tier:"status",card:"onair",icon:"live",ctl:["set","clear"],key:"on_air"},
   follower:{tier:"notice",card:"follower",icon:"twitch",ctl:["send"],key:"twitch_follow",sound:"beep"},
   sub:{tier:"alert",full:"sub",dur:8,notray:1,preview:"full:sub",icon:"twitch",ctl:["send"],key:"twitch_sub",sound:"done",
@@ -1807,7 +1809,7 @@ const DEF={
   bits:{tier:"notice",card:"bits",icon:"gem",ctl:["send"],key:"twitch_bits",sound:"rising"},
   tip:{tier:"notice",card:"tip",icon:"kofi",ctl:["send"],key:"kofi_tip",sound:"rising"},
   raid:{tier:"alert",full:"raid",dur:8,notray:1,preview:"full:raid",icon:"raid",ctl:["send"],key:"twitch_raid",sound:"alert",
-    pay:()=>({animation:"raid",title:"From PixelPal_42",message:"42 viewers",colors:["#FF5046"]})},
+    pay:()=>({animation:"raid",title:"From FireBall1725",message:"42 viewers",colors:["#FF5046"]})},
   superchat:{tier:"notice",card:"superchat",icon:"youtube",ctl:["send"],key:"youtube_superchat",sound:"rising"},
   ytmember:{tier:"notice",card:"ytmember",icon:"youtube",ctl:["send"],key:"youtube_member",sound:"beep"},
   upload:{tier:"notice",card:"upload",icon:"youtube",ctl:["send"],key:"youtube_upload",sound:"chime"},
@@ -2105,8 +2107,8 @@ const CARDS={
   onair:S=>({icon:liveIcon,col:[255,70,80],title:"ON AIR",l2:"LIVE ON TWITCH",l3:"SINCE @19:02"}),
   follower:S=>({icon:twitchIcon,col:TW,title:"NEW FOLLOWER",l2:"PIXELPAL_42",l3:"12 TODAY"}),
   bits:S=>({icon:gemIcon,col:[180,110,255],title:"CHEER",l2:"PIXELPAL_42",l3:"LETS GOOO",big:"500",unit:"BITS"}),
-  tip:S=>({icon:kofiIcon,col:[41,171,224],title:"KO-FI TIP",l2:"FROM SAM",l3:"FOR THE SUSHI FUND",big:"5",unit:"CAD"}),
-  superchat:S=>({icon:youtubeIcon,col:[255,200,60],title:"SUPER CHAT",l2:"SAM: LOVE THE NEW BOARD",l3:"PINNED FOR 2 MIN",big:"10",unit:"CAD"}),
+  tip:S=>({icon:kofiIcon,col:[41,171,224],title:"KO-FI TIP",l2:"FROM ADALÉA",l3:"FOR THE SUSHI FUND",big:"5",unit:"CAD"}),
+  superchat:S=>({icon:youtubeIcon,col:[255,200,60],title:"SUPER CHAT",l2:"ADALÉA: LOVE THE NEW BOARD",l3:"PINNED FOR 2 MIN",big:"10",unit:"CAD"}),
   ytmember:S=>({icon:youtubeIcon,col:[60,200,120],title:"NEW MEMBER",l2:"PIXELPAL_42",l3:"WELCOME TO THE CREW"}),
   upload:S=>({icon:youtubeIcon,col:YT,title:"NEW VIDEO IS UP",l2:"I BUILT AN LED STATUS BAR",l3:"PUBLIC AT @18:00"}),
   hype:S=>({icon:twitchIcon,col:TW,title:"HYPE TRAIN",l2:"LEVEL 3, 64% TO 4",l3:"ENDS IN 3:12",big:"3",unit:"LVL"}),
@@ -2121,7 +2123,7 @@ const CARDS={
   cry:S=>({icon:waveIcon,col:[255,140,170],title:"NURSERY",l2:"CRYING DETECTED",l3:"AT "+hm(S.now)}),
   tvtime:S=>({icon:tvIcon,col:[120,200,255],title:"TV TIME",l2:"12 MIN LEFT",l3:"THEN BATH TIME",big:"12",unit:"MIN"}),
   bedtime:S=>({icon:napIcon,col:[180,160,255],title:"BEDTIME",l2:"IN 15 MINUTES",l3:"PYJAMAS AND TEETH",big:"15",unit:"MIN"}),
-  kidhome:S=>({icon:keyIcon,col:[130,230,160],title:"SAM IS HOME",l2:"USED THE DOOR CODE",l3:"AT "+hm(S.now)}),
+  kidhome:S=>({icon:keyIcon,col:[130,230,160],title:"ADALÉA IS HOME",l2:"USED THE DOOR CODE",l3:"AT "+hm(S.now)}),
   gate:S=>({icon:gateIcon,col:GARAGE,title:"BACK GATE",l2:"OPEN 2 MIN",l3:"YARD SIDE",big:"2",unit:"MIN"}),
   gate10:S=>({icon:gateIcon,col:GARAGE,title:"BACK GATE",l2:"STILL OPEN",l3:"YARD SIDE",big:"4",unit:"MIN"})
 };
@@ -3064,7 +3066,7 @@ async function brConnect(){const st=$("brState");if(BROKER)return;
 function dataCard(key,b){const v=b.value,A=b.attributes||{},o=Array.isArray(v)&&v.find(x=>x&&typeof x==="object")||{},label=key.replace(/^[a-z_]+\./,"").replace(/_/g," ");
   const card=A.media_title!==undefined?"media":A.next_rising!==undefined?"sun":Array.isArray(v)?(typeof v[0]==="number"?"chart":"datetime" in o?"forecast":"route" in o?"departures":"change" in o?"ticker":"state" in o&&"name" in o?"lights":"list"):typeof v==="number"?(/°/.test(b.unit||"")?"temperature":"value"):"text";
   return card==="text"?{card,title:label,value:v,attributes:A}:{card,label,value:v,unit:b.unit,attributes:A};}
-const ANIM_EX={weather:{v:1,key:"morning_weather",tier:"alert",animation:"weather",title:"Good morning",sensors:["today","forecast"],seconds:300,sound:"chime"},live:{v:1,key:"twitch_live",tier:"alert",animation:"live",title:"Sam is live",message:"Building an LED display, come hang out",colors:["#9146FF"],sound:"rising"},raid:{v:1,key:"twitch_raid",tier:"alert",animation:"raid",title:"From PixelPal_42",message:"42 viewers",colors:["#FF5046"],sound:"alert"},red_alert:{v:1,key:"red_alert",tier:"critical",animation:"red_alert",title:"Red alert",message:"Tornado warning",sound:"alarm"},
+const ANIM_EX={weather:{v:1,key:"morning_weather",tier:"alert",animation:"weather",title:"Good morning",sensors:["today","forecast"],seconds:300,sound:"chime"},live:{v:1,key:"twitch_live",tier:"alert",animation:"live",title:"FireBall1725 is live",message:"Building an LED display, come hang out",colors:["#9146FF"],sound:"rising"},raid:{v:1,key:"twitch_raid",tier:"alert",animation:"raid",title:"From FireBall1725",message:"42 viewers",colors:["#FF5046"],sound:"alert"},red_alert:{v:1,key:"red_alert",tier:"critical",animation:"red_alert",title:"Red alert",message:"Tornado warning",sound:"alarm"},
   countdown:{v:1,key:"new_year",tier:"alert",animation:"countdown",title:"Happy new year",message:"2027",seconds:10,sound:"done"},
   flag:{v:1,key:"canada_day",tier:"alert",animation:"flag",flag:"canada",title:"Happy Canada Day",message:"1 July",sound:"chime"},
   confetti:{v:1,key:"offer",tier:"alert",animation:"confetti",title:"You did it",message:"Offer accepted",colors:["#FF7C45","#48C28A","#5AA2F5","#E8B53A"],sound:"rising"}};
