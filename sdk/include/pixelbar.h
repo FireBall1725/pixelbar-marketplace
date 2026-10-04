@@ -16,6 +16,12 @@
  *      "parts":{"moon":{"size":true,"colors":1,"description":"The moon behind the hill"}, ...}}
  *     Each part lists what it takes: "amount", "speed", "size" (true when it has them) and how many "colors".
  *     Home Assistant builds the part controls from this, and the Marketplace renders a preview per part.
+ *     An animation may add "options": choices beyond the parts, which the notification sends as "options": { ... } and the
+ *     plugin reads with pb_param by name. Each is one of:
+ *       {"values": ["goal", "message"], "default": "goal", "description": "..."}   a pick list
+ *       {"type": "boolean", "default": true, "description": "..."}                a switch (reads back as "true" or "false")
+ *       {"type": "number", "min": 0, "max": 100, "default": 50, "description": "..."}   a number (reads back as its text)
+ *       {"type": "string", "default": "", "description": "..."}                   free text
  *
  * Rules: no C library (the helpers here cover the usual needs), 64 KB of memory in all including an 8 KB stack,
  * and keep a frame cheap. Colours are 0xRRGGBB; alpha is 0 to 255. Coordinates are LEDs; the float versions
@@ -47,8 +53,8 @@ PB_IMPORT("rect") void pb_rect(int x, int y, int w, int h, int rgb, int alpha);
 PB_IMPORT("text") int pb_text(const char *s, int len, int x, int y, int rgb, int size, int outline);
 /* How wide that text would be, without drawing it. */
 PB_IMPORT("text_width") int pb_text_width(const char *s, int len, int size);
-/* The notification's words: key is "title", "message" or "detail". Copies up to cap bytes into buf and gives back
-   the length, or -1 when the notification didn't send it. */
+/* The notification's words: key is "title", "message" or "detail", or one of your manifest's options (a number or a switch
+   comes as its text). Copies up to cap bytes into buf and gives back the length, or -1 when the notification didn't send it. */
 PB_IMPORT("param") int pb_param(const char *key, int key_len, char *buf, int cap);
 /* The notification's colors[i] as 0xRRGGBB, or -1 past the end (or when it sent none). */
 PB_IMPORT("color") int pb_color(int i);
@@ -75,6 +81,18 @@ PB_IMPORT("unclip") void pb_unclip(void);
 /* One of PixelBar's built-in icons (bell, tree, pumpkin, gift, snowflake ...) centred on cx, cy, 23 LEDs tall. */
 PB_IMPORT("icon") void pb_icon(const char *name, int len, double cx, double cy, int rgb);
 
+/* ---------- version 2.1: named faces and the card's pictures ---------- */
+/* Text in a named face: "pixel" (the 5 x 7 default), "small" (3 x 5 capitals), "big", "segment" (7-segment, 16 LEDs tall, digits
+   and the letters a segment display can make; size and outline don't apply), or a title face: "space", "retro64", "alagard",
+   "celtic", "comicoro". Gives back the width. */
+PB_IMPORT("text_font") int pb_text_font(const char *font, int font_len, const char *s, int len, int x, int y, int rgb, int size, int outline);
+PB_IMPORT("text_width_font") int pb_text_width_font(const char *font, int font_len, const char *s, int len, int size);
+/* The notification's pictures ("images": [{ "id": ... }], sent to the display earlier): picture i drawn with its top left at x, y.
+   Gives back its width, or 0 when the notification has no picture there or the display doesn't hold it. */
+PB_IMPORT("image") int pb_image(int i, double x, double y, int alpha);
+/* Picture i's width (wh 0) or height (wh 1), 0 when there's none. */
+PB_IMPORT("image_size") int pb_image_size(int i, int wh);
+
 /* ---------- version 2: what a theme is told ---------- */
 /* Whether a part is on, its amount/speed/size as a percentage (100 is as drawn), and its colours. name is the part's
    key from your manifest; key is "amount", "speed" or "size". Defaults come back when the user hasn't set one. */
@@ -96,6 +114,8 @@ PB_IMPORT("powd") double pb_powd(double a, double b);
 #define PB_NUM(part, key, dflt) pb_part_num((part), pb_strlen(part), (key), pb_strlen(key), (dflt))
 #define PB_COLOR(part, i, dflt) pb_part_color((part), pb_strlen(part), (i), (dflt))
 #define PB_ICON(name, cx, cy, rgb) pb_icon((name), pb_strlen(name), (cx), (cy), (rgb))
+#define PB_TEXT_FONT(font, s, x, y, rgb, size, outline) pb_text_font((font), pb_strlen(font), (s), pb_strlen(s), (x), (y), (rgb), (size), (outline))
+#define PB_TEXT_WIDTH_FONT(font, s, size) pb_text_width_font((font), pb_strlen(font), (s), pb_strlen(s), (size))
 
 /* ---------- the three library functions the compiler may call on its own ---------- */
 /* Clang turns some loops and copies into strlen, memcpy and memset calls; with no C library, these stand in. */

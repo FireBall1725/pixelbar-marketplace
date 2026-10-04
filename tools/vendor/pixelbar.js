@@ -1234,7 +1234,15 @@ function pluginImports(P,st){const dec=new TextDecoder(),enc=new TextEncoder(),r
   return {px:(x,y,c,a)=>fb().px(x,y,rgb(c),A(a)),rect:(x,y,w,h,c,a)=>fb().rect(x,y,w,h,rgb(c),A(a)),
     text:(p,n,x,y,c,size,outline)=>{const s=fit(str(p,n)),sc=size>=3?3:size===2?2:1;if(outline)fb().textO(F5,s,x,y,rgb(c),sc);else fb().text(F5,s,x,y,rgb(c),sc);return fb().tw(F5,s,sc);},
     text_width:(p,n,size)=>fb().tw(F5,fit(str(p,n)),size>=3?3:size===2?2:1),
-    param:(kp,kn,bp,cap)=>{const v=P[str(kp,kn)];if(typeof v!=="string"||cap<1)return -1;const b=enc.encode(v).subarray(0,cap-1),o=new Uint8Array(st.mem.buffer,bp,b.length+1);o.set(b);o[b.length]=0;return b.length;},
+    // Text in a named face: pixel (5 x 7), small (3 x 5 capitals), big, segment (7-segment, its own size), or a title face. Gives back the width.
+    text_font:(fp,fn,p,n,x,y,c,size,outline)=>{const f=str(fp,fn),s0=str(p,n),sc=size>=3?3:size===2?2:1,col=rgb(c);
+      if(f==="segment"){const s=s0.replace(TRY_KEEP.segment,"");segText(fb(),s,Math.round(x),Math.round(y),{col});return segW(s);}
+      const F=f==="small"?F3:f==="big"?BIG:TITLE_FONTS[f]||F5,s=fitText(s0,F,false);if(outline)fb().textO(F,s,x,y,col,sc);else fb().text(F,s,x,y,col,sc);return fb().tw(F,s,sc);},
+    text_width_font:(fp,fn,p,n,size)=>{const f=str(fp,fn),s0=str(p,n),sc=size>=3?3:size===2?2:1;if(f==="segment")return segW(s0.replace(TRY_KEEP.segment,""));const F=f==="small"?F3:f==="big"?BIG:TITLE_FONTS[f]||F5;return fb().tw(F,fitText(s0,F,false),sc);},
+    /* The card's picture i (its images list), at x, y: its width, or 0 when the card has none there or the display doesn't hold it. */
+    image:(i,x,y,a)=>{const id=Array.isArray(P.images)?P.images[i]:null,im=id&&IMGS[id];if(!im)return 0;drawImg(fb(),id,Math.round(x),Math.round(y),A(a)/255);return im.w;},
+    image_size:(i,wh)=>{const id=Array.isArray(P.images)?P.images[i]:null,im=id&&IMGS[id];return im?(wh?im.h:im.w):0;},
+    param:(kp,kn,bp,cap)=>{const k=str(kp,kn);let v=P[k];if(v===undefined&&P.options&&typeof P.options==="object"&&P.options[k]!==undefined&&P.options[k]!==null)v=String(P.options[k]);if(typeof v!=="string"||cap<1)return -1;const b=enc.encode(v).subarray(0,cap-1),o=new Uint8Array(st.mem.buffer,bp,b.length+1);o.set(b);o[b.length]=0;return b.length;},
     color:i=>{const c=hex((P.colors||[])[i]);return c===null?-1:c;},
     pxf:(x,y,c,a)=>fb().px(x,y,rgb(c),A(a)),add:(x,y,c,a)=>fb().add(x,y,rgb(c),A(a)),rectf:(x,y,w,h,c,a)=>fb().rect(x,y,w,h,rgb(c),A(a)),
     vgrad:(x,y,w,h,c0,c1,a)=>fb().vgrad(x,y,w,h,rgb(c0),rgb(c1),A(a)),frame_rect:(x0,y0,x1,y1,c,a)=>fb().frame(x0,y0,x1,y1,rgb(c),A(a)),
@@ -2910,7 +2918,7 @@ function applyNotify(key,b,x={}){const ik="json:"+key;
   if(b.flags!==undefined&&(!Array.isArray(b.flags)||b.flags.some(x=>!PRIDE[x])))throw new Error('"flags" must be a list from: '+Object.keys(PRIDE).join(", ")+".");
   for(const k in THEMES)ANIMS[k]=(fb,S)=>sHoliday(fb,S,{theme:k,title:f.title,message:md(),flags:b.flags,night:b.night,colors:cols});
   // A Marketplace animation takes the strip like a built-in one; its plugin reads the words, colours and parts from the card each frame.
-  if(isPluginKey(b.animation))ANIMS[b.animation]=(fb,S)=>{const pl=animPlugin(b.animation);if(!pl)return;const g=F();Object.assign(pl.P,{title:(g.title||"").trim()?g.title:undefined,message:g.message,detail:g.detail,colors:Array.isArray(b.colors)?b.colors:undefined,parts:b.parts});pl.frame(fb,S.ft!=null?S.ft:S.t);};
+  if(isPluginKey(b.animation))ANIMS[b.animation]=(fb,S)=>{const pl=animPlugin(b.animation);if(!pl)return;const g=F();Object.assign(pl.P,{title:(g.title||"").trim()?g.title:undefined,message:g.message,detail:g.detail,colors:Array.isArray(b.colors)?b.colors:undefined,parts:b.parts,options:b.options,images:imgs});pl.frame(fb,S.ft!=null?S.ft:S.t);};
   if(b.animation!==undefined&&!ANIMS[b.animation])throw new Error('"animation" must be one of: '+Object.keys(ANIMS).join(", ")+", or a Marketplace animation, mp:<slug>.");
   const anim=b.animation?ANIMS[b.animation]:null,ol=outlineOf(b.outline);
   if(ol!==undefined)CARD_OUTLINE[ik]=ol;else delete CARD_OUTLINE[ik];
@@ -2991,7 +2999,7 @@ function applyNotify2(key,b){if(b===null){NOTE_SCR.delete(key);autoScreen();retu
   const has=b.screen&&SCREENS.includes(b.screen),said=b.screen?(has?` Showing the ${b.screen} screen while it lasts.`:` This display has no ${b.screen} screen, so that part does nothing here.`):"";
   if(!b.card){live.clear("json:"+key);autoScreen();return (has?"Showing the "+b.screen+" screen while "+key+" lasts.":said.trim());}
   const c=b.card,f={case:c.case||b.case,tfont:c.font,tier:b.tier,sound:b.sound,screens:b.screens,tray:b.tray,renotify:b.renotify,outline:c.outline,effects:c.effects,speed:c.speed,palette:c.palette,since:c.since||b.since};
-  if(c.card==="animation")Object.assign(f,{title:c.title||" ",message:c.message,detail:c.detail,animation:c.name,colors:c.colors,images:c.images,seconds:c.seconds,until:c.until,flag:c.flag,flags:c.flags,night:c.night,cards:c.cards,score:c.score,parts:c.parts,icon:iconName(c.icon)});
+  if(c.card==="animation")Object.assign(f,{title:c.title||" ",message:c.message,detail:c.detail,animation:c.name,colors:c.colors,images:c.images,seconds:c.seconds,until:c.until,flag:c.flag,flags:c.flags,night:c.night,cards:c.cards,score:c.score,parts:c.parts,options:c.options,icon:iconName(c.icon)});
   else if(c.card==="text"){const d=cardData(c),dv=d&&!d.missing&&d.value!=null?String(d.value):undefined;Object.assign(f,{title:c.title||c.label||" ",message:c.message!=null?c.message:dv,detail:c.detail,icon:iconName(c.icon),color:c.color,big:c.big,font:c.big&&c.big.font,images:c.images,until:c.until||b.until,progress:c.progress});}
   else Object.assign(f,{title:c.title||c.label||c.card,icon:iconName(c.icon),color:c.color});
   const ik="json:"+key,x={box:b.box,fallback:!!b.fallback,dl:deliveryOf(b),expiresAt:b.expires?Date.parse(b.expires):0};if(c.card!=="text"&&c.card!=="animation"){CARD2[ik]=c;x.card="c2:"+ik;}

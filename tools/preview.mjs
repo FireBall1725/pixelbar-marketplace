@@ -41,6 +41,15 @@ export async function preview(dir, out) {
     res.ms = +d640.ms.toFixed(3); res.wasm_bytes = bytes.length;
     if (m) res.manifest = m;
     if (m && m.parts) { res.sweep = []; for (const c of sweep(Object.keys(m.parts))) { const f = `${slug}-${c.name}.gif`; gif(join(out, f), (await render(256, SWEEP_SECONDS, c.parts)).frames, FPS); res.files.push(f); res.sweep.push(f); } }
+    // Every value of a pick-list option gets a preview too, so each face of an animation is seen.
+    if (m && m.options && typeof m.options === "object") {
+      res.sweep = res.sweep || [];
+      for (const [k, o] of Object.entries(m.options)) if (o && Array.isArray(o.values) && o.values.length <= 8) for (const v of o.values) {
+        const a = await loadAnim(bytes, { ...params, options: { ...(params.options || {}), [k]: v } }), fb = new T.FB(256, 32), frames = [];
+        for (let i = 0; i < FPS * SECONDS; i++) { a.frame(fb, i / FPS); frames.push(leds(fb.d, 256, 32, 3)); }
+        const f = `${slug}-${k}-${String(v).replace(/[^a-z0-9]+/gi, "_")}.gif`; gif(join(out, f), frames, FPS); res.files.push(f); res.sweep.push(f);
+      }
+    }
     return res;
   }
   if (item.kind === "theme" && isPlugin(item)) {

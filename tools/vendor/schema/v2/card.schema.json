@@ -1450,8 +1450,14 @@
                 "colors": {
                   "$ref": "#/$defs/animation_colors"
                 },
+                "images": {
+                  "$ref": "#/$defs/animation_images"
+                },
                 "parts": {
                   "$ref": "#/$defs/animation_parts"
+                },
+                "options": {
+                  "$ref": "#/$defs/animation_options"
                 }
               }
             }
@@ -2018,6 +2024,17 @@
         "$ref": "theme.schema.json#/$defs/part"
       },
       "description": "For a Marketplace animation: its parts by name, each with on, amount, speed, size and colors as its manifest lists them."
+    },
+    "animation_options": {
+      "type": "object",
+      "additionalProperties": {
+        "type": [
+          "string",
+          "number",
+          "boolean"
+        ]
+      },
+      "description": "For a Marketplace animation: its options by name, as its manifest lists them (a pick list, a switch, a number or text)."
     }
   }
 }

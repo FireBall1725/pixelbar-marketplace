@@ -80,7 +80,7 @@ The integer calls, enough for most animations:
 | `pb_rect(x, y, w, h, rgb, alpha)` | A filled rectangle, blended the same way. |
 | `pb_text(s, len, x, y, rgb, size, outline)` | Text in PixelBar's 5 x 7 font: accents, Cyrillic, Greek and symbols like ★ ♥ ↑ included. `size` 1, 2 or 3. `outline` 1 adds a dark edge so it reads over anything. Drawn as written. Gives back its width. |
 | `pb_text_width(s, len, size)` | How wide that text would be, without drawing it. |
-| `pb_param(key, key_len, buf, cap)` | The notification's `"title"`, `"message"` or `"detail"`, copied into `buf`. Gives back its length, or -1 when it wasn't sent. |
+| `pb_param(key, key_len, buf, cap)` | The notification's `"title"`, `"message"` or `"detail"`, or one of your manifest's options (see below), copied into `buf`. Gives back its length, or -1 when it wasn't sent. |
 | `pb_color(i)` | The notification's `colors[i]` as `0xRRGGBB`, or -1 past the end. |
 
 Colours are `0xRRGGBB` throughout. `PB_TEXT(s, x, y, rgb, size, outline)` and `PB_PARAM(key, buf)` save writing the lengths out.
@@ -99,6 +99,10 @@ The same shapes the built-in scenes are drawn with, taking positions as doubles 
 | `pb_clip(x, y, w, h)`, `pb_unclip()` | Drawing stays inside the box until `pb_unclip`; they nest |
 | `pb_icon(name, len, cx, cy, rgb)` | A built-in icon (`bell`, `tree`, `pumpkin`, `gift`, `snowflake` ...), 23 LEDs tall. `PB_ICON(name, cx, cy, rgb)` fills the length in |
 | `pb_hashd(n)`, `pb_sind(a)`, `pb_cosd(a)`, `pb_powd(a, b)` | The host's own double-precision pseudo-random, sine, cosine and power, for a port that should land every particle where the original does |
+| `pb_text_font(font, font_len, s, len, x, y, rgb, size, outline)` | Text in a named face: `pixel` (the default), `small` (3 x 5 capitals), `big`, `segment` (7-segment, 16 LEDs tall, digits and the letters a segment display can make), or a title face: `space`, `retro64`, `alagard`, `celtic`, `comicoro`. `PB_TEXT_FONT(font, s, x, y, rgb, size, outline)` takes C strings |
+| `pb_text_width_font(font, font_len, s, len, size)` | How wide that would be |
+| `pb_image(i, x, y, alpha)` | The notification's picture `i` (its `images` list, sent to the display earlier), top left at `x, y`. Gives back its width, or 0 when there's none: draw something else then |
+| `pb_image_size(i, wh)` | Picture `i`'s width (`wh` 0) or height (`wh` 1), 0 when there's none |
 
 ## Writing a theme
 
@@ -153,6 +157,29 @@ To check a port against the scene it came from, LED by LED at every width (the s
 sdk/build.sh sdk/examples/spooky-christmas/theme.c /tmp/spooky.wasm
 node tools/test/plugin-compare.mjs /tmp/spooky.wasm spooky_christmas
 ```
+
+## Options: choices beyond the parts
+
+An animation's manifest may list `options`: things a notification picks that aren't amounts or colours, like which face of a card to show or where the words sit. Home Assistant builds a control for each, the notification sends them as `"options": { ... }` on its card, and the plugin reads each one with `pb_param` by name, as text.
+
+```c
+const char *manifest(void) {
+  return "{\"api\":2,\"kind\":\"animation\",\"title\":\"Football\","
+    "\"options\":{"
+    "\"event\":{\"values\":[\"goal\",\"message\",\"substitution\"],\"default\":\"goal\",\"description\":\"What happened\"},"
+    "\"stripes\":{\"type\":\"boolean\",\"default\":true,\"description\":\"The title in moving stripes\"},"
+    "\"speed\":{\"type\":\"number\",\"min\":0,\"max\":300,\"default\":100,\"description\":\"As a percentage\"}}}";
+}
+```
+
+| Shape | Control | What `pb_param` gives back |
+| --- | --- | --- |
+| `{"values": [...], "default": ...}` | a pick list | the value, as text |
+| `{"type": "boolean", "default": true}` | a switch | `true` or `false` |
+| `{"type": "number", "min": 0, "max": 100, "default": 50}` | a slider | the number, as text |
+| `{"type": "string", "default": ""}` | a text box | the text |
+
+An option that wasn't sent gives -1, so fall back to your default. Don't name an option `title`, `message` or `detail`. The Marketplace renders a preview for every value of a pick list, so each face of your animation is seen. [Football](../items/animation/football/anim.c) uses all of this: an `event` option picks a goal, a plain message, the substitution board, a yellow or red card or a scrolling line-up, the crest comes from the notification's picture, and the board's numbers are drawn in the `segment` face.
 
 ## Helpers in pixelbar.h
 
