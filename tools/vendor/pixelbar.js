@@ -1256,6 +1256,15 @@ async function loadPlugin(bytes,P={}){const st={fb:null,mem:null,t:0},pb=pluginI
 function addPluginTheme(key,plug){const m=plug.manifest||{},tc=(m.colors||[]).map(rgbOf).filter(Boolean);
   THEMES[key]={name:m.title||key,title:fitText(m.banner||m.title||key,F5),tc:tc.length>1?tc:tc[0]||[255,255,255],bg:plug.bg,plugin:plug};return THEMES[key];}
 /* The notification version: the scene, a little dimmer, with the title dropping in (remembrance fades in instead). */
+/* Marketplace plugins by key (mp:<slug>), fetched from the Marketplace's dist files and registered once: a theme into THEMES,
+   an animation into PLUG.anim. The page can point pluginSource at its own copy of the Marketplace. Until the .wasm is in, the key draws nothing. */
+const PLUG={anim:{},loading:{}};let PLUGIN_SRC=slug=>fetch("https://cdn.jsdelivr.net/gh/FireBall1725/pixelbar-marketplace@dist/"+slug+".wasm").then(r=>r.ok?r.arrayBuffer():null);
+function setPluginSource(fn){PLUGIN_SRC=fn;}
+const isPluginKey=k=>typeof k==="string"&&/^mp:[a-z0-9][a-z0-9-]{1,40}$/.test(k);
+function ensurePlugin(key,kind){if(PLUG.loading[key])return PLUG.loading[key];PLUG.loading[key]=(async()=>{try{const bytes=await PLUGIN_SRC(key.slice(3));if(!bytes)return;const P={},plug=await loadPlugin(bytes,P);plug.P=P;if(kind==="theme")addPluginTheme(key,plug);else PLUG.anim[key]=plug;}catch(e){/* stays dark */}})();return PLUG.loading[key];}
+/* The theme or the animation plugin for a key: null while it loads, and for a key that isn't one. */
+function themeOf(k){if(THEMES[k])return THEMES[k];if(isPluginKey(k))ensurePlugin(k,"theme");return null;}
+function animPlugin(k){if(PLUG.anim[k])return PLUG.anim[k];if(isPluginKey(k))ensurePlugin(k,"anim");return null;}
 function sHoliday(fb,S,o){const th=THEMES[o.theme],t=S.ft!=null?S.ft:S.t%10,{W}=S;th.bg(fb,Object.assign({},S,{t:t+2,flags:o.flags,night:o.night,hx:W>=256?W-(o.theme==="canada_day"?46:o.theme==="fourth_of_july"?38:24):undefined}),0.8);
   const ttl=o.title||th.title,sc=W>=256&&fb.tw(F5,ttl,2)<=W-8?2:1,tw=fb.tw(F5,ttl,sc),tx=Math.round((W-tw)/2),drop=th.quiet||t>=0.7?1:easeBounce(t/0.7),a=th.quiet?Math.min(1,t/1.5):1;
   const y0=(sc===2?(o.message?3:9):(o.message?5:12))-(1-drop)*30,tc=o.colors&&o.colors.length?(o.colors.length>1?o.colors:o.colors[0]):th.tc,col=typeof tc==="function"?X=>tc(X-tx,t):Array.isArray(tc[0])?X=>tc[(Math.floor((X-tx)/(3*sc)+t*2)%tc.length+tc.length)%tc.length]:tc;
@@ -1509,7 +1518,7 @@ function drawAdvLine(fb,S,A,prog,w){const a=A.adv,pv=prog(a,1),ak=a.cur?pv:(a.pr
 /* A holiday theme replaces the sky, faint on a faint one (like its weather); the active screen's weather strip stays. */
 /* Faint, like the faint weather: dimmer, and half as many of everything that falls, floats or bursts. */
 const THEME_FAINT=0.5,THEME_FAINT_N=0.5;
-function bgFade(A,prog,dst,S,table){if(S.theme&&THEMES[S.theme]){const f=table===AMB;THEMES[S.theme].bg(dst,f?Object.assign({},S,{faint:true}):S,f?THEME_FAINT:1);return A.kind;}return kindFade(A,prog,dst,S,table);}
+function bgFade(A,prog,dst,S,table){const thm=S.theme&&themeOf(S.theme);if(thm){const f=table===AMB;thm.bg(dst,f?Object.assign({},S,{faint:true}):S,f?THEME_FAINT:1);return A.kind;}return kindFade(A,prog,dst,S,table);}
 function kindFade(A,prog,dst,S,table){const a=A.kind,pa=prog(a,AMBF);if(a.prev&&pa<1&&table[a.prev])table[a.prev](dst,S,1-pa);if(table[a.cur])table[a.cur](dst,S,a.prev?pa:1);return a;}
 /* 1x2 only: notices, alerts, status cards and lights take the whole strip up to the tray, and the clock steps aside. */
 const narrowBase=k=>!k||k==="wxin"||k==="fcast"||k.startsWith("sn:");
@@ -2900,7 +2909,9 @@ function applyNotify(key,b,x={}){const ik="json:"+key;
   if(b.flag!==undefined&&!WAVE_FLAGS[b.flag])throw new Error('"flag" must be one of: '+Object.keys(WAVE_FLAGS).join(", ")+".");
   if(b.flags!==undefined&&(!Array.isArray(b.flags)||b.flags.some(x=>!PRIDE[x])))throw new Error('"flags" must be a list from: '+Object.keys(PRIDE).join(", ")+".");
   for(const k in THEMES)ANIMS[k]=(fb,S)=>sHoliday(fb,S,{theme:k,title:f.title,message:md(),flags:b.flags,night:b.night,colors:cols});
-  if(b.animation!==undefined&&!ANIMS[b.animation])throw new Error('"animation" must be one of: '+Object.keys(ANIMS).join(", ")+".");
+  // A Marketplace animation takes the strip like a built-in one; its plugin reads the words, colours and parts from the card each frame.
+  if(isPluginKey(b.animation))ANIMS[b.animation]=(fb,S)=>{const pl=animPlugin(b.animation);if(!pl)return;const g=F();Object.assign(pl.P,{title:(g.title||"").trim()?g.title:undefined,message:g.message,detail:g.detail,colors:Array.isArray(b.colors)?b.colors:undefined,parts:b.parts});pl.frame(fb,S.ft!=null?S.ft:S.t);};
+  if(b.animation!==undefined&&!ANIMS[b.animation])throw new Error('"animation" must be one of: '+Object.keys(ANIMS).join(", ")+", or a Marketplace animation, mp:<slug>.");
   const anim=b.animation?ANIMS[b.animation]:null,ol=outlineOf(b.outline);
   if(ol!==undefined)CARD_OUTLINE[ik]=ol;else delete CARD_OUTLINE[ik];
   if(b.effects!==undefined)CARD_FX[ik]=b.effects;else delete CARD_FX[ik];
@@ -2965,10 +2976,10 @@ function applyWeather(b){if(b===null)return "Nothing to clear; the display keeps
   live.cond=h[1];live.wx=wx;live.day=h[2]!==undefined?!!h[2]:(b.is_day!==undefined?!!b.is_day:live.day);live.syncKind();syncBars();return `Weather set to ${b.condition}, ${live.day?"day":"night"}.`;}
 /* pixelbar/<room>/theme: a holiday scene in place of the weather sky on idle. An empty message goes back to the weather. */
 function applyTheme(b){if(b===null||!b.theme){live.theme=null;live.themeO={};syncBars();return "Back to the weather.";}
-  if(!THEMES[b.theme])throw new Error('"theme" must be one of: '+Object.keys(THEMES).join(", ")+".");
+  if(!THEMES[b.theme]&&!isPluginKey(b.theme))throw new Error('"theme" must be one of: '+Object.keys(THEMES).join(", ")+", or a Marketplace theme, mp:<slug>.");themeOf(b.theme);
   if(b.flags!==undefined&&(!Array.isArray(b.flags)||b.flags.some(x=>!PRIDE[x])))throw new Error('"flags" must be a list from: '+Object.keys(PRIDE).join(", ")+".");
   if(b.parts!==undefined&&(!b.parts||typeof b.parts!=="object"||Array.isArray(b.parts)))throw new Error('"parts" tunes the scene: { "leaves": { "amount": 200 }, "fireworks": { "on": false } }.');
-  live.theme=b.theme;live.themeO={flags:b.flags,night:b.night,parts:b.parts};syncBars();return "Theme set to "+THEMES[b.theme].name+"."+(bgOf(live.mode).type==="sky"?"":" It shows on screens with the sky behind them, faint on a faint sky.");}
+  live.theme=b.theme;live.themeO={flags:b.flags,night:b.night,parts:b.parts};syncBars();return "Theme set to "+(THEMES[b.theme]||{name:b.theme}).name+"."+(bgOf(live.mode).type==="sky"?"":" It shows on screens with the sky behind them, faint on a faint sky.");}
 function themeMsg(k){return {topic:"pixelbar/all/theme",note:"Retained. An empty message goes back to the weather.",body:JSON.stringify(Object.assign({v:2,theme:k},k==="pride"?{flags:["progress","trans","bi","pan","lesbian","nonbinary"]}:k==="hanukkah"?{night:8}:{}),null,2)};}
 /* Material Design icon names, as Home Assistant entities carry them, mapped to the nearest PixelBar icon. */
 const MDI_RAW={"door-open":"door","door-closed":"door_closed","garage-open":"garage","garage-variant":"garage",lock:"locked","lock-open":"lock","lock-open-variant":"lock",lightbulb:"bulb","lightbulb-on":"bulb","lightning-bolt":"bolt",flash:"bolt","water-alert":"leak","water-percent":"water",fire:"flame","smoke-detector":"smoke","molecule-co2":"co2","weather-sunny":"sun","weather-night":"moon","weather-snowy":"snowflake","ev-station":"charger","solar-power":"solar",television:"tv",cellphone:"phone","gamepad-variant":"game","book-open":"book","washing-machine":"washer","tumble-dryer":"dryer","robot-vacuum":"vacuum",stove:"oven","trash-can":"bin",delete:"bin",recycle:"recycling",bicycle:"bike","subway-variant":"metro",email:"mail",mailbox:"mail",flower:"plant","baby-face":"baby",paw:"pet",information:"info",alert:"warning","alert-circle":"warning","motion-sensor":"motion",run:"motion",account:"person",cctv:"camera","window-closed":"window","window-open":"window","package-variant":"package","package-variant-closed":"package","shield-home":"alarm","home-variant":"home","thermometer-lines":"thermometer","fan-speed-1":"fan","format-font":"font","format-text":"font","alphabetical":"font"};
@@ -2980,7 +2991,7 @@ function applyNotify2(key,b){if(b===null){NOTE_SCR.delete(key);autoScreen();retu
   const has=b.screen&&SCREENS.includes(b.screen),said=b.screen?(has?` Showing the ${b.screen} screen while it lasts.`:` This display has no ${b.screen} screen, so that part does nothing here.`):"";
   if(!b.card){live.clear("json:"+key);autoScreen();return (has?"Showing the "+b.screen+" screen while "+key+" lasts.":said.trim());}
   const c=b.card,f={case:c.case||b.case,tfont:c.font,tier:b.tier,sound:b.sound,screens:b.screens,tray:b.tray,renotify:b.renotify,outline:c.outline,effects:c.effects,speed:c.speed,palette:c.palette,since:c.since||b.since};
-  if(c.card==="animation")Object.assign(f,{title:c.title||" ",message:c.message,detail:c.detail,animation:c.name,colors:c.colors,images:c.images,seconds:c.seconds,until:c.until,flag:c.flag,flags:c.flags,night:c.night,cards:c.cards,score:c.score,icon:iconName(c.icon)});
+  if(c.card==="animation")Object.assign(f,{title:c.title||" ",message:c.message,detail:c.detail,animation:c.name,colors:c.colors,images:c.images,seconds:c.seconds,until:c.until,flag:c.flag,flags:c.flags,night:c.night,cards:c.cards,score:c.score,parts:c.parts,icon:iconName(c.icon)});
   else if(c.card==="text"){const d=cardData(c),dv=d&&!d.missing&&d.value!=null?String(d.value):undefined;Object.assign(f,{title:c.title||c.label||" ",message:c.message!=null?c.message:dv,detail:c.detail,icon:iconName(c.icon),color:c.color,big:c.big,font:c.big&&c.big.font,images:c.images,until:c.until||b.until,progress:c.progress});}
   else Object.assign(f,{title:c.title||c.label||c.card,icon:iconName(c.icon),color:c.color});
   const ik="json:"+key,x={box:b.box,fallback:!!b.fallback,dl:deliveryOf(b),expiresAt:b.expires?Date.parse(b.expires):0};if(c.card!=="text"&&c.card!=="animation"){CARD2[ik]=c;x.card="c2:"+ik;}
@@ -3568,7 +3579,7 @@ function drawLook(d,t,nowD){const fb=d.fb;fb.noClip();fb.clear();
   else if(d.msgs){if(d._p===undefined){d._p=null;try{for(const m of d.msgs){const r=v2route(m.topic);if(r&&r.kind==="data"&&m.payload)applyV2(r,m.payload);}
       const m=d.msgs.find(x=>{const r=v2route(x.topic);return r&&r.kind!=="data";})||d.msgs[0];d._p=prevFor(m.topic,m.payload,"__thumb"+(++THUMB_N));}catch(e){d._p=null;}}
     if(d._p)drawPrev(fb,d._p,{W:d.W,H:32,id:"cat",t:t+3.3,now:nowD,opened:new Date(nowD.getTime()-300000),pkgAt:new Date(nowD.getTime()-1500000)},t);}
-  else if(d.theme){THEMES[d.theme].bg(fb,{W:d.W,H:32,t:t+3.3,parts:d.parts},1);}
+  else if(d.theme){const th=themeOf(d.theme);if(th)th.bg(fb,{W:d.W,H:32,t:t+3.3,parts:d.parts},1);}
   d.present(fb);}
 /* A clock counting seconds in one of the fonts, centred on a 96-LED strip. */
 function fontSample(fb,font,t,key){const s=Math.floor(t),str=p2(Math.floor(s/60)%60)+":"+p2(s%60),W=fb.W;
@@ -3676,7 +3687,7 @@ function prevFor(topic,b,key="__preview"){const r=v2route(topic);if(!r)throw new
   if(r.kind==="notify"){applyNotify2(key,b);const d=DEF["json:"+key];if(!d)return null;const anim=b.card&&b.card.card==="animation";return d.full&&FULL["json:"+key]&&(d.tier==="alert"||anim)?{k:"full",card:"json:"+key}:d.adv?{k:"card",card:"adv:json:"+key}:{k:"card",card:d.card};}
   if(r.kind==="data")return {k:"c2",card:dataCard(r.name,b)};
   if(r.kind==="box")return {k:"box",cards:b.cards,every:b.every||10};
-  if(r.kind==="theme"){if(!THEMES[b.theme])throw new Error('"theme" must be one of: '+Object.keys(THEMES).join(", ")+".");return {k:"theme",th:b.theme,flags:b.flags,night:b.night,parts:b.parts};}
+  if(r.kind==="theme"){if(!THEMES[b.theme]&&!isPluginKey(b.theme))throw new Error('"theme" must be one of: '+Object.keys(THEMES).join(", ")+", or a Marketplace theme, mp:<slug>.");themeOf(b.theme);return {k:"theme",th:b.theme,flags:b.flags,night:b.night,parts:b.parts};}
   if(r.kind==="weather"){const x=b.extra&&EXTRAS.find(e=>e[0]===b.extra),h=HA_WX.find(e=>e[0]===b.condition),day=h&&h[2]!==undefined?!!h[2]:b.is_day!==false;
     return {k:"wx",kind:(x?x[0]:h[1])+(day?"-day":""),wxp:{caption:Array.isArray(b.caption)?b.caption.map((c,i)=>c==null?null:up(c,i<2?F5:F3)):undefined}};}
   if(r.kind==="image")return {k:"img",img:dec565(Object.assign({},b,{id:r.name}))};
@@ -3685,7 +3696,7 @@ function drawPrev(fb,P,S,t){const W=S.W;
   if(P.k==="full")FULL[P.card](fb,Object.assign({},S,{ft:t%10,score:[2,1]}));else if(P.k==="card")drawCard(fb,P.card,0,0,W,32,S);
   else if(P.k==="c2")drawCard2(fb,P.card,0,0,W,32,Object.assign({},S,{scr:"active"}));
   else if(P.k==="box"){const ok=P.cards.filter(whenOk),c=ok.length?ok[Math.floor(t/Math.min(P.every,4))%ok.length]:null;if(c)drawCard2(fb,c,0,0,W,32,Object.assign({},S,{scr:"active"}));}
-  else if(P.k==="theme")THEMES[P.th].bg(fb,Object.assign({},S,{flags:P.flags,night:P.night,parts:P.parts}),1);else if(P.k==="wx")sWeather(fb,Object.assign({},S,{wxp:P.wxp}),P.kind);
+  else if(P.k==="theme"){const th=themeOf(P.th);if(th)th.bg(fb,Object.assign({},S,{flags:P.flags,night:P.night,parts:P.parts}),1);}else if(P.k==="wx")sWeather(fb,Object.assign({},S,{wxp:P.wxp}),P.kind);
   else if(P.k==="img"){const im=P.img;for(let j=0;j<im.h;j++)for(let i=0;i<im.w;i++){const c=im.px[j*im.w+i];if(c[0]+c[1]+c[2]>9)fb.px(2+i,2+j,c);}}}
 function jsonPreview(){const note=$("jsonPrevNote"),topic=$("jsonTopic").value.trim(),txt=$("jsonText").value.trim();PREV=null;PREV_ERR=null;note.classList.remove("err");
   try{const r=v2route(topic);if(!r)throw new Error(v2problem(topic,null));if(!txt){note.textContent="An empty message clears it.";dirty=true;return;}

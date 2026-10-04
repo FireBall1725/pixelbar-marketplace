@@ -1426,6 +1426,35 @@
                 }
               }
             }
+          },
+          {
+            "if": {
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "pattern": "^mp:[a-z0-9][a-z0-9-]{1,40}$"
+                }
+              },
+              "required": [
+                "name"
+              ]
+            },
+            "then": {
+              "properties": {
+                "message": {
+                  "$ref": "#/$defs/animation_message"
+                },
+                "detail": {
+                  "$ref": "#/$defs/animation_detail"
+                },
+                "colors": {
+                  "$ref": "#/$defs/animation_colors"
+                },
+                "parts": {
+                  "$ref": "#/$defs/animation_parts"
+                }
+              }
+            }
           }
         ]
       },
@@ -1716,35 +1745,7 @@
     "animation_name": {
       "type": "string",
       "description": "goal, fireworks, confetti, red_alert, countdown, live, raid, weather, flag, or any holiday theme.",
-      "enum": [
-        "goal",
-        "weather",
-        "fireworks",
-        "confetti",
-        "live",
-        "raid",
-        "red_alert",
-        "countdown",
-        "flag",
-        "new_year",
-        "valentines",
-        "lunar_new_year",
-        "pancake_day",
-        "st_patricks",
-        "holi",
-        "easter",
-        "eid",
-        "pride",
-        "canada_day",
-        "fourth_of_july",
-        "thanksgiving",
-        "halloween",
-        "dia_de_muertos",
-        "diwali",
-        "remembrance",
-        "hanukkah",
-        "christmas"
-      ]
+      "pattern": "^(goal|weather|fireworks|confetti|live|raid|red_alert|countdown|flag|new_year|valentines|lunar_new_year|pancake_day|st_patricks|holi|easter|eid|pride|canada_day|fourth_of_july|thanksgiving|halloween|dia_de_muertos|diwali|remembrance|hanukkah|christmas|mp:[a-z0-9][a-z0-9-]{1,40})$"
     },
     "animation_title": {
       "type": "string",
@@ -2010,6 +2011,13 @@
     },
     "case": {
       "$ref": "common.schema.json#/$defs/case"
+    },
+    "animation_parts": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "theme.schema.json#/$defs/part"
+      },
+      "description": "For a Marketplace animation: its parts by name, each with on, amount, speed, size and colors as its manifest lists them."
     }
   }
 }

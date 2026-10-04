@@ -15,12 +15,14 @@
     },
     "theme": {
       "type": "string",
-      "pattern": "^[a-z_]+$",
-      "description": "A holiday scene in place of the weather sky. An empty message goes back to the weather."
+      "pattern": "^([a-z_]+|mp:[a-z0-9][a-z0-9-]{1,40})$",
+      "description": "A holiday scene in place of the weather sky. An empty message goes back to the weather. A Marketplace plugin theme is mp:<its slug>, with the parts its manifest lists."
     },
     "parts": {
       "type": "object",
-      "additionalProperties": false,
+      "additionalProperties": {
+        "$ref": "#/$defs/part"
+      },
       "description": "Tunes the scene, part by part: { \"leaves\": { \"amount\": 200, \"speed\": 50 }, \"fireworks\": { \"on\": false } }. Which parts there are depends on the theme.",
       "properties": {
         "banners": {
@@ -1961,6 +1963,30 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "theme": {
+            "type": "string",
+            "pattern": "^mp:"
+          }
+        },
+        "required": [
+          "theme"
+        ]
+      },
+      "then": {
+        "properties": {
+          "parts": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/$defs/part"
+            },
+            "description": "The plugin's parts, by the names its manifest lists."
           }
         }
       }
