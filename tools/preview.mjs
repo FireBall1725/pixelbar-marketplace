@@ -45,7 +45,8 @@ export async function preview(dir, out) {
     if (m && m.options && typeof m.options === "object") {
       res.sweep = res.sweep || [];
       for (const [k, o] of Object.entries(m.options)) if (o && Array.isArray(o.values) && o.values.length <= 8) for (const v of o.values) {
-        const a = await loadAnim(bytes, { ...params, options: { ...(params.options || {}), [k]: v } }), fb = new T.FB(256, 32), frames = [];
+        // An option value may bring its own example words (manifest "examples"), so a substitution shows shirt numbers, not the goal's score.
+        const ex = (o.examples && o.examples[v]) || {}, a = await loadAnim(bytes, { ...params, ...ex, options: { ...(params.options || {}), [k]: v } }), fb = new T.FB(256, 32), frames = [];
         for (let i = 0; i < FPS * SECONDS; i++) { a.frame(fb, i / FPS); frames.push(leds(fb.d, 256, 32, 3)); }
         const f = `${slug}-${k}-${String(v).replace(/[^a-z0-9]+/gi, "_")}.gif`; gif(join(out, f), frames, FPS); res.files.push(f); res.sweep.push(f);
       }
