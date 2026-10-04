@@ -4,7 +4,7 @@
   "main": "src/index.js",
   "compatibility_date": "2026-09-01",
   "vars": { "REPO": "FireBall1725/pixelbar-marketplace", "BRANCH": "previews" },
-  // GITHUB_TOKEN is a secret: a fine-grained token that can read this repository's contents.
+  // GITHUB_TOKEN is an optional secret (a fine-grained token with Contents: read on this repository) that lifts the GitHub API rate limit.
   "previews": {},
   "routes": [
     { "pattern": "previews.pixelbar.fireball1725.ca", "custom_domain": true }

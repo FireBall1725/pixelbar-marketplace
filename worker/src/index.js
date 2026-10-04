@@ -46,8 +46,10 @@ async function ranged(request, res) {
   return new Response(request.method === "HEAD" ? null : all.slice(a, b + 1), { status: 206, headers: h });
 }
 
+/* The repo is public, so a token is optional: with one, GitHub allows 5000 API calls an hour instead of 60. */
+const auth = env => (env.GITHUB_TOKEN ? { Authorization: `Bearer ${env.GITHUB_TOKEN}` } : {});
 const gh = (env, path, accept = "application/vnd.github+json") => fetch(`https://api.github.com${path}`, {
-  headers: { Authorization: `Bearer ${env.GITHUB_TOKEN}`, Accept: accept, "User-Agent": "pixelbar-previews", "X-GitHub-Api-Version": "2022-11-28" },
+  headers: { ...auth(env), Accept: accept, "User-Agent": "pixelbar-previews", "X-GitHub-Api-Version": "2022-11-28" },
 });
 
 async function listing(env, path) {
@@ -90,7 +92,7 @@ async function page(env, pr) {
 async function raw(env, pr, file) {
   const ext = file.split(".").pop().toLowerCase(), type = TYPES[ext];
   if (!type) return new Response("Not a preview file.", { status: 404 });
-  const r = await fetch(`https://raw.githubusercontent.com/${env.REPO}/${env.BRANCH}/${pr}/${file}`, { headers: { Authorization: `Bearer ${env.GITHUB_TOKEN}`, "User-Agent": "pixelbar-previews" } });
+  const r = await fetch(`https://raw.githubusercontent.com/${env.REPO}/${env.BRANCH}/${pr}/${file}`, { headers: { ...auth(env), "User-Agent": "pixelbar-previews" } });
   if (r.status === 404) return new Response("No such file.", { status: 404 });
   if (!r.ok) return new Response(`GitHub said ${r.status}.`, { status: 502 });
   return new Response(r.body, { headers: { "Content-Type": type } });

@@ -1,2 +1,2 @@
-# Copy to .dev.vars for `npx wrangler dev`. A fine-grained GitHub token with read access to the repository's contents.
+# Optional. Copy to .dev.vars for `npx wrangler dev` to lift the GitHub API rate limit: a fine-grained token with Contents: read on the repository.
 GITHUB_TOKEN=github_pat_...
