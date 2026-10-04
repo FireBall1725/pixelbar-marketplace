@@ -60,4 +60,6 @@ node tools/validate.mjs items/<kind>/<name>
 node tools/preview.mjs items/<kind>/<name> previews    # look at previews/<name>.gif
 ```
 
+A plugin you can also watch live: open the built `.wasm` on the site's Demo or in Home Assistant's Marketplace tab ("Open a .wasm you built"); it reloads each time you rebuild it.
+
 The pull request runs the same checks and posts the previews as a comment. Fix anything it lists, push again, and the comment updates.

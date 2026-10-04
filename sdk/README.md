@@ -221,6 +221,10 @@ What keeps it fast:
 - Use `pb_px` for points and `pb_rect` for areas. One `pb_rect` beats a hundred `pb_px` calls.
 - Keep floating-point division and `pb_sin` out of loops over every pixel. A 256-entry table filled in `init` does the same job for a fraction of the cost.
 
+## Trying it as you go
+
+Build it, then open it where the display's simulator runs: on [the site's Demo](https://pixelbar.fireball1725.ca/demo) or in Home Assistant's Marketplace tab, under Animations or Themes, **Open a .wasm you built**. It joins the list as `mp:local-<name>` with the option and part controls from its manifest, plays on the preview at any size, and in Chrome it reloads within a second of each rebuild, so a terminal running `sdk/build.sh` on save is the whole loop. Nothing leaves your machine. For the same GIFs the pull request bot posts, run `node tools/preview.mjs items/<kind>/<name> previews`.
+
 ## Sending it in
 
 Commit `items/animation/<name>/anim.c` (or `items/theme/<name>/theme.c`) and `item.json`, and open a pull request. Don't commit the `.wasm`: CI builds it from your source, so what runs is always what was reviewed. The pull request comment shows the GIF, the still, the compiled size and the frame time, and a theme's part sweep.
