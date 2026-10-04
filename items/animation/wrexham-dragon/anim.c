@@ -153,11 +153,12 @@ static void dragon(float t, float cx, float cy, float s, int body, int fire, int
 static void dragons(float t, int w, int h) {
   if (!PB_ON("dragon")) return;
   int n = (int)pb_floor(pct("dragon", "amount") + 0.5f); if (n < 1) n = 1; if (n > 4) n = 4;
-  const float sp = pct("dragon", "speed"), s = 1.25f * pct("dragon", "size");
+  const float sp = pct("dragon", "speed"), s = 1.6f * pct("dragon", "size");
   const int body = pcol("dragon", 0, DRAGON), fire = pcol("dragon", 1, 0xFF7A1A);
   for (int i = 0; i < n; i++) {
-    const float span = w + 44 * s, v = (18 + i * 3) * sp, x = fmodp(t * v + pb_hash(i * 31 + 2) * span, span) - 22 * s;
-    const float y = h * 0.56f + pb_sin(t * 1.6f + i * 2) * 2.5f * s;
+    /* Across the strip in about four and a half seconds whatever its width, each extra dragon a touch quicker. */
+    const float span = w + 44 * s, v = span / 4.5f * (1 + i * 0.15f) * sp, x = fmodp(t * v + pb_hash(i * 31 + 2) * span, span) - 22 * s;
+    const float y = h * 0.58f + pb_sin(t * 1.6f + i * 2) * 1.6f * s;
     dragon(t + i * 1.7f, x, y, s, body, fire, 0);
   }
 }
@@ -166,8 +167,8 @@ static void dragons(float t, int w, int h) {
    with embers, and the card redraws fresh behind that. The words it burns come back whole as the loop starts again. */
 static void burn(float t, int w, int h, int body, int fire) {
   const float ft = fmodp(t, 8.f); if (ft < 6.0f) return;
-  const float q = (ft - 6.0f) / 2.0f, s = 1.25f * pct("dragon", "size");
-  const float x = -26 * s + q * (w + 56 * s), y = h * 0.58f + pb_sin(t * 9) * 1.2f, front = x + 16 * s;
+  const float q = (ft - 6.0f) / 2.0f, s = 1.6f * pct("dragon", "size");
+  const float x = -26 * s + q * (w + 56 * s), y = h * 0.56f + pb_sin(t * 9) * 1.2f, front = x + 16 * s;
   /* burnt: black behind the flame front, a glowing edge of embers just behind it */
   if (front > 0) pb_rectf(0, 0, front, h, 0x000000, 255);
   for (int i = 0; i < 40; i++) {
