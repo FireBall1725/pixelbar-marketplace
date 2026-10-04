@@ -136,7 +136,7 @@ void frame(float t, int w, int h) {
 }
 
 const char *manifest(void) {
-  return "{\"api\":2,\"kind\":\"animation\",\"title\":\"Bubbles\",\"colors\":[\"#7A263A\",\"#1BB1E7\"],"
+  return "{\"api\":2,\"kind\":\"animation\",\"title\":\"West Ham bubbles\",\"colors\":[\"#7A263A\",\"#1BB1E7\"],"
     "\"parts\":{"
     "\"bubbles\":{\"amount\":true,\"speed\":true,\"size\":true,\"colors\":2,\"description\":\"Bubbles floating up, popping near the top\"},"
     "\"confetti\":{\"amount\":true,\"speed\":true,\"colors\":3,\"description\":\"Confetti falling in the team colours\"},"
