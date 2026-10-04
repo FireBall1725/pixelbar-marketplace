@@ -220,6 +220,10 @@
           ],
           "description": "Applied to everything but the tray: night turns it all a dim red that's easy on dark-adapted eyes; dim halves it. none by default."
         },
+        "dim": {
+          "type": "integer", "minimum": 0, "maximum": 100,
+          "description": "In the overlay style, how far the sky dims under a notification's card, as a percentage of the way to black, so the card reads without a frame. 35 by default; 0 leaves the sky alone."
+        },
         "brightness": {
           "type": "integer",
           "minimum": 1,

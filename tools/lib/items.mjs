@@ -1,6 +1,6 @@
-// SPDX-License-Identifier: AGPL-3.0-only
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // Copyright (C) 2026 FireBall1725
-// The marketplace's items: one folder per item, items/<kind>/<slug>/item.json, plus anim.c for an animation.
+// The marketplace's items: one folder per item, items/<kind>/<slug>/item.json, plus the C source of a plugin (an animation, or a theme with "source").
 import { createHash } from "node:crypto";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
@@ -21,9 +21,12 @@ export function listItems(root = "items") {
 /* The times an example stamps fresh each time (since, until, expires) don't make two items different. */
 const TIMES = ["since", "until", "expires"];
 const norm = v => Array.isArray(v) ? v.map(norm) : v && typeof v === "object" ? Object.fromEntries(Object.keys(v).sort().filter(k => !TIMES.includes(k)).map(k => [k, norm(v[k])])) : v;
-/* What makes an item the same as another: its messages, or an animation's source with spaces squeezed out. */
+/* An item built from C: every animation, and a theme that carries "source" instead of messages. */
+export const isPlugin = item => item.kind === "animation" || (item.kind === "theme" && item.source != null);
+export const sourceOf = item => item.source || (item.kind === "theme" ? "theme.c" : "anim.c");
+/* What makes an item the same as another: its messages, or a plugin's source with spaces squeezed out. */
 export function fingerprint(dir, item) {
-  const body = item.kind === "animation" ? readFileSync(join(dir, item.source || "anim.c"), "utf8").replace(/\s+/g, " ").trim()
+  const body = isPlugin(item) ? readFileSync(join(dir, sourceOf(item)), "utf8").replace(/\s+/g, " ").trim()
     : JSON.stringify(norm((item.msgs || []).map(m => ({ topic: m.topic, payload: m.payload }))));
   return createHash("sha256").update(item.kind + "\n" + body).digest("hex").slice(0, 16);
 }

@@ -1,9 +1,11 @@
-# Keeps index.json, the list Home Assistant reads, in step with items/ on main.
+# Keeps the dist branch (index.json with every item, plus each animation compiled) in step with items/ on main.
+# Home Assistant reads it through jsDelivr: https://cdn.jsdelivr.net/gh/FireBall1725/pixelbar-marketplace@dist/index.json
 name: Update index
 on:
   push:
     branches: [main]
-    paths: ["items/**"]
+    paths: ["items/**", "tools/**", "sdk/**"]
+  workflow_dispatch:
 permissions:
   contents: write
 jobs:
@@ -15,13 +17,19 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      - name: Install clang and wasm-ld
+        run: sudo apt-get update -q && sudo apt-get install -y -q clang lld
       - run: npm ci
       - run: node tools/validate.mjs
-      - run: node tools/index.mjs index.json
-      - name: Commit index.json
+      - run: node tools/index.mjs dist
+      - name: Push the dist branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.json
-          git commit -m "Update index.json" || exit 0
-          git push
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          rm -rf pub && git init -q -b dist pub
+          cp -R dist/. pub/ && echo "Built by the Update index workflow from main. Read index.json; animations are the .wasm files." > pub/README.md
+          git -C pub add -A && git -C pub commit -q -m "Index from ${GITHUB_SHA::7}"
+          git -C pub push -q -f "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" dist

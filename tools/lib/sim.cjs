@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-only
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // Copyright (C) 2026 FireBall1725
 // Loads the site's simulator (tools/vendor/pixelbar.js) in Node with a stub DOM, so previews use its real drawing code.
 // sim(names) returns those top-level names from inside it.

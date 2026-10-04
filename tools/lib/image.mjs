@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-only
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // Copyright (C) 2026 FireBall1725
 // Frames as pictures: each LED drawn as a lit square with a dark gap, the way the panel looks, then PNG or animated GIF.
 import { writeFileSync } from "node:fs";

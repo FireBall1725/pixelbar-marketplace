@@ -1,5 +1,5 @@
 #!/bin/sh
-# SPDX-License-Identifier: AGPL-3.0-only
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # Copyright (C) 2026 FireBall1725
 # Copies what the checks and previews borrow from the site: its simulator script and the v2 JSON schemas.
 # Run it after the site changes, then commit tools/vendor. SITE defaults to ~/Repos/pixelbar-site.

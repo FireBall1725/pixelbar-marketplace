@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-only
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // Copyright (C) 2026 FireBall1725
 // Frames plus a WAV to an MP4 (H.264 and AAC) through ffmpeg, so a sound can be heard and seen in one file. Gives back
 // the path, or null when ffmpeg isn't installed.

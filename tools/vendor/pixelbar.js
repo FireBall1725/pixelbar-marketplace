@@ -1222,7 +1222,37 @@ const THEMES={new_year:{name:"New Year's",title:"HAPPY NEW YEAR",tc:[255,215,110
   canada_day:{name:"Canada Day",title:"HAPPY CANADA DAY",tc:[[255,70,70],[255,255,255]],bg:thCanada},fourth_of_july:{name:"Fourth of July",title:"HAPPY 4TH OF JULY",tc:[[255,80,80],[255,255,255],[110,150,255]],bg:thJuly},
   thanksgiving:{name:"Thanksgiving",title:"HAPPY THANKSGIVING",tc:[255,170,60],bg:thThanks},halloween:{name:"Halloween",title:"HAPPY HALLOWEEN",tc:[255,140,30],bg:thHalloween},
   dia_de_muertos:{name:"Día de los Muertos",title:"DIA DE LOS MUERTOS",tc:[[255,60,140],[255,150,30],[80,200,255],[255,220,60]],bg:thMuertos},diwali:{name:"Diwali",title:"HAPPY DIWALI",tc:[255,200,80],bg:thDiwali},remembrance:{name:"Remembrance Day",title:"LEST WE FORGET",tc:[235,230,230],bg:thPoppy,quiet:1},
-  hanukkah:{name:"Hanukkah",title:"HAPPY HANUKKAH",tc:[170,200,255],bg:thHanukkah},spooky_christmas:{name:"Spooky Christmas",title:"MERRY SPOOKY CHRISTMAS",tc:[[255,140,40],[200,230,240]],bg:thSpookyXmas},christmas:{name:"Christmas",title:"MERRY CHRISTMAS",tc:[[255,70,70],[255,255,255]],bg:thChristmas}};
+  hanukkah:{name:"Hanukkah",title:"HAPPY HANUKKAH",tc:[170,200,255],bg:thHanukkah},christmas:{name:"Christmas",title:"MERRY CHRISTMAS",tc:[[255,70,70],[255,255,255]],bg:thChristmas}};
+/* Scenes that moved to the Marketplace as plugins. Not shipped as themes; kept so the SDK port can be compared LED for LED. */
+const REF_THEMES={spooky_christmas:{name:"Spooky Christmas",title:"MERRY SPOOKY CHRISTMAS",tc:[[255,140,40],[200,230,240]],bg:thSpookyXmas}};
+/* ---------- Marketplace plugins: themes and animations compiled to WebAssembly with the SDK ---------- */
+/* What a plugin may import. It draws on st.fb and reads the notification or theme in P ({title, message, detail, colors, parts, faint, night, hx}); st.mem is set once it's instantiated. */
+function pluginImports(P,st){const dec=new TextDecoder(),enc=new TextEncoder(),rgb=c=>[(c>>16)&255,(c>>8)&255,c&255],A=a=>clamp(a,0,255)/255,fit=s=>fitText(s,F5,false),hex=h=>{const m=/^#?([0-9a-f]{6})$/i.exec(String(h||""));return m?parseInt(m[1],16):null;};
+  const str=(p,n)=>dec.decode(new Uint8Array(st.mem.buffer,p,n)),fb=()=>st.fb,part=k=>(P.parts&&P.parts[k])||{},pct=(v,lo,hi,d)=>{const x=+v;return v!==null&&v!==undefined&&isFinite(x)?clamp(x,lo,hi):d;};
+  return {px:(x,y,c,a)=>fb().px(x,y,rgb(c),A(a)),rect:(x,y,w,h,c,a)=>fb().rect(x,y,w,h,rgb(c),A(a)),
+    text:(p,n,x,y,c,size,outline)=>{const s=fit(str(p,n)),sc=size===2?2:1;if(outline)fb().textO(F5,s,x,y,rgb(c),sc);else fb().text(F5,s,x,y,rgb(c),sc);return fb().tw(F5,s,sc);},
+    text_width:(p,n,size)=>fb().tw(F5,fit(str(p,n)),size===2?2:1),
+    param:(kp,kn,bp,cap)=>{const v=P[str(kp,kn)];if(typeof v!=="string"||cap<1)return -1;const b=enc.encode(v).subarray(0,cap-1),o=new Uint8Array(st.mem.buffer,bp,b.length+1);o.set(b);o[b.length]=0;return b.length;},
+    color:i=>{const c=hex((P.colors||[])[i]);return c===null?-1:c;},
+    pxf:(x,y,c,a)=>fb().px(x,y,rgb(c),A(a)),add:(x,y,c,a)=>fb().add(x,y,rgb(c),A(a)),rectf:(x,y,w,h,c,a)=>fb().rect(x,y,w,h,rgb(c),A(a)),
+    vgrad:(x,y,w,h,c0,c1,a)=>fb().vgrad(x,y,w,h,rgb(c0),rgb(c1),A(a)),frame_rect:(x0,y0,x1,y1,c,a)=>fb().frame(x0,y0,x1,y1,rgb(c),A(a)),
+    disc:(cx,cy,r,c,a)=>fb().disc(cx,cy,r,rgb(c),A(a)),ring:(cx,cy,r,w,c,a)=>fb().ring(cx,cy,r,w,rgb(c),A(a)),line:(x0,y0,x1,y1,c,a0,a1)=>fb().line(x0,y0,x1,y1,rgb(c),A(a0),A(a1)),
+    poly:(p,n,c,a)=>{const f=new Float64Array(st.mem.buffer,p,n*2),Q=[];for(let i=0;i<n;i++)Q.push([f[i*2],f[i*2+1]]);fb().poly(Q,rgb(c),A(a));},
+    clip:(x,y,w,h)=>fb().pushClip(x,y,w,h),unclip:()=>fb().popClip(),icon:(p,n,cx,cy,c)=>{const d=ICONS[str(p,n)];if(d)d(fb(),cx,cy,st.t,rgb(c));},
+    part_on:(p,n)=>part(str(p,n)).on===false?0:1,
+    part_num:(p,n,kp,kn,d)=>{const k=str(kp,kn),lo=k==="size"?25:0,hi=k==="size"?300:500;let r=pct(part(str(p,n))[k],lo,hi,d);if(k==="amount"&&P.faint)r=Math.round(r*THEME_FAINT_N);return r;},
+    part_color:(p,n,i,d)=>{const cs=part(str(p,n)).colors,c=Array.isArray(cs)?hex(cs[i]):null;return c===null?d:c;},
+    hero_x:()=>heroX({hx:P.hx,W:fb().W}),night:()=>Math.round(+P.night)||0,hashd:hash,sind:Math.sin,cosd:Math.cos,powd:Math.pow};}
+/* Loads a plugin's .wasm: { manifest, frame(fb, t), bg(fb, S, k) }. frame clears fb and draws one frame (an animation); bg draws it as a theme's sky,
+   reading parts, faint, night and hx from S like a built-in theme, k bright. A plugin that traps goes dark instead of taking the page down. */
+async function loadPlugin(bytes,P={}){const st={fb:null,mem:null,t:0},pb=pluginImports(P,st),{instance}=await WebAssembly.instantiate(bytes,{pb}),X=instance.exports;st.mem=X.memory;
+  let manifest=null;if(X.manifest){try{const p=X.manifest(),m=new Uint8Array(X.memory.buffer);let n=0;while(m[p+n]&&n<65536)n++;manifest=JSON.parse(new TextDecoder().decode(m.subarray(p,p+n)));}catch(e){manifest={error:String(e&&e.message||e)};}}
+  let inited=false,scratch=null;const run=(fb,t)=>{st.fb=fb;st.t=t;if(!inited){inited=true;if(X.init)X.init(fb.W,32);}try{X.frame(t,fb.W,32);}catch(e){}};
+  return {manifest,frame(fb,t){fb.noClip();fb.clear();run(fb,t);},
+    bg(fb,S,k){Object.assign(P,{parts:S.parts,faint:S.faint,night:S.night,hx:S.hx});if(k>=1){run(fb,S.t);return;}if(!scratch||scratch.W!==fb.W)scratch=new FB(fb.W,fb.H);scratch.clear();run(scratch,S.t);fb.mixFrom(scratch,k);}};}
+/* A plugin theme joins THEMES under key, so theme messages, previews and the catalogue treat it like a built-in one. */
+function addPluginTheme(key,plug){const m=plug.manifest||{},tc=(m.colors||[]).map(rgbOf).filter(Boolean);
+  THEMES[key]={name:m.title||key,title:fitText(m.banner||m.title||key,F5),tc:tc.length>1?tc:tc[0]||[255,255,255],bg:plug.bg,plugin:plug};return THEMES[key];}
 /* The notification version: the scene, a little dimmer, with the title dropping in (remembrance fades in instead). */
 function sHoliday(fb,S,o){const th=THEMES[o.theme],t=S.ft!=null?S.ft:S.t%10,{W}=S;th.bg(fb,Object.assign({},S,{t:t+2,flags:o.flags,night:o.night,hx:W>=256?W-(o.theme==="canada_day"?46:o.theme==="fourth_of_july"?38:24):undefined}),0.8);
   const ttl=o.title||th.title,sc=W>=256&&fb.tw(F5,ttl,2)<=W-8?2:1,tw=fb.tw(F5,ttl,sc),tx=Math.round((W-tw)/2),drop=th.quiet||t>=0.7?1:easeBounce(t/0.7),a=th.quiet?Math.min(1,t/1.5):1;
@@ -1630,12 +1660,14 @@ function renderZ(d,S,A,prog,dst,scr){const {W,H,id}=S,Zs=zonesOf(scr,id),zs=A.Z[
   Zs.forEach((z,i)=>{const w=has(zs[i])?(z.w==="*"?each:Math.min(z.w,Math.max(0,right-x))):0;R.push({x,w});x+=w;});
   const taken=(i,k)=>k!=null&&!String(k).startsWith("bx:")&&!Zs[i].show.includes(k),bc=k=>String(k).startsWith("bx:")?boxCard(k):null;
   let clockX=right;Zs.forEach((z,i)=>{if(R[i].w&&(z.show.includes("clock")||(bc(zs[i]&&zs[i].cur)||{}).card==="clock")&&R[i].x>0)clockX=Math.min(clockX,R[i].x);});
-  /* An event can spill over its neighbours: across the whole width when the zone allows it, or on idle up to 240 px, stopping at the clock. */
+  /* An event can spill over its neighbours: across the whole width when the zone allows it, or on idle up to 240 px, stopping at the clock or at the next box that's showing an event of its own. */
   /* a.prev sticks after the roll ends, so a gone event only counts while it's still rolling out. */
   const rect=i=>{const a=zs[i];if(!a||!R[i].w||!(taken(i,a.cur)||(a.prev!==undefined&&prog(a,ROLL)<1&&taken(i,a.prev))))return R[i];if(Zs[i].wide)return {x:0,w:right,spill:1};
-    if(style==="overlay")return {x:R[i].x,w:Math.max(R[i].w,Math.min(240,clockX-R[i].x)),spill:1};return R[i];};
+    if(style==="overlay"){let stop=clockX;for(let j=i+1;j<Zs.length;j++){const b=zs[j];if(R[j].w&&b&&(taken(j,b.cur)||(b.prev!==undefined&&prog(b,ROLL)<1&&taken(j,b.prev)))){stop=Math.min(stop,R[j].x);break;}}
+      return {x:R[i].x,w:Math.max(R[i].w,Math.min(240,stop-R[i].x)),spill:1};}return R[i];};
   const rs=Zs.map((_,i)=>rect(i)),hidden=i=>rs.some((r,j)=>j!==i&&r.spill&&R[i].w&&R[i].x<r.x+r.w&&R[i].x+R[i].w>r.x);
-  if(style==="overlay"){let f=0;zs.forEach((a,i)=>{if(!a||!R[i].w)return;const pc=ease(prog(a,ROLL)),on=taken(i,a.cur),was=a.prev!==undefined&&taken(i,a.prev);f=Math.max(f,on&&was?1:on?pc:was?1-pc:0);});if(f>0)dst.scaleRect(0,0,W,H,1-0.35*f);}
+  // While an event holds a box, the sky dims to 65% under that box (as wide as the event spills), so the card reads without a frame and the rest of the strip stays as it was.
+  if(style==="overlay")zs.forEach((a,i)=>{if(!a||!R[i].w)return;const pc=ease(prog(a,ROLL)),on=taken(i,a.cur),was=a.prev!==undefined&&taken(i,a.prev),f=on&&was?1:on?pc:was?1-pc:0;if(f>0){const r=rs[i],dim=(def&&def.dim!=null?clamp(+def.dim,0,100):35)/100;if(dim>0)dst.scaleRect(r.x,0,r.w,H,1-dim*f);}});
   // Effects around a card: the boxes are compared with the sky under them afterwards, so the weather can come in front of the words.
   const fxI=bgOf(scr).type==="sky"?Zs.map((_,i)=>i).filter(i=>zs[i]&&rs[i].w>0&&fxOf(zs[i].cur,def)):[],fxBg=fxI.length?(d.L.fxbg=d.L.fxbg||new FB(W,H)):null;
   if(fxBg)fxBg.d.set(dst.d);
@@ -2766,7 +2798,7 @@ function applyBox(target,name,b){layerSet(BOXES,name,target,b===null?null:{cards
 /* A layout's screens as a list. Layouts from before the list named active, idle and sleep; those keep their old looks. */
 function screensList(b){if(Array.isArray(b.screens))return b.screens;
   return ["sleep","active","idle"].filter(n=>b.screens[n]).map(n=>Object.assign({name:n},SDEF_DEFAULT[n],b.screens[n].background?{background:b.screens[n].background}:{},{boxes:b.screens[n].boxes}));}
-const SCR_KEYS=["when","style","outline","effects","background","tint","filter","brightness","quiet","clock_style"];
+const SCR_KEYS=["when","style","outline","effects","background","tint","filter","brightness","dim","quiet","clock_style"];
 function applyLayout2(b){if(b===null){resetScreens(simSize);live.mode=layScr="demo";laySel=0;renderScreens();renderLay();return "No layout, so the demo screen.";}
   const list=screensList(b),names=list.map(x=>x.name);if(new Set(names).size!==names.length)throw new Error("Two screens have the same name. Each needs its own.");if(names.includes("demo"))throw new Error('"demo" is the screen a display shows before it has a layout. Call yours something else.');
   SCREENS.splice(0,SCREENS.length,...names);DEMO=false;SDEF={};
@@ -2877,7 +2909,10 @@ function applyNotify(key,b,x={}){const ik="json:"+key;
   const t=b.tier,ongoing=t!=="alert"&&!(t==="notice"&&b.tray!=="until_cleared"),d={tier:t,icon,key,raw:1,card:ik,tray:"mini:"+icon+":"+hex(col),ctl:ongoing?["send","clear"]:["send"]};
   if(t==="critical"||t==="warning"){d.adv=ik;d.full=ik;}else if(t==="advisory")d.adv=ik;else if(t==="alert"){d.full=ik;if(anim){d.notray=1;d.dur=b.animation==="weather"?clamp(Math.round(+b.seconds||60),5,3600):b.animation==="countdown"?secs+4:THEMES[b.animation]||b.animation==="live"||b.animation==="fireworks"||b.animation==="flag"?10:8;}}
   if(t==="notice"&&b.tray==="until_cleared")d.keep=1;
-  Object.assign(d,x);DEF[ik]=d;if(b.sound!==undefined)SOUND_OF[ik]=b.sound;else delete SOUND_OF[ik];
+  Object.assign(d,x);
+  // An animation that runs to a time (a countdown, a weather round-up) holds the strip that long, unless the message set its own takeover.
+  if(d.dur&&d.dl&&b.takeover===undefined)d.dl=Object.assign({},d.dl,{takeover:d.dur});
+  DEF[ik]=d;if(b.sound!==undefined)SOUND_OF[ik]=b.sound;else delete SOUND_OF[ik];
   if(Array.isArray(b.screens))SCR.n.set(ik,new Set(b.screens.filter(x=>SCREENS.includes(x))));else SCR.n.delete(ik);
   const note=missing.length?` The display doesn't have ${missing.join(" or ")} yet, so it's drawn without ${missing.length>1?"them":"it"}.`:"";
   if(key.startsWith("__"))return note;if(live.E.has(ik)&&!b.renotify)return "Updated "+key+" in place."+note;
@@ -3052,7 +3087,7 @@ const WXDESC={clear:"The sun and a warm glow by day; a clear night with stars an
   blizzard:"Heavy, wind-driven snow with slow white-outs.",drizzle:"Fine, sparse, slow rain.",rainbow:"An arc across a clearing sky; at night, a faint white moonbow.",aurora:"The northern lights across the whole strip."};
 const THDESC={new_year:"Gold and silver fireworks with glitter falling.",valentines:"Hearts rising, with a big one beating.",lunar_new_year:"Red lanterns swaying on strings, gold sparkles and firecracker bursts.",pancake_day:"A pancake flipping out of a pan, and a stack with butter, syrup and lemon.",st_patricks:"Shamrocks drifting, and a rainbow into a pot of gold.",holi:"Clouds of coloured powder bursting and drifting.",
   easter:"A spring sky, painted eggs in the grass, tulips and a hopping bunny.",eid:"A crescent moon and star, with lanterns hanging and glowing.",pride:"A waving flag across the whole strip, changing every 6 seconds.",canada_day:"A Canadian flag waving on a pole, red and white fireworks, maple leaves falling.",fourth_of_july:"A US flag waving on a pole, with red, white and blue fireworks.",
-  thanksgiving:"Autumn leaves tumbling at dusk, pumpkins and a hay bale.",halloween:"A full moon, bats, ghosts drifting by and jack-o'-lanterns on the hills.",dia_de_muertos:"Papel picado, a sugar skull, marigold petals and candles.",diwali:"A row of diyas flickering along the bottom, fireworks above.",remembrance:"Poppies falling slowly and one large poppy. Nothing flashes or bounces.",hanukkah:"A menorah with the candles for the night lit; its candles and flames take their own colours and flicker.",spooky_christmas:"Halloween meets Christmas: a hill curling into a spiral against a huge moon, crooked gravestones, bats in the snow, jack-o'-lanterns in Santa hats and striped gifts with lopsided bows.",christmas:"A lit tree with presents, snow falling, and bulbs on a wire along the top."};
+  thanksgiving:"Autumn leaves tumbling at dusk, pumpkins and a hay bale.",halloween:"A full moon, bats, ghosts drifting by and jack-o'-lanterns on the hills.",dia_de_muertos:"Papel picado, a sugar skull, marigold petals and candles.",diwali:"A row of diyas flickering along the bottom, fireworks above.",remembrance:"Poppies falling slowly and one large poppy. Nothing flashes or bounces.",hanukkah:"A menorah with the candles for the night lit; its candles and flames take their own colours and flicker.",christmas:"A lit tree with presents, snow falling, and bulbs on a wire along the top."};
 /* What you can send: every Home Assistant weather state, day and night. */
 const wxDisps=[];
 for(const [name,c] of [["sunny / clear-night","clear"],...HA_WX.filter(([n])=>n!=="sunny"&&n!=="clear-night"),...EXTRAS.map(([k,n])=>[n+" (extra)",k])]){

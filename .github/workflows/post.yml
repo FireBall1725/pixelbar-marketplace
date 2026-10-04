@@ -43,15 +43,28 @@ jobs:
           git -C previews add -A
           git -C previews commit -q -m "Previews for #${N}" || echo "no change"
           git -C previews push -q origin previews
+      - name: Label
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          N: ${{ steps.pr.outputs.n }}
+        run: |
+          want=$(python3 -c 'import json; print("\n".join(json.load(open("out/result.json")).get("labels", [])))')
+          have=$(gh api "repos/${REPO}/issues/${N}/labels" --jq '.[].name')
+          for l in $(echo "$have" | grep -E '^(kind:|has pictures|needs changes)' || true); do echo "$want" | grep -qxF "$l" || gh api -X DELETE "repos/${REPO}/issues/${N}/labels/$(python3 -c 'import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1]))' "$l")" > /dev/null; done
+          echo "$want" | while IFS= read -r l; do [ -n "$l" ] && ! echo "$have" | grep -qxF "$l" && gh api -X POST "repos/${REPO}/issues/${N}/labels" -f "labels[]=$l" > /dev/null; done || true
       - name: Comment
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
           N: ${{ steps.pr.outputs.n }}
           SHA: ${{ github.event.workflow_run.head_sha }}
+          PREVIEWS_URL: ${{ vars.PREVIEWS_URL }}
         run: |
           base="https://github.com/${REPO}/raw/previews/pr-${N}"
-          sed "s#{{BASE}}#${base}#g" out/comment.md > body.md
+          # With the previews site set up (repository variable PREVIEWS_URL), the comment links the page where sounds play.
+          if [ -n "$PREVIEWS_URL" ]; then site="${PREVIEWS_URL%/}/pr-${N}"; page="▶ [Watch and listen in the browser](${site}/)"; else site="$base"; page=""; fi
+          sed -e "s#{{BASE}}#${base}#g" -e "s#{{SITE}}#${site}#g" -e "s#{{PAGE}}#${page}#" out/comment.md | awk 'NF || !blank++ { if (NF) blank = 0; print }' > body.md
           printf '\n<sub>For %s. Previews come from the site simulator in tools/vendor.</sub>\n' "$SHA" >> body.md
           id=$(gh api "repos/${REPO}/issues/${N}/comments" --paginate --jq '.[] | select(.user.login == "github-actions[bot]" and (.body | contains("<!-- pixelbar-preview -->"))) | .id' | head -1)
           if [ -n "$id" ]; then gh api -X PATCH "repos/${REPO}/issues/comments/${id}" -F body=@body.md > /dev/null
