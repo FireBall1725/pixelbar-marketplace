@@ -78,7 +78,7 @@ The integer calls, enough for most animations:
 | --- | --- |
 | `pb_px(x, y, rgb, alpha)` | One pixel, blended over what's there. `alpha` 255 covers it, 128 is half. Off the strip is ignored. |
 | `pb_rect(x, y, w, h, rgb, alpha)` | A filled rectangle, blended the same way. |
-| `pb_text(s, len, x, y, rgb, size, outline)` | Text in PixelBar's 5 x 7 font: accents, Cyrillic, Greek and symbols like ★ ♥ ↑ included. `size` 1 or 2. `outline` 1 adds a dark edge so it reads over anything. Drawn as written. Gives back its width. |
+| `pb_text(s, len, x, y, rgb, size, outline)` | Text in PixelBar's 5 x 7 font: accents, Cyrillic, Greek and symbols like ★ ♥ ↑ included. `size` 1, 2 or 3. `outline` 1 adds a dark edge so it reads over anything. Drawn as written. Gives back its width. |
 | `pb_text_width(s, len, size)` | How wide that text would be, without drawing it. |
 | `pb_param(key, key_len, buf, cap)` | The notification's `"title"`, `"message"` or `"detail"`, copied into `buf`. Gives back its length, or -1 when it wasn't sent. |
 | `pb_color(i)` | The notification's `colors[i]` as `0xRRGGBB`, or -1 past the end. |

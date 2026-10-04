@@ -45,7 +45,8 @@ The whole file stays under 64 KB. The easiest way to get the messages right is t
 ## What gets turned away
 
 - Anything you didn't make or don't have the rights to share. A melody from a song is the composer's, so an RTTTL version of a chart hit doesn't belong here; a tune you wrote does.
-- Logos, brands and pictures of real people.
+- Pictures of real people.
+- Logos drawn as pictures. A club's colours, nickname or crest in a goal animation is fine; the display already carries the crests for its goal screen.
 - Personal details: names, addresses, phone numbers, plates.
 - Copies of something already here. The check compares messages and plugin source, so a renamed copy is caught.
 

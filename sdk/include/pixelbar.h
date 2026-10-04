@@ -42,7 +42,7 @@ PB_EXPORT("manifest") const char *manifest(void);
 PB_IMPORT("px") void pb_px(int x, int y, int rgb, int alpha);
 /* A filled rectangle, blended the same way. */
 PB_IMPORT("rect") void pb_rect(int x, int y, int w, int h, int rgb, int alpha);
-/* Text in PixelBar's 5 x 7 font (accents, Cyrillic, Greek and symbols included), size 1 or 2, with a dark outline
+/* Text in PixelBar's 5 x 7 font (accents, Cyrillic, Greek and symbols included), size 1, 2 or 3, with a dark outline
    when outline is 1 so it reads over anything. Drawn as written. Gives back its width in LEDs. */
 PB_IMPORT("text") int pb_text(const char *s, int len, int x, int y, int rgb, int size, int outline);
 /* How wide that text would be, without drawing it. */
