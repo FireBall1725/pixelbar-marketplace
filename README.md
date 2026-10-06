@@ -8,8 +8,9 @@ Contributions come in as pull requests, and every pull request gets checked and 
 
 | Path | What it holds |
 | --- | --- |
-| `items/<kind>/<name>/` | One folder per item: `item.json`, plus the C source of an animation or a plugin theme |
-| `dist` branch | What Home Assistant reads: `index.json` with every item, plus each plugin compiled, rebuilt on every merge |
+| `items/<kind>/<author>/<name>/` | One folder per item: `item.json`, plus the C source of an animation or a plugin theme |
+| `retired.json` | Items taken out, whose numbers are never reused ([docs/ids.md](docs/ids.md)) |
+| `dist` branch | What Home Assistant reads: `index.json` with every item, plus every version of each plugin compiled, rebuilt on every merge |
 | `sdk/` | The plugin SDK: `pixelbar.h`, a build script, the Hearts animation, the Spooky Christmas theme and [the guide](sdk/README.md) |
 | `tools/` | The checks, the preview renderer and the index builder |
 | `tools/vendor/` | The site's simulator and v2 schemas, copied in so previews and checks match the display |
@@ -27,8 +28,8 @@ By hand, add a folder under `items/` and open a pull request. Before you push, r
 
 ```sh
 npm ci
-node tools/validate.mjs items/theme/my-theme
-node tools/preview.mjs items/theme/my-theme previews
+node tools/validate.mjs items/theme/your-username/my-theme
+node tools/preview.mjs items/theme/your-username/my-theme previews
 ```
 
 ## What happens to a pull request
@@ -37,7 +38,7 @@ node tools/preview.mjs items/theme/my-theme previews
 
 **Post previews** then puts the GIFs, stills, WAVs and MP4s on the `previews` branch and keeps one comment on the pull request up to date with them, so reviewers see what the item draws without installing it. GitHub won't play a linked sound inline, so the comment also links the item's page on the previews site, where sounds play in the browser. The check never gets write access or secrets; only the posting step does, and it never runs the pull request's code.
 
-Merging to `main` rebuilds the `dist` branch: `index.json` with every item in full (a plugin theme's manifest included) and each plugin compiled to `.wasm`. Home Assistant reads it through jsDelivr at `https://cdn.jsdelivr.net/gh/FireBall1725/pixelbar-marketplace@dist/`.
+Merging to `main` rebuilds the `dist` branch: `index.json` with every item in full (a plugin theme's manifest included) and each plugin compiled to `wasm/<id>/<version>.wasm`. Published builds are never rebuilt, and every version stays. Items are known by a permanent number, a name and a version: see [docs/ids.md](docs/ids.md). Home Assistant reads it through jsDelivr at `https://cdn.jsdelivr.net/gh/FireBall1725/pixelbar-marketplace@dist/`.
 
 ## Keeping the copied site files current
 
