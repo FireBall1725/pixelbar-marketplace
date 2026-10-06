@@ -38,7 +38,12 @@ const issued = Math.max(0, ...onBase.keys(), ...retired.map(r => r.id));
 function againstBase(d, item) {
   const say = [], { ns } = partsOf(d);
   if (!Number.isInteger(item.id)) { say.push(`Give it "id": ${free++} (the next free number).`); return say; }
-  const b = onBase.get(item.id);
+  let b = onBase.get(item.id);
+  // Still where main has it: then this folder is a different item taking a number that's in use, not that item moving.
+  if (b && b.dir !== d && existsSync(join(b.dir, "item.json"))) {
+    let still; try { still = JSON.parse(readFileSync(join(b.dir, "item.json"), "utf8")).id === item.id; } catch { still = false; }
+    if (still) { say.push(`id ${item.id} is already ${b.dir}'s; a new item takes "id": ${free++}.`); b = null; return say; }
+  }
   if (b) {
     if (b.item.kind !== item.kind) say.push(`id ${item.id} is ${b.dir} on main, a ${b.item.kind}; an item's kind can't change.`);
     if (typeof item.version === "string" && typeof b.item.version === "string") {
