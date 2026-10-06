@@ -8,7 +8,7 @@ An item lives in `items/<kind>/<namespace>/<slug>/`, and its name is `<namespace
 
 - The namespace is the author's GitHub username in lowercase. The check refuses an item whose folder doesn't match its `author`, and a new item from a pull request has to go under the pull request author's own name.
 - `pixelbar/` is kept for official items, and only maintainers can publish there. Nothing uses it yet.
-- The slug is lowercase letters, digits and `-`, 2 to 41 characters.
+- The slug is lowercase letters, digits and `-`, 2 to 41 characters, with at least one letter, so `mp:2048` can only ever mean id 2048.
 - A name is unique across kinds: there can't be an animation and a sound both called `fireball1725/beep`.
 - Two people can both have a `football`. Renaming or moving an item is fine, because nothing that matters points at the name.
 

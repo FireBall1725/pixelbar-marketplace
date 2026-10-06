@@ -8,7 +8,7 @@ import { join } from "node:path";
 import { problem, route } from "./lib/schema.mjs";
 import { KINDS, LICENSES, MAINTAINERS, MAX_BYTES, OFFICIAL, SEMVER, fingerprint, isPlugin, listItems, partsOf, readRetired, sourceOf } from "./lib/items.mjs";
 
-const SLUG = /^[a-z0-9][a-z0-9-]{1,40}$/, LOGIN = /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/, TAG = /^[a-z0-9-]{2,24}$/, NS = /^[a-z0-9](?:[a-z0-9-]{0,38})$/;
+const SLUG = /^(?=[a-z0-9-]*[a-z])[a-z0-9][a-z0-9-]{1,40}$/, LOGIN = /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/, TAG = /^[a-z0-9-]{2,24}$/, NS = /^[a-z0-9](?:[a-z0-9-]{0,38})$/;
 /* What each kind must hold, by the routes of its messages. */
 const NEEDS = {
   notification: [ms => ms.some(r => r.kind === "notify"), "a notification message (pixelbar/all/notify/<key>)"],
@@ -23,7 +23,7 @@ export function check(dir, seen = new Map()) {
   const out = [], say = m => out.push(m), { kind, ns, slug } = partsOf(dir), file = join(dir, "item.json");
   if (!KINDS.includes(kind)) say(`"${kind}" isn't a kind: items go in items/<${KINDS.join("|")}>/<your GitHub username>/<name>/.`);
   if (!NS.test(ns)) say(`The folder "${ns}" should be your GitHub username in lowercase: items/${kind}/<username>/${slug}/.`);
-  if (!SLUG.test(slug)) say(`The folder name "${slug}" should be lowercase letters, digits and -, 2 to 41 long.`);
+  if (!SLUG.test(slug)) say(`The folder name "${slug}" should be lowercase letters, digits and -, 2 to 41 long, with at least one letter (a number on its own reads as an id).`);
   if (!existsSync(file)) { say("item.json is missing."); return { problems: out }; }
   if (statSync(file).size > MAX_BYTES) say("item.json is over 64 KB.");
   let item;
