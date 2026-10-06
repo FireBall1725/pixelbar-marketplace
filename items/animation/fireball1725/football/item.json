@@ -1,5 +1,7 @@
 {
   "kind": "animation",
+  "id": 4,
+  "version": "1.0.0",
   "title": "Football",
   "description": "One card for a match day, picked by its event option: a goal with rays, confetti and the striped title; a plain message like HALF TIME; the substitution board in 7-segment red and green; a yellow or red card flipping in; the line-up scrolling by. Crest from the notification's picture.",
   "author": "FireBall1725",
