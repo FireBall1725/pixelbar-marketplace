@@ -1,0 +1,407 @@
+{
+  "version": 2,
+  "built": "2026-10-06T09:48:36.621Z",
+  "next_id": 5,
+  "items": [
+    {
+      "id": 4,
+      "name": "fireball1725/football",
+      "kind": "animation",
+      "namespace": "fireball1725",
+      "slug": "football",
+      "path": "items/animation/fireball1725/football",
+      "version": "1.0.0",
+      "title": "Football",
+      "description": "One card for a match day, picked by its event option: a goal with rays, confetti and the striped title; a plain message like HALF TIME; the substitution board in 7-segment red and green; a yellow or red card flipping in; the line-up scrolling by. Crest from the notification's picture.",
+      "author": "FireBall1725",
+      "license": "MIT",
+      "tags": [
+        "football",
+        "goal",
+        "match",
+        "soccer"
+      ],
+      "fingerprint": "5c9533aecec4f0d2",
+      "wasm": "wasm/4/1.0.0.wasm",
+      "sha256": "e1827a866098a67d76842453a6fd25d16b652eb209f546a59edddffbf1612cd6",
+      "versions": [
+        {
+          "version": "1.0.0",
+          "wasm": "wasm/4/1.0.0.wasm",
+          "sha256": "e1827a866098a67d76842453a6fd25d16b652eb209f546a59edddffbf1612cd6"
+        }
+      ],
+      "params": {
+        "title": "GOAL!",
+        "message": "NEW 1-0 COV",
+        "detail": "23'",
+        "colors": [
+          "#FFFFFF",
+          "#F1BE48"
+        ],
+        "options": {
+          "event": "goal"
+        }
+      },
+      "legacy": "football.wasm",
+      "manifest": {
+        "api": 2,
+        "kind": "animation",
+        "title": "Football",
+        "colors": [
+          "#FFFFFF",
+          "#E8B53A"
+        ],
+        "options": {
+          "event": {
+            "values": [
+              "goal",
+              "message",
+              "substitution",
+              "yellow_card",
+              "red_card",
+              "lineup"
+            ],
+            "default": "goal",
+            "description": "What happened: a goal, a plain message, a substitution, a yellow or red card, or the line-up scrolling by",
+            "examples": {
+              "message": {
+                "title": "",
+                "message": "Half time",
+                "detail": "NEW 1-0 COV"
+              },
+              "substitution": {
+                "title": "",
+                "message": "14 Isak",
+                "detail": "9 Wilson"
+              },
+              "yellow_card": {
+                "title": "",
+                "message": "Guimaraes",
+                "detail": "71'"
+              },
+              "red_card": {
+                "title": "",
+                "message": "Botman",
+                "detail": "88'"
+              },
+              "lineup": {
+                "title": "",
+                "message": "Pope, Trippier, Schar, Botman, Burn, Guimaraes, Joelinton, Tonali, Murphy, Isak, Gordon",
+                "detail": "4-3-3"
+              }
+            }
+          },
+          "align": {
+            "values": [
+              "auto",
+              "left",
+              "centre",
+              "right"
+            ],
+            "default": "auto",
+            "description": "Where the words sit in their room; auto centres a message and keeps a goal's score beside its title"
+          },
+          "show_title": {
+            "type": "boolean",
+            "default": true,
+            "description": "The big title on a goal; off, the message takes its space"
+          },
+          "stripes": {
+            "type": "boolean",
+            "default": true,
+            "description": "The goal title in moving stripes of both colours; off, it's the first colour alone"
+          }
+        },
+        "parts": {
+          "sky": {
+            "colors": 2,
+            "description": "The gradient behind everything, top colour then bottom"
+          },
+          "rays": {
+            "colors": 2,
+            "description": "The burst of rays as a goal starts"
+          },
+          "confetti": {
+            "amount": true,
+            "speed": true,
+            "colors": 3,
+            "description": "Confetti falling in the team colours on a goal"
+          },
+          "ticker": {
+            "speed": true,
+            "description": "How fast a line-up, or any line too long for its room, scrolls"
+          }
+        }
+      }
+    },
+    {
+      "id": 1,
+      "name": "fireball1725/hearts",
+      "kind": "animation",
+      "namespace": "fireball1725",
+      "slug": "hearts",
+      "path": "items/animation/fireball1725/hearts",
+      "version": "1.0.0",
+      "title": "Hearts",
+      "description": "Hearts float up in the notification's colours while the title drops in. The SDK's example.",
+      "author": "FireBall1725",
+      "license": "MIT",
+      "tags": [
+        "love",
+        "celebration"
+      ],
+      "fingerprint": "7f68d1b58a7d0dd0",
+      "wasm": "wasm/1/1.0.0.wasm",
+      "sha256": "f5a27082353c4979eef664515a5c699a23cdc57efdbc2615becc025b862d1f4f",
+      "versions": [
+        {
+          "version": "1.0.0",
+          "wasm": "wasm/1/1.0.0.wasm",
+          "sha256": "f5a27082353c4979eef664515a5c699a23cdc57efdbc2615becc025b862d1f4f"
+        }
+      ],
+      "params": {
+        "title": "HAPPY ANNIVERSARY",
+        "message": "TEN YEARS TODAY",
+        "colors": [
+          "#FF5078",
+          "#FF96BE",
+          "#E12850"
+        ]
+      },
+      "legacy": "hearts.wasm"
+    },
+    {
+      "id": 3,
+      "name": "fireball1725/west-ham-bubbles",
+      "kind": "animation",
+      "namespace": "fireball1725",
+      "slug": "west-ham-bubbles",
+      "path": "items/animation/fireball1725/west-ham-bubbles",
+      "version": "1.0.0",
+      "title": "West Ham bubbles",
+      "description": "The football card for a club that blows bubbles: every event it has (goal, message, substitution board, yellow or red card, line-up), with bubbles floating up through all of them and popping near the top, in claret and blue unless you send colours.",
+      "author": "FireBall1725",
+      "license": "MIT",
+      "tags": [
+        "football",
+        "west-ham",
+        "bubbles",
+        "goal"
+      ],
+      "fingerprint": "0cd54fdc63fbdf02",
+      "wasm": "wasm/3/1.0.0.wasm",
+      "sha256": "214c9232368e6bc373103118ac3896e2987d38098b2781e8b602b30280db6104",
+      "versions": [
+        {
+          "version": "1.0.0",
+          "wasm": "wasm/3/1.0.0.wasm",
+          "sha256": "214c9232368e6bc373103118ac3896e2987d38098b2781e8b602b30280db6104"
+        }
+      ],
+      "params": {
+        "title": "GOAL!",
+        "message": "WHU 1-0 TOT",
+        "detail": "67'",
+        "colors": [
+          "#7A263A",
+          "#1BB1E7"
+        ],
+        "options": {
+          "event": "goal"
+        }
+      },
+      "legacy": "west-ham-bubbles.wasm",
+      "manifest": {
+        "api": 2,
+        "kind": "animation",
+        "title": "West Ham bubbles",
+        "colors": [
+          "#7A263A",
+          "#1BB1E7"
+        ],
+        "options": {
+          "event": {
+            "values": [
+              "goal",
+              "message",
+              "substitution",
+              "yellow_card",
+              "red_card",
+              "lineup"
+            ],
+            "default": "goal",
+            "description": "What happened: a goal, a plain message, a substitution, a yellow or red card, or the line-up scrolling by",
+            "examples": {
+              "message": {
+                "title": "",
+                "message": "Half time",
+                "detail": "WHU 1-0 TOT"
+              },
+              "substitution": {
+                "title": "",
+                "message": "9 Antonio",
+                "detail": "20 Bowen"
+              },
+              "yellow_card": {
+                "title": "",
+                "message": "Soucek",
+                "detail": "71'"
+              },
+              "red_card": {
+                "title": "",
+                "message": "Mavropanos",
+                "detail": "88'"
+              },
+              "lineup": {
+                "title": "",
+                "message": "Areola, Wan-Bissaka, Mavropanos, Kilman, Emerson, Soucek, Alvarez, Bowen, Paqueta, Kudus, Fullkrug",
+                "detail": "4-2-3-1"
+              }
+            }
+          },
+          "align": {
+            "values": [
+              "auto",
+              "left",
+              "centre",
+              "right"
+            ],
+            "default": "auto",
+            "description": "Where the words sit in their room; auto centres a message and keeps a goal's score beside its title"
+          },
+          "show_title": {
+            "type": "boolean",
+            "default": true,
+            "description": "The big title on a goal; off, the message takes its space"
+          },
+          "stripes": {
+            "type": "boolean",
+            "default": true,
+            "description": "The goal title in moving stripes of both colours; off, it's the first colour alone"
+          }
+        },
+        "parts": {
+          "bubbles": {
+            "amount": true,
+            "speed": true,
+            "size": true,
+            "colors": 2,
+            "description": "Bubbles floating up through everything, popping near the top"
+          },
+          "sky": {
+            "colors": 2,
+            "description": "The gradient behind everything, top colour then bottom"
+          },
+          "rays": {
+            "colors": 2,
+            "description": "The burst of rays as a goal starts"
+          },
+          "confetti": {
+            "amount": true,
+            "speed": true,
+            "colors": 3,
+            "description": "Confetti falling in the team colours on a goal"
+          },
+          "ticker": {
+            "speed": true,
+            "description": "How fast a line-up, or any line too long for its room, scrolls"
+          }
+        }
+      }
+    },
+    {
+      "id": 2,
+      "name": "fireball1725/spooky-christmas",
+      "kind": "theme",
+      "namespace": "fireball1725",
+      "slug": "spooky-christmas",
+      "path": "items/theme/fireball1725/spooky-christmas",
+      "version": "1.0.0",
+      "title": "Spooky Christmas",
+      "description": "A pale moon over a spiral hill, bats, crooked gravestones and jack-o'-lanterns in Santa hats, under falling snow. The built-in scene, ported to the SDK as the theme example.",
+      "author": "FireBall1725",
+      "license": "MIT",
+      "tags": [
+        "christmas",
+        "halloween",
+        "winter"
+      ],
+      "fingerprint": "7c0796fbbf249384",
+      "wasm": "wasm/2/1.0.0.wasm",
+      "sha256": "66a9841b5b0ec59ad093404ea91ae2862361905ac27109f884380ca49d123cdb",
+      "versions": [
+        {
+          "version": "1.0.0",
+          "wasm": "wasm/2/1.0.0.wasm",
+          "sha256": "66a9841b5b0ec59ad093404ea91ae2862361905ac27109f884380ca49d123cdb"
+        }
+      ],
+      "params": {},
+      "legacy": "spooky-christmas.wasm",
+      "manifest": {
+        "api": 2,
+        "kind": "theme",
+        "title": "Spooky Christmas",
+        "banner": "MERRY SPOOKY CHRISTMAS",
+        "colors": [
+          "#FF8C28",
+          "#C8E6F0"
+        ],
+        "parts": {
+          "sky": {
+            "colors": 2,
+            "description": "The sky behind everything, top colour then bottom: teal to purple. One colour for a flat sky; off for black."
+          },
+          "stars": {
+            "amount": true,
+            "speed": true,
+            "colors": 1,
+            "description": "Stars."
+          },
+          "moon": {
+            "size": true,
+            "colors": 1,
+            "description": "The huge pale moon behind the hill's curl."
+          },
+          "hill": {
+            "size": true,
+            "colors": 1,
+            "description": "The hill whose crest curls into a spiral, black against the moon."
+          },
+          "bats": {
+            "amount": true,
+            "speed": true,
+            "colors": 1,
+            "description": "Bats flitting across."
+          },
+          "graves": {
+            "amount": true,
+            "colors": 1,
+            "description": "Crooked gravestones."
+          },
+          "fence": {
+            "colors": 1,
+            "description": "A bent iron fence along the ground."
+          },
+          "pumpkins": {
+            "size": true,
+            "description": "Jack-o'-lanterns in Santa hats."
+          },
+          "gifts": {
+            "colors": 2,
+            "description": "Gifts wrapped in stripes (these colours in turn) with lopsided bows."
+          },
+          "snow": {
+            "amount": true,
+            "speed": true,
+            "colors": 2,
+            "description": "Snow falling."
+          }
+        }
+      }
+    }
+  ],
+  "retired": []
+}
