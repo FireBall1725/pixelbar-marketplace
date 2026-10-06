@@ -7,7 +7,7 @@ Every Marketplace item has three handles: a permanent number (its id), a readabl
 An item lives in `items/<kind>/<namespace>/<slug>/`, and its name is `<namespace>/<slug>`, for example `fireball1725/football`.
 
 - The namespace is the author's GitHub username in lowercase. The check refuses an item whose folder doesn't match its `author`, and a new item from a pull request has to go under the pull request author's own name.
-- `pixelbar/` is for official items, and only maintainers can publish there.
+- `pixelbar/` is kept for official items, and only maintainers can publish there. Nothing uses it yet.
 - The slug is lowercase letters, digits and `-`, 2 to 41 characters.
 - A name is unique across kinds: there can't be an animation and a sound both called `fireball1725/beep`.
 - Two people can both have a `football`. Renaming or moving an item is fine, because nothing that matters points at the name.
@@ -64,13 +64,13 @@ A plugin's latest build is `items[].wasm`, for example `wasm/4/1.0.0.wasm`, next
 
 ## Add-ons that need an item
 
-An add-on on the I2C bus names the items it needs in its handshake, as an id and the lowest version it works with: "item 5, 1.0.0 or newer". The bar then:
+An add-on on the I2C bus names the items it needs in its handshake, as an id and the lowest version it works with: "item 4, 1.0.0 or newer". The bar then:
 
 1. Uses the build it already has, when it's new enough.
 2. Otherwise asks Home Assistant's PixelBar integration to fetch it from `dist`. The display never downloads anything itself.
 3. Or takes a copy the add-on carries, sent over the serial link, but only when its SHA-256 matches a published build of that id and version.
 
-After that the add-on sends small commands to the item ("play 5, mood listening"), never pixels.
+After that the add-on sends small commands to the item ("play 4, event goal"), never pixels.
 
 ## Signing (planned)
 
@@ -82,8 +82,8 @@ The items that were here before ids got numbers in the order they were added:
 
 | id | Name | Was |
 | --- | --- | --- |
-| 1 | `pixelbar/hearts` | `items/animation/hearts` |
-| 2 | `pixelbar/spooky-christmas` | `items/theme/spooky-christmas` |
+| 1 | `fireball1725/hearts` | `items/animation/hearts` |
+| 2 | `fireball1725/spooky-christmas` | `items/theme/spooky-christmas` |
 | 3 | `fireball1725/west-ham-bubbles` | `items/animation/west-ham-bubbles` |
 | 4 | `fireball1725/football` | `items/animation/football` |
 
