@@ -3,15 +3,15 @@
 // Renders an item's preview the way the Marketplace shows it: an animated GIF on a medium (256 LED) strip, a still at
 // XXL (640), a big LED view of a picture, the notes of a sound. Plugins are compiled from their C first. A theme also gets
 // the moderation sweep: every part off, then each part on alone, so nothing can hide behind the others.
-//   node tools/preview.mjs items/<kind>/<slug> [out dir]     prints a JSON summary of what it wrote
+//   node tools/preview.mjs items/<kind>/<namespace>/<slug> [out dir]   (files are named <namespace>-<slug>...)     prints a JSON summary of what it wrote
 import { existsSync, mkdirSync, readFileSync, statSync } from "node:fs";
 import { performance } from "node:perf_hooks";
 import { execFileSync } from "node:child_process";
-import { basename, join, resolve } from "node:path";
+import { join, resolve } from "node:path";
 import sim from "./lib/sim.cjs";
 import { SIM_NAMES, loadAnim } from "./lib/anim.mjs";
 import { builtinParts, sweep } from "./lib/parts.mjs";
-import { isPlugin, sourceOf } from "./lib/items.mjs";
+import { isPlugin, partsOf, sourceOf } from "./lib/items.mjs";
 import { gif, leds, png } from "./lib/image.mjs";
 import { synth, wav } from "./lib/audio.mjs";
 import { video } from "./lib/video.mjs";
@@ -19,7 +19,7 @@ import { video } from "./lib/video.mjs";
 const NOW = new Date("2026-10-03T14:25:00"), FPS = 15, SECONDS = 6, ROOT = resolve(new URL("..", import.meta.url).pathname);
 
 export async function preview(dir, out) {
-  const item = JSON.parse(readFileSync(join(dir, "item.json"), "utf8")), slug = basename(resolve(dir)), T = sim(SIM_NAMES);
+  const item = JSON.parse(readFileSync(join(dir, "item.json"), "utf8")), { ns, slug: base } = partsOf(resolve(dir)), slug = `${ns}-${base}`, T = sim(SIM_NAMES);
   mkdirSync(out, { recursive: true });
   const res = { slug, kind: item.kind, title: item.title, files: [], notes: null, ms: null, audio: null, video: null };
   const strip = (W, draw) => { const fb = new T.FB(W, 32); draw(fb); return leds(fb.d, W, 32, 3); };
@@ -110,6 +110,6 @@ export async function preview(dir, out) {
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   const dir = process.argv[2], out = process.argv[3] || "previews";
-  if (!dir || !existsSync(join(dir, "item.json"))) { console.error("usage: node tools/preview.mjs items/<kind>/<slug> [out dir]"); process.exit(2); }
+  if (!dir || !existsSync(join(dir, "item.json"))) { console.error("usage: node tools/preview.mjs items/<kind>/<namespace>/<slug> [out dir]"); process.exit(2); }
   console.log(JSON.stringify(await preview(dir, out), null, 2));
 }

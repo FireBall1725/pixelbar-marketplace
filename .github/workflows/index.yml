@@ -21,7 +21,12 @@ jobs:
         run: sudo apt-get update -q && sudo apt-get install -y -q clang lld
       - run: npm ci
       - run: node tools/validate.mjs
-      - run: node tools/index.mjs dist
+      # Every build already published stays: the old dist branch's wasm/ comes along, and published versions are never rebuilt.
+      - name: Fetch the published builds
+        env:
+          REPO: ${{ github.repository }}
+        run: git clone -q --depth 1 -b dist "https://github.com/${REPO}.git" prev || mkdir -p prev
+      - run: node tools/index.mjs dist --keep prev
       - name: Push the dist branch
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -37,4 +42,4 @@ jobs:
       - name: Purge the jsDelivr cache
         env:
           REPO: ${{ github.repository }}
-        run: for f in $(ls dist); do curl -sf "https://purge.jsdelivr.net/gh/${REPO}@dist/${f}" > /dev/null || echo "purge of ${f} failed"; done
+        run: for f in $(cd dist && ls *.json *.wasm); do curl -sf "https://purge.jsdelivr.net/gh/${REPO}@dist/${f}" > /dev/null || echo "purge of ${f} failed"; done

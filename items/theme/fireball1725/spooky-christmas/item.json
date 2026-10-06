@@ -1,9 +1,15 @@
 {
   "kind": "theme",
+  "id": 2,
+  "version": "1.0.0",
   "title": "Spooky Christmas",
   "description": "A pale moon over a spiral hill, bats, crooked gravestones and jack-o'-lanterns in Santa hats, under falling snow. The built-in scene, ported to the SDK as the theme example.",
   "author": "FireBall1725",
   "license": "MIT",
-  "tags": ["christmas", "halloween", "winter"],
+  "tags": [
+    "christmas",
+    "halloween",
+    "winter"
+  ],
   "source": "theme.c"
 }

@@ -1,12 +1,14 @@
 # Contributing
 
-Thanks for sharing what you made. Each item is one folder, `items/<kind>/<name>/`, with an `item.json`. The folder name is lowercase letters, digits and `-`, 2 to 41 characters, and it's how the item is known.
+Thanks for sharing what you made. Each item is one folder, `items/<kind>/<your GitHub username>/<name>/`, with an `item.json`. Your username goes in lowercase; the name is lowercase letters, digits and `-`, 2 to 41 characters. Every item also has a permanent number and a version: [docs/ids.md](docs/ids.md) has the details.
 
 ## item.json
 
 ```json
 {
   "kind": "theme",
+  "id": 12,
+  "version": "1.0.0",
   "title": "Snowy Christmas",
   "description": "The Christmas scene with twice the snow and a bigger snowman.",
   "author": "your-github-username",
@@ -21,9 +23,11 @@ Thanks for sharing what you made. Each item is one folder, `items/<kind>/<name>/
 | Field | Rules |
 | --- | --- |
 | `kind` | Matches the folder: `notification`, `card`, `sensor`, `theme`, `sound`, `picture` or `animation` |
+| `id` | The item's number, which never changes. For a new item, use the number the pull request check gives you |
+| `version` | Three numbers, starting at `1.0.0`. Raise it every time you change the item |
 | `title` | Up to 60 characters |
 | `description` | Optional, up to 300 characters |
-| `author` | Your GitHub username |
+| `author` | Your GitHub username, the same as the folder above your item's |
 | `license` | `CC-BY-4.0`, `CC-BY-SA-4.0`, `CC0-1.0` or `MIT` |
 | `tags` | Optional, up to 5 lowercase words |
 | `msgs` | 1 to 8 messages, each `{ "topic", "payload" }`, every topic starting `pixelbar/all/` |
@@ -50,14 +54,16 @@ The whole file stays under 64 KB. The easiest way to get the messages right is t
 - Personal details: names, addresses, phone numbers, plates.
 - Copies of something already here. The check compares messages and plugin source, so a renamed copy is caught.
 
+To take an item out, delete its folder and add it to `retired.json` in the same pull request. Its number is never reused, and its builds stay up so anything already using it keeps working.
+
 The licence you pick applies to everything in your folder. CC-BY-4.0 is the default suggestion: anyone can use and change it, and your name stays on it.
 
 ## Before you push
 
 ```sh
 npm ci
-node tools/validate.mjs items/<kind>/<name>
-node tools/preview.mjs items/<kind>/<name> previews    # look at previews/<name>.gif
+node tools/validate.mjs items/<kind>/<username>/<name>
+node tools/preview.mjs items/<kind>/<username>/<name> previews    # look at previews/<username>-<name>.gif
 ```
 
 A plugin you can also watch live: open the built `.wasm` on the site's Demo or in Home Assistant's Marketplace tab ("Open a .wasm you built"); it reloads each time you rebuild it.

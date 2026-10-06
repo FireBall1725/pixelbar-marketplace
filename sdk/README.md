@@ -27,17 +27,18 @@ sdk/build.sh my-anim.c                      # writes my-anim.wasm
 To preview it, put it in an item folder and render it:
 
 ```sh
-mkdir -p items/animation/my-anim
-cp my-anim.c items/animation/my-anim/anim.c
-# write items/animation/my-anim/item.json (below), then:
-node tools/preview.mjs items/animation/my-anim previews
+mkdir -p items/animation/your-username/my-anim
+cp my-anim.c items/animation/your-username/my-anim/anim.c
+# write items/animation/your-username/my-anim/item.json (below), then:
+node tools/preview.mjs items/animation/your-username/my-anim previews
 ```
 
-That writes `previews/my-anim.gif` (6 seconds on a 256 LED strip) and `previews/my-anim-xxl.png` (one frame at 640), and prints how long a frame took.
+That writes `previews/your-username-my-anim.gif` (6 seconds on a 256 LED strip) and `previews/your-username-my-anim-xxl.png` (one frame at 640), and prints how long a frame took.
 
 ```json
 {
   "kind": "animation",
+  "version": "1.0.0",
   "title": "My animation",
   "description": "What it draws.",
   "author": "your-github-username",
@@ -223,8 +224,8 @@ What keeps it fast:
 
 ## Trying it as you go
 
-Build it, then open it where the display's simulator runs: on [the site's Demo](https://pixelbar.fireball1725.ca/demo) or in Home Assistant's Marketplace tab, under Animations or Themes, **Open a .wasm you built**. It joins the list as `mp:local-<name>` with the option and part controls from its manifest, plays on the preview at any size, and in Chrome it reloads within a second of each rebuild, so a terminal running `sdk/build.sh` on save is the whole loop. Nothing leaves your machine. For the same GIFs the pull request bot posts, run `node tools/preview.mjs items/<kind>/<name> previews`.
+Build it, then open it where the display's simulator runs: on [the site's Demo](https://pixelbar.fireball1725.ca/demo) or in Home Assistant's Marketplace tab, under Animations or Themes, **Open a .wasm you built**. It joins the list as `mp:local-<name>` with the option and part controls from its manifest, plays on the preview at any size, and in Chrome it reloads within a second of each rebuild, so a terminal running `sdk/build.sh` on save is the whole loop. Nothing leaves your machine. For the same GIFs the pull request bot posts, run `node tools/preview.mjs items/<kind>/<username>/<name> previews`.
 
 ## Sending it in
 
-Commit `items/animation/<name>/anim.c` (or `items/theme/<name>/theme.c`) and `item.json`, and open a pull request. Don't commit the `.wasm`: CI builds it from your source, so what runs is always what was reviewed. The pull request comment shows the GIF, the still, the compiled size and the frame time, and a theme's part sweep.
+Commit `items/animation/<username>/<name>/anim.c` (or `items/theme/<username>/<name>/theme.c`) and `item.json`, and open a pull request. Leave `id` out the first time: the check tells you which number to use. Don't commit the `.wasm`: CI builds it from your source, so what runs is always what was reviewed. The pull request comment shows the GIF, the still, the compiled size and the frame time, and a theme's part sweep.

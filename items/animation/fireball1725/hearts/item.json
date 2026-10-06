@@ -1,0 +1,23 @@
+{
+  "kind": "animation",
+  "id": 1,
+  "version": "1.0.0",
+  "title": "Hearts",
+  "description": "Hearts float up in the notification's colours while the title drops in. The SDK's example.",
+  "author": "FireBall1725",
+  "license": "MIT",
+  "tags": [
+    "love",
+    "celebration"
+  ],
+  "source": "anim.c",
+  "params": {
+    "title": "HAPPY ANNIVERSARY",
+    "message": "TEN YEARS TODAY",
+    "colors": [
+      "#FF5078",
+      "#FF96BE",
+      "#E12850"
+    ]
+  }
+}

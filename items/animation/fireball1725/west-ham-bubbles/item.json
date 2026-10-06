@@ -1,5 +1,7 @@
 {
   "kind": "animation",
+  "id": 3,
+  "version": "1.0.0",
   "title": "West Ham bubbles",
   "description": "The football card for a club that blows bubbles: every event it has (goal, message, substitution board, yellow or red card, line-up), with bubbles floating up through all of them and popping near the top, in claret and blue unless you send colours.",
   "author": "FireBall1725",

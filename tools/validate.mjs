@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // Copyright (C) 2026 FireBall1725
 // Checks items before they're merged: the fields every item needs, each message against the display's own schemas,
-// what each kind must carry, size limits, and that nothing is already in the marketplace.
+// what each kind must carry, size limits, ids and names, and that nothing is already in the marketplace.
 //   node tools/validate.mjs [item dirs...]   (all items when none are given) exits 1 on any problem
 import { existsSync, readFileSync, statSync } from "node:fs";
-import { basename, dirname, join } from "node:path";
+import { join } from "node:path";
 import { problem, route } from "./lib/schema.mjs";
-import { KINDS, LICENSES, MAX_BYTES, fingerprint, isPlugin, listItems, sourceOf } from "./lib/items.mjs";
+import { KINDS, LICENSES, MAINTAINERS, MAX_BYTES, OFFICIAL, SEMVER, fingerprint, isPlugin, listItems, partsOf, readRetired, sourceOf } from "./lib/items.mjs";
 
-const SLUG = /^[a-z0-9][a-z0-9-]{1,40}$/, LOGIN = /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/, TAG = /^[a-z0-9-]{2,24}$/;
+const SLUG = /^(?=[a-z0-9-]*[a-z])[a-z0-9][a-z0-9-]{1,40}$/, LOGIN = /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/, TAG = /^[a-z0-9-]{2,24}$/, NS = /^[a-z0-9](?:[a-z0-9-]{0,38})$/;
 /* What each kind must hold, by the routes of its messages. */
 const NEEDS = {
   notification: [ms => ms.some(r => r.kind === "notify"), "a notification message (pixelbar/all/notify/<key>)"],
@@ -20,9 +20,10 @@ const NEEDS = {
 };
 
 export function check(dir, seen = new Map()) {
-  const out = [], say = m => out.push(m), kind = basename(dirname(dir)), slug = basename(dir), file = join(dir, "item.json");
-  if (!KINDS.includes(kind)) say(`"${kind}" isn't a kind: items go in items/<${KINDS.join("|")}>/<name>/.`);
-  if (!SLUG.test(slug)) say(`The folder name "${slug}" should be lowercase letters, digits and -, 2 to 41 long.`);
+  const out = [], say = m => out.push(m), { kind, ns, slug } = partsOf(dir), file = join(dir, "item.json");
+  if (!KINDS.includes(kind)) say(`"${kind}" isn't a kind: items go in items/<${KINDS.join("|")}>/<your GitHub username>/<name>/.`);
+  if (!NS.test(ns)) say(`The folder "${ns}" should be your GitHub username in lowercase: items/${kind}/<username>/${slug}/.`);
+  if (!SLUG.test(slug)) say(`The folder name "${slug}" should be lowercase letters, digits and -, 2 to 41 long, with at least one letter (a number on its own reads as an id).`);
   if (!existsSync(file)) { say("item.json is missing."); return { problems: out }; }
   if (statSync(file).size > MAX_BYTES) say("item.json is over 64 KB.");
   let item;
@@ -31,9 +32,13 @@ export function check(dir, seen = new Map()) {
   if (typeof item.title !== "string" || !item.title.trim() || item.title.length > 60) say('"title" is required, up to 60 characters.');
   if (item.description != null && (typeof item.description !== "string" || item.description.length > 300)) say('"description" is up to 300 characters.');
   if (typeof item.author !== "string" || !LOGIN.test(item.author)) say('"author" is your GitHub username.');
+  else if (ns !== item.author.toLowerCase() && !(ns === OFFICIAL && MAINTAINERS.includes(item.author)))
+    say(`The item is in items/${kind}/${ns}/, but its author is ${item.author}: it goes in items/${kind}/${item.author.toLowerCase()}/${slug}/.`);
+  if (!Number.isInteger(item.id) || item.id < 1) say('"id" is the item\'s number, a whole number from 1: the pull request check says which one to use.');
+  if (typeof item.version !== "string" || !SEMVER.test(item.version)) say('"version" is three numbers like "1.0.0": raise it whenever you change the item.');
   if (!LICENSES.includes(item.license)) say(`"license" must be one of: ${LICENSES.join(", ")}.`);
   if (item.tags != null && (!Array.isArray(item.tags) || item.tags.length > 5 || item.tags.some(t => !TAG.test(t)))) say('"tags" is up to five lowercase words (letters, digits and -).');
-  const allowed = new Set(["kind", "title", "description", "author", "license", "tags", "msgs", "source", "params"]);
+  const allowed = new Set(["kind", "id", "version", "title", "description", "author", "license", "tags", "msgs", "source", "params"]);
   for (const k of Object.keys(item)) if (!allowed.has(k)) say(`"${k}" isn't a field of an item.`);
   const flags = [];
   if (isPlugin(item)) {
@@ -65,11 +70,34 @@ export function check(dir, seen = new Map()) {
   return { item, problems: out, flags: [...new Set(flags)] };
 }
 
+/* Across every item: no two share an id or a name, and no id belongs to a retired item. Gives a map of folder -> problems. */
+export function crossCheck(all = listItems(), retired = readRetired()) {
+  const out = new Map(), say = (d, m) => out.set(d, [...(out.get(d) || []), m]), byId = new Map(), byName = new Map();
+  for (const d of all) {
+    let item; try { item = JSON.parse(readFileSync(join(d, "item.json"), "utf8")); } catch { continue; }
+    const { name } = partsOf(d);
+    if (Number.isInteger(item.id)) {
+      if (byId.has(item.id)) say(d, `id ${item.id} is already ${byId.get(item.id)}'s.`); else byId.set(item.id, d);
+      const r = retired.find(x => x.id === item.id);
+      if (r) say(d, `id ${item.id} belonged to ${r.name}, which was retired; ids are never reused.`);
+    }
+    if (byName.has(name)) say(d, `${name} is already the name of ${byName.get(name)}: names are unique across kinds.`); else byName.set(name, d);
+  }
+  return out;
+}
+/* The number a new item gets: one past every id ever issued, retired ones included. */
+export function nextId(ids, retired = readRetired()) {
+  return Math.max(0, ...ids, ...retired.map(r => r.id)) + 1;
+}
+
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const all = listItems(), targets = process.argv.length > 2 ? process.argv.slice(2) : all, seen = new Map();
+  const all = listItems(), targets = process.argv.length > 2 ? process.argv.slice(2) : all, seen = new Map(), cross = crossCheck(all);
   // Everything already merged counts for duplicates; the items being checked are compared last.
   for (const d of all) if (!targets.includes(d)) { try { const it = JSON.parse(readFileSync(join(d, "item.json"), "utf8")); seen.set(fingerprint(d, it), d); } catch { /* checked when it's a target */ } }
   let bad = 0;
-  for (const d of targets) { const r = check(d, seen); if (r.problems.length) { bad++; console.log(`✗ ${d}`); r.problems.forEach(p => console.log(`    ${p}`)); } else console.log(`✓ ${d}`); }
+  for (const d of targets) {
+    const r = check(d, seen), problems = [...r.problems, ...(cross.get(d) || [])];
+    if (problems.length) { bad++; console.log(`✗ ${d}`); problems.forEach(p => console.log(`    ${p}`)); } else console.log(`✓ ${d}`);
+  }
   process.exit(bad ? 1 : 0);
 }
