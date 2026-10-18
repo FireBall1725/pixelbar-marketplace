@@ -228,4 +228,4 @@ Build it, then open it where the display's simulator runs: on [the site's Demo](
 
 ## Sending it in
 
-Commit `items/animation/<username>/<name>/anim.c` (or `items/theme/<username>/<name>/theme.c`) and `item.json`, and open a pull request. Leave `id` out the first time: the check tells you which number to use. Don't commit the `.wasm`: CI builds it from your source, so what runs is always what was reviewed. The pull request comment shows the GIF, the still, the compiled size and the frame time, and a theme's part sweep.
+`node tools/new-item.mjs animation <name>` starts the folder with an `item.json` and a starter `anim.c`. Commit `items/animation/<username>/<name>/anim.c` (or `items/theme/<username>/<name>/theme.c`) and `item.json`, and open a pull request. The `id` in `item.json` is a UUID that stays with the item for good; if it's missing the check prints one to paste in. Don't commit the `.wasm`: CI builds it from your source, so what runs is always what was reviewed. The pull request comment shows the GIF, the still, the compiled size and the frame time, and a theme's part sweep.

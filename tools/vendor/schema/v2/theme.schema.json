@@ -15,8 +15,8 @@
     },
     "theme": {
       "type": "string",
-      "pattern": "^([a-z_]+|mp:[a-z0-9][a-z0-9-]{1,40})$",
-      "description": "A holiday scene in place of the weather sky. An empty message goes back to the weather. A Marketplace plugin theme is mp:<its slug>, with the parts its manifest lists."
+      "pattern": "^([a-z_]+|mp:(?:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|[a-z0-9][a-z0-9-]{0,38}/[a-z0-9][a-z0-9-]{1,40})(?:@[0-9]{1,4}\\.[0-9]{1,4}\\.[0-9]{1,4})?)$",
+      "description": "A holiday scene in place of the weather sky. An empty message goes back to the weather. A Marketplace plugin theme is mp:<author>/<name> (mp:fireball1725/spooky-christmas) or mp:<id> (its UUID), with @<version> for one build, and the parts its manifest lists."
     },
     "parts": {
       "type": "object",

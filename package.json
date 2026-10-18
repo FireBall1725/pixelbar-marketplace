@@ -6,7 +6,8 @@
   "scripts": {
     "validate": "node tools/validate.mjs",
     "preview": "node tools/preview.mjs",
-    "index": "node tools/index.mjs"
+    "index": "node tools/index.mjs",
+    "new-item": "node tools/new-item.mjs"
   },
   "dependencies": {
     "ajv": "^8.17.1",

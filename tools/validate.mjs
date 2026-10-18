@@ -6,9 +6,9 @@
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { problem, route } from "./lib/schema.mjs";
-import { KINDS, LICENSES, MAINTAINERS, MAX_BYTES, OFFICIAL, SEMVER, fingerprint, isPlugin, listItems, partsOf, readRetired, sourceOf } from "./lib/items.mjs";
+import { KINDS, LICENSES, MAINTAINERS, MAX_BYTES, OFFICIAL, SEMVER, UUID, fingerprint, newId, isPlugin, listItems, partsOf, readRetired, sourceOf } from "./lib/items.mjs";
 
-const SLUG = /^(?=[a-z0-9-]*[a-z])[a-z0-9][a-z0-9-]{1,40}$/, LOGIN = /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/, TAG = /^[a-z0-9-]{2,24}$/, NS = /^[a-z0-9](?:[a-z0-9-]{0,38})$/;
+const SLUG = /^[a-z0-9][a-z0-9-]{1,40}$/, LOGIN = /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/, TAG = /^[a-z0-9-]{2,24}$/, NS = /^[a-z0-9](?:[a-z0-9-]{0,38})$/;
 /* What each kind must hold, by the routes of its messages. */
 const NEEDS = {
   notification: [ms => ms.some(r => r.kind === "notify"), "a notification message (pixelbar/all/notify/<key>)"],
@@ -23,7 +23,7 @@ export function check(dir, seen = new Map()) {
   const out = [], say = m => out.push(m), { kind, ns, slug } = partsOf(dir), file = join(dir, "item.json");
   if (!KINDS.includes(kind)) say(`"${kind}" isn't a kind: items go in items/<${KINDS.join("|")}>/<your GitHub username>/<name>/.`);
   if (!NS.test(ns)) say(`The folder "${ns}" should be your GitHub username in lowercase: items/${kind}/<username>/${slug}/.`);
-  if (!SLUG.test(slug)) say(`The folder name "${slug}" should be lowercase letters, digits and -, 2 to 41 long, with at least one letter (a number on its own reads as an id).`);
+  if (!SLUG.test(slug)) say(`The folder name "${slug}" should be lowercase letters, digits and -, 2 to 41 long.`);
   if (!existsSync(file)) { say("item.json is missing."); return { problems: out }; }
   if (statSync(file).size > MAX_BYTES) say("item.json is over 64 KB.");
   let item;
@@ -34,7 +34,7 @@ export function check(dir, seen = new Map()) {
   if (typeof item.author !== "string" || !LOGIN.test(item.author)) say('"author" is your GitHub username.');
   else if (ns !== item.author.toLowerCase() && !(ns === OFFICIAL && MAINTAINERS.includes(item.author)))
     say(`The item is in items/${kind}/${ns}/, but its author is ${item.author}: it goes in items/${kind}/${item.author.toLowerCase()}/${slug}/.`);
-  if (!Number.isInteger(item.id) || item.id < 1) say('"id" is the item\'s number, a whole number from 1: the pull request check says which one to use.');
+  if (typeof item.id !== "string" || !UUID.test(item.id)) say(`"id" is the item's UUID, for example "${newId()}": node tools/new-item.mjs makes one, or node -e "console.log(crypto.randomUUID())".`);
   if (typeof item.version !== "string" || !SEMVER.test(item.version)) say('"version" is three numbers like "1.0.0": raise it whenever you change the item.');
   if (!LICENSES.includes(item.license)) say(`"license" must be one of: ${LICENSES.join(", ")}.`);
   if (item.tags != null && (!Array.isArray(item.tags) || item.tags.length > 5 || item.tags.some(t => !TAG.test(t)))) say('"tags" is up to five lowercase words (letters, digits and -).');
@@ -76,7 +76,7 @@ export function crossCheck(all = listItems(), retired = readRetired()) {
   for (const d of all) {
     let item; try { item = JSON.parse(readFileSync(join(d, "item.json"), "utf8")); } catch { continue; }
     const { name } = partsOf(d);
-    if (Number.isInteger(item.id)) {
+    if (typeof item.id === "string" && UUID.test(item.id)) {
       if (byId.has(item.id)) say(d, `id ${item.id} is already ${byId.get(item.id)}'s.`); else byId.set(item.id, d);
       const r = retired.find(x => x.id === item.id);
       if (r) say(d, `id ${item.id} belonged to ${r.name}, which was retired; ids are never reused.`);
@@ -85,11 +85,6 @@ export function crossCheck(all = listItems(), retired = readRetired()) {
   }
   return out;
 }
-/* The number a new item gets: one past every id ever issued, retired ones included. */
-export function nextId(ids, retired = readRetired()) {
-  return Math.max(0, ...ids, ...retired.map(r => r.id)) + 1;
-}
-
 if (import.meta.url === `file://${process.argv[1]}`) {
   const all = listItems(), targets = process.argv.length > 2 ? process.argv.slice(2) : all, seen = new Map(), cross = crossCheck(all);
   // Everything already merged counts for duplicates; the items being checked are compared last.

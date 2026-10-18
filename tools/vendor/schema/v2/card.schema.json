@@ -1432,7 +1432,7 @@
               "properties": {
                 "name": {
                   "type": "string",
-                  "pattern": "^mp:[a-z0-9][a-z0-9-]{1,40}$"
+                  "pattern": "^mp:(?:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|[a-z0-9][a-z0-9-]{0,38}/[a-z0-9][a-z0-9-]{1,40})(?:@[0-9]{1,4}\\.[0-9]{1,4}\\.[0-9]{1,4})?$"
                 }
               },
               "required": [
@@ -1751,7 +1751,7 @@
     "animation_name": {
       "type": "string",
       "description": "goal, fireworks, confetti, red_alert, countdown, live, raid, weather, flag, or any holiday theme.",
-      "pattern": "^(goal|weather|fireworks|confetti|live|raid|red_alert|countdown|flag|new_year|valentines|lunar_new_year|pancake_day|st_patricks|holi|easter|eid|pride|canada_day|fourth_of_july|thanksgiving|halloween|dia_de_muertos|diwali|remembrance|hanukkah|christmas|mp:[a-z0-9][a-z0-9-]{1,40})$"
+      "pattern": "^(goal|weather|fireworks|confetti|live|raid|red_alert|countdown|flag|new_year|valentines|lunar_new_year|pancake_day|st_patricks|holi|easter|eid|pride|canada_day|fourth_of_july|thanksgiving|halloween|dia_de_muertos|diwali|remembrance|hanukkah|christmas|mp:(?:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|[a-z0-9][a-z0-9-]{0,38}/[a-z0-9][a-z0-9-]{1,40})(?:@[0-9]{1,4}\\.[0-9]{1,4}\\.[0-9]{1,4})?)$"
     },
     "animation_title": {
       "type": "string",
