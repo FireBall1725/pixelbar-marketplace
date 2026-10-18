@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // Copyright (C) 2026 FireBall1725
 // Checks the checker: good items of every kind pass and render, broken ones fail with the right reason.
-import { mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { randomUUID } from "node:crypto";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { check } from "../validate.mjs";
@@ -9,8 +11,7 @@ import { preview } from "../preview.mjs";
 
 const T = join(tmpdir(), "pbm-test"), out = process.argv[2] || join(T, "out");
 rmSync(T, { recursive: true, force: true });
-let nid = 0;
-const mk = (kind, slug, item, ns = "fireball1725") => { const d = join(T, "items", kind, ns, slug); mkdirSync(d, { recursive: true }); writeFileSync(join(d, "item.json"), JSON.stringify({ kind, id: ++nid, version: "1.0.0", author: "FireBall1725", license: "CC-BY-4.0", ...item })); return d; };
+const mk = (kind, slug, item, ns = "fireball1725") => { const d = join(T, "items", kind, ns, slug); mkdirSync(d, { recursive: true }); writeFileSync(join(d, "item.json"), JSON.stringify({ kind, id: randomUUID(), version: "1.0.0", author: "FireBall1725", license: "CC-BY-4.0", ...item })); return d; };
 const img = (() => { const w = 8, h = 8, b = Buffer.alloc(w * h * 2); for (let i = 0; i < w * h; i++) { const v = (i % 3 === 0) ? 0xF800 : (i % 3 === 1) ? 0x07E0 : 0x001F; b[i * 2] = v >> 8; b[i * 2 + 1] = v & 255; } return { v: 2, w, h, format: "rgb565", data: b.toString("base64") }; })();
 const good = {
   notification: mk("notification", "front-door", { title: "Front door", msgs: [{ topic: "pixelbar/all/notify/front_door", payload: { v: 2, tier: "alert", sound: "chime", card: { card: "text", icon: "door", title: "FRONT DOOR", message: "OPENED" } } }] }),
@@ -28,9 +29,23 @@ const bad = {
   "duplicate": [mk("card", "big-clock-2", { title: "Copy", msgs: [{ topic: "pixelbar/all/box/main", payload: { v: 2, cards: [{ card: "clock" }] } }] }), /same as/],
   "someone else's folder": [mk("card", "their-clock", { title: "X", msgs: [{ topic: "pixelbar/all/box/side", payload: { v: 2, cards: [{ card: "clock" }] } }] }, "someone"), /goes in items\/card\/fireball1725/],
   "no id": [mk("card", "no-id", { title: "X", id: undefined, msgs: [{ topic: "pixelbar/all/box/top", payload: { v: 2, cards: [{ card: "clock" }] } }] }), /"id"/],
+  "number id": [mk("card", "number-id", { title: "X", id: 7, msgs: [{ topic: "pixelbar/all/box/left", payload: { v: 2, cards: [{ card: "clock" }] } }] }), /"id" is the item's UUID/],
   "bad version": [mk("card", "bad-version", { title: "X", version: "1.0", msgs: [{ topic: "pixelbar/all/box/bottom", payload: { v: 2, cards: [{ card: "clock" }] } }] }), /"version"/],
 };
 let fail = 0;
+// The scaffold: every kind it can start passes the check as it is, in a folder under the given username.
+const here = process.cwd(), root = join(T, "scaffold"), tools = new URL("..", import.meta.url).pathname;
+mkdirSync(join(root, "sdk/examples/hearts"), { recursive: true });
+writeFileSync(join(root, "sdk/examples/hearts/hearts.c"), readFileSync(join(tools, "../sdk/examples/hearts/hearts.c")));
+for (const kind of ["notification", "card", "sensor", "theme", "sound", "animation"]) {
+  try {
+    execFileSync("node", [join(tools, "new-item.mjs"), kind, "starter-" + kind, "Someone"], { cwd: root, stdio: "pipe" });
+    const d = join(root, "items", kind, "someone", "starter-" + kind), r = (process.chdir(root), check(join("items", kind, "someone", "starter-" + kind)));
+    process.chdir(here);
+    const id = JSON.parse(readFileSync(join(d, "item.json"), "utf8")).id;
+    if (r.problems.length || !/^[0-9a-f-]{36}$/.test(id)) { fail++; console.log(`✗ scaffold ${kind}: ${r.problems.join(" | ") || "id " + id}`); } else console.log(`✓ scaffold ${kind} → ${id}`);
+  } catch (e) { process.chdir(here); fail++; console.log(`✗ scaffold ${kind}: ${String(e.stderr || e.message).split("\n")[0]}`); }
+}
 const seen = new Map();
 for (const [k, d] of Object.entries(good)) { const r = check(d, seen); if (r.problems.length) { fail++; console.log(`✗ good ${k}: ${r.problems.join(" | ")}`); continue; } const p = await preview(d, out); console.log(`✓ good ${k} → ${p.files.join(", ")}${p.notes ? `  notes ${p.notes.names.join(" ")}` : ""}`); }
 for (const [k, [d, re]] of Object.entries(bad)) { const r = check(d, seen); const ok = r.problems.some(p => re.test(p)); if (!ok) fail++; console.log(`${ok ? "✓" : "✗"} bad ${k}: ${r.problems.join(" | ") || "(passed!)"}`); }

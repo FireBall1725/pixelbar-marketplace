@@ -1,13 +1,15 @@
 # Contributing
 
-Thanks for sharing what you made. Each item is one folder, `items/<kind>/<your GitHub username>/<name>/`, with an `item.json`. Your username goes in lowercase; the name is lowercase letters, digits and `-`, 2 to 41 characters. Every item also has a permanent number and a version: [docs/ids.md](docs/ids.md) has the details.
+Thanks for sharing what you made. Each item is one folder, `items/<kind>/<your GitHub username>/<name>/`, with an `item.json`. Your username goes in lowercase; the name is lowercase letters, digits and `-`, 2 to 41 characters. Every item also has a permanent id (a UUID) and a version: [docs/ids.md](docs/ids.md) has the details.
+
+The quickest start is `node tools/new-item.mjs <kind> <name>`. It makes the folder, an `item.json` with a fresh id, and something valid to edit (a starter animation for `animation`).
 
 ## item.json
 
 ```json
 {
   "kind": "theme",
-  "id": 12,
+  "id": "3888a1f4-ca24-4795-89ad-52d5935f6a2a",
   "version": "1.0.0",
   "title": "Snowy Christmas",
   "description": "The Christmas scene with twice the snow and a bigger snowman.",
@@ -23,7 +25,7 @@ Thanks for sharing what you made. Each item is one folder, `items/<kind>/<your G
 | Field | Rules |
 | --- | --- |
 | `kind` | Matches the folder: `notification`, `card`, `sensor`, `theme`, `sound`, `picture` or `animation` |
-| `id` | The item's number, which never changes. For a new item, use the number the pull request check gives you |
+| `id` | The item's UUID, which never changes. `tools/new-item.mjs` makes one; so does `node -e "console.log(crypto.randomUUID())"`, and the pull request check prints one if it's missing |
 | `version` | Three numbers, starting at `1.0.0`. Raise it every time you change the item |
 | `title` | Up to 60 characters |
 | `description` | Optional, up to 300 characters |

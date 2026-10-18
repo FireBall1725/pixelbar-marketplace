@@ -1264,12 +1264,26 @@ async function loadPlugin(bytes,P={}){const st={fb:null,mem:null,t:0},pb=pluginI
 function addPluginTheme(key,plug){const m=plug.manifest||{},tc=(m.colors||[]).map(rgbOf).filter(Boolean);
   THEMES[key]={name:m.title||key,title:fitText(m.banner||m.title||key,F5),tc:tc.length>1?tc:tc[0]||[255,255,255],bg:plug.bg,plugin:plug};return THEMES[key];}
 /* The notification version: the scene, a little dimmer, with the title dropping in (remembrance fades in instead). */
-/* Marketplace plugins by key (mp:<slug>), fetched from the Marketplace's dist files and registered once: a theme into THEMES,
-   an animation into PLUG.anim. The page can point pluginSource at its own copy of the Marketplace. Until the .wasm is in, the key draws nothing. */
-const PLUG={anim:{},loading:{}};let PLUGIN_SRC=slug=>fetch("https://cdn.jsdelivr.net/gh/FireBall1725/pixelbar-marketplace@dist/"+slug+".wasm").then(r=>r.ok?r.arrayBuffer():null);
+/* Marketplace plugins by key, fetched from the Marketplace's dist files and registered once: a theme into THEMES, an animation into
+   PLUG.anim. A key is mp:<author>/<name> (mp:fireball1725/football) or mp:<id>, the item's UUID, either with @<version> for one build,
+   or mp:local-<name> for a .wasm a developer opened from disk. Saved setups keep the id, so a rename can't break them.
+   The page can point pluginSource at its own copy of the Marketplace. Until the .wasm is in, the key draws nothing. */
+const MARKET_DIST="https://cdn.jsdelivr.net/gh/FireBall1725/pixelbar-marketplace@dist/";
+/* The dist file for a key without its mp: (a ref), from index.json (idx): undefined until the index is given, null when it doesn't
+   have the item or that version. A local-<name> ref isn't in the Marketplace at all, so the page's pluginSource has to serve it. */
+function marketPath(ref,idx){if(/^local-/.test(ref))return null;if(!idx)return undefined;const m=/^(.+?)(?:@(\d+\.\d+\.\d+))?$/.exec(ref);
+  const it=[...(idx.items||[]),...(idx.retired||[])].find(i=>i.id===m[1]||i.name===m[1]);if(!it)return null;
+  if(m[2]){const v=(it.versions||[]).find(v=>v.version===m[2]);return v?v.wasm:null;}
+  return it.wasm||((it.versions||[]).slice(-1)[0]||{}).wasm||null;}
+/* A pluginSource for the Marketplace at base, fetching with get: its index.json is read once, and only for keys that need it. */
+function marketSource(base,get){let idx=null;const index=()=>idx||(idx=get(base+"index.json").then(r=>r.ok?r.json():null).catch(()=>null));
+  return async ref=>{let p=marketPath(ref,null);if(p===undefined)p=marketPath(ref,await index());if(!p)return null;const r=await get(base+p);return r.ok?r.arrayBuffer():null;};}
+const PLUG={anim:{},loading:{}};let PLUGIN_SRC=marketSource(MARKET_DIST,u=>fetch(u));
 function setPluginSource(fn){PLUGIN_SRC=fn;}
-const isPluginKey=k=>typeof k==="string"&&/^mp:[a-z0-9][a-z0-9-]{1,40}$/.test(k);
+const isPluginKey=k=>typeof k==="string"&&/^mp:(?:(?:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|[a-z0-9][a-z0-9-]{0,38}\/[a-z0-9][a-z0-9-]{1,40})(?:@[0-9]{1,4}\.[0-9]{1,4}\.[0-9]{1,4})?|local-[a-z0-9-]{1,34})$/.test(k);
 function ensurePlugin(key,kind){if(PLUG.loading[key])return PLUG.loading[key];PLUG.loading[key]=(async()=>{try{const bytes=await PLUGIN_SRC(key.slice(3));if(!bytes)return;const P={},plug=await loadPlugin(bytes,P);plug.P=P;if(kind==="theme")addPluginTheme(key,plug);else PLUG.anim[key]=plug;}catch(e){/* stays dark */}})();return PLUG.loading[key];}
+/* Drops a plugin so the next frame fetches it again: a developer's rebuilt .wasm. */
+function forgetPlugin(key){delete PLUG.anim[key];delete PLUG.loading[key];if(THEMES[key]&&THEMES[key].plugin)delete THEMES[key];}
 /* The theme or the animation plugin for a key: null while it loads, and for a key that isn't one. */
 function themeOf(k){if(THEMES[k])return THEMES[k];if(isPluginKey(k))ensurePlugin(k,"theme");return null;}
 function animPlugin(k){if(PLUG.anim[k])return PLUG.anim[k];if(isPluginKey(k))ensurePlugin(k,"anim");return null;}
@@ -2919,7 +2933,7 @@ function applyNotify(key,b,x={}){const ik="json:"+key;
   for(const k in THEMES)ANIMS[k]=(fb,S)=>sHoliday(fb,S,{theme:k,title:f.title,message:md(),flags:b.flags,night:b.night,colors:cols});
   // A Marketplace animation takes the strip like a built-in one; its plugin reads the words, colours and parts from the card each frame.
   if(isPluginKey(b.animation))ANIMS[b.animation]=(fb,S)=>{const pl=animPlugin(b.animation);if(!pl)return;const g=F();Object.assign(pl.P,{title:(g.title||"").trim()?g.title:undefined,message:g.message,detail:g.detail,colors:Array.isArray(b.colors)?b.colors:undefined,parts:b.parts,options:b.options,images:imgs});pl.frame(fb,S.ft!=null?S.ft:S.t);};
-  if(b.animation!==undefined&&!ANIMS[b.animation])throw new Error('"animation" must be one of: '+Object.keys(ANIMS).join(", ")+", or a Marketplace animation, mp:<slug>.");
+  if(b.animation!==undefined&&!ANIMS[b.animation])throw new Error('"animation" must be one of: '+Object.keys(ANIMS).join(", ")+", or a Marketplace animation, mp:<author>/<name> or mp:<id>.");
   const anim=b.animation?ANIMS[b.animation]:null,ol=outlineOf(b.outline);
   if(ol!==undefined)CARD_OUTLINE[ik]=ol;else delete CARD_OUTLINE[ik];
   if(b.effects!==undefined)CARD_FX[ik]=b.effects;else delete CARD_FX[ik];
@@ -2984,7 +2998,7 @@ function applyWeather(b){if(b===null)return "Nothing to clear; the display keeps
   live.cond=h[1];live.wx=wx;live.day=h[2]!==undefined?!!h[2]:(b.is_day!==undefined?!!b.is_day:live.day);live.syncKind();syncBars();return `Weather set to ${b.condition}, ${live.day?"day":"night"}.`;}
 /* pixelbar/<room>/theme: a holiday scene in place of the weather sky on idle. An empty message goes back to the weather. */
 function applyTheme(b){if(b===null||!b.theme){live.theme=null;live.themeO={};syncBars();return "Back to the weather.";}
-  if(!THEMES[b.theme]&&!isPluginKey(b.theme))throw new Error('"theme" must be one of: '+Object.keys(THEMES).join(", ")+", or a Marketplace theme, mp:<slug>.");themeOf(b.theme);
+  if(!THEMES[b.theme]&&!isPluginKey(b.theme))throw new Error('"theme" must be one of: '+Object.keys(THEMES).join(", ")+", or a Marketplace theme, mp:<author>/<name> or mp:<id>.");themeOf(b.theme);
   if(b.flags!==undefined&&(!Array.isArray(b.flags)||b.flags.some(x=>!PRIDE[x])))throw new Error('"flags" must be a list from: '+Object.keys(PRIDE).join(", ")+".");
   if(b.parts!==undefined&&(!b.parts||typeof b.parts!=="object"||Array.isArray(b.parts)))throw new Error('"parts" tunes the scene: { "leaves": { "amount": 200 }, "fireworks": { "on": false } }.');
   live.theme=b.theme;live.themeO={flags:b.flags,night:b.night,parts:b.parts};syncBars();return "Theme set to "+(THEMES[b.theme]||{name:b.theme}).name+"."+(bgOf(live.mode).type==="sky"?"":" It shows on screens with the sky behind them, faint on a faint sky.");}
@@ -3695,7 +3709,7 @@ function prevFor(topic,b,key="__preview"){const r=v2route(topic);if(!r)throw new
   if(r.kind==="notify"){applyNotify2(key,b);const d=DEF["json:"+key];if(!d)return null;const anim=b.card&&b.card.card==="animation";return d.full&&FULL["json:"+key]&&(d.tier==="alert"||anim)?{k:"full",card:"json:"+key}:d.adv?{k:"card",card:"adv:json:"+key}:{k:"card",card:d.card};}
   if(r.kind==="data")return {k:"c2",card:dataCard(r.name,b)};
   if(r.kind==="box")return {k:"box",cards:b.cards,every:b.every||10};
-  if(r.kind==="theme"){if(!THEMES[b.theme]&&!isPluginKey(b.theme))throw new Error('"theme" must be one of: '+Object.keys(THEMES).join(", ")+", or a Marketplace theme, mp:<slug>.");themeOf(b.theme);return {k:"theme",th:b.theme,flags:b.flags,night:b.night,parts:b.parts};}
+  if(r.kind==="theme"){if(!THEMES[b.theme]&&!isPluginKey(b.theme))throw new Error('"theme" must be one of: '+Object.keys(THEMES).join(", ")+", or a Marketplace theme, mp:<author>/<name> or mp:<id>.");themeOf(b.theme);return {k:"theme",th:b.theme,flags:b.flags,night:b.night,parts:b.parts};}
   if(r.kind==="weather"){const x=b.extra&&EXTRAS.find(e=>e[0]===b.extra),h=HA_WX.find(e=>e[0]===b.condition),day=h&&h[2]!==undefined?!!h[2]:b.is_day!==false;
     return {k:"wx",kind:(x?x[0]:h[1])+(day?"-day":""),wxp:{caption:Array.isArray(b.caption)?b.caption.map((c,i)=>c==null?null:up(c,i<2?F5:F3)):undefined}};}
   if(r.kind==="image")return {k:"img",img:dec565(Object.assign({},b,{id:r.name}))};

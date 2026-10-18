@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // Copyright (C) 2026 FireBall1725
 // The marketplace's items: one folder per item, items/<kind>/<namespace>/<slug>/item.json, plus the C source of a plugin
-// (an animation, or a theme with "source"). An item's name is <namespace>/<slug>; its id is a number that never changes or gets reused.
-import { createHash } from "node:crypto";
+// (an animation, or a theme with "source"). An item's name is <namespace>/<slug>; its id is a UUID that never changes or gets reused.
+import { createHash, randomUUID } from "node:crypto";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join, sep } from "node:path";
 
@@ -11,6 +11,9 @@ export const LICENSES = ["CC-BY-4.0", "CC-BY-SA-4.0", "CC0-1.0", "MIT"];
 export const MAX_BYTES = 64 * 1024;
 /* Namespaces only these GitHub accounts may publish under, besides their own: pixelbar/ is for official items. */
 export const OFFICIAL = "pixelbar", MAINTAINERS = ["FireBall1725"];
+/* An id: a version 4 UUID, lowercase. The author makes it (tools/new-item.mjs does), so there's no counter to coordinate. */
+export const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+export const newId = () => randomUUID();
 export const SEMVER = /^(0|[1-9]\d{0,3})\.(0|[1-9]\d{0,3})\.(0|[1-9]\d{0,3})$/;
 
 const dirs = d => existsSync(d) ? readdirSync(d).filter(n => statSync(join(d, n)).isDirectory()) : [];

@@ -7,10 +7,9 @@
 // A published version is never rebuilt: the bytes behind wasm/<id>/<version>.wasm don't change once they're out.
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
-import { copyFileSync, cpSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { compareVersions, fingerprint, isPlugin, listItems, partsOf, readRetired, sourceOf } from "./lib/items.mjs";
-import { nextId } from "./validate.mjs";
 import { loadAnim } from "./lib/anim.mjs";
 
 const args = process.argv.slice(2), keep = args.includes("--keep") ? args.splice(args.indexOf("--keep"), 2)[1] : null;
@@ -26,7 +25,7 @@ const versionsOf = id => {
     .sort(compareVersions).map(v => ({ version: v, wasm: `wasm/${id}/${v}.wasm`, sha256: sha256(join(d, v + ".wasm")) }));
 };
 
-const dirs = listItems(), slugs = dirs.map(d => partsOf(d).slug);
+const dirs = listItems();
 const items = await Promise.all(dirs.map(async d => {
   const it = JSON.parse(readFileSync(join(d, "item.json"), "utf8")), { kind, ns, slug, name } = partsOf(d);
   const row = { id: it.id, name, kind, namespace: ns, slug, path: d, version: it.version, title: it.title, description: it.description || "",
@@ -36,8 +35,6 @@ const items = await Promise.all(dirs.map(async d => {
     mkdirSync(join(out, "wasm", String(it.id)), { recursive: true });
     if (!existsSync(wasm)) execFileSync(join(ROOT, "sdk/build.sh"), [join(d, sourceOf(it)), wasm], { stdio: "pipe" });
     row.wasm = `wasm/${it.id}/${it.version}.wasm`; row.sha256 = sha256(wasm); row.versions = versionsOf(it.id); row.params = it.params || {};
-    // The name readers used before ids (mp:<slug>, <slug>.wasm) stays served while no other item shares the slug.
-    if (slugs.filter(s => s === slug).length === 1) { copyFileSync(wasm, join(out, slug + ".wasm")); row.legacy = slug + ".wasm"; }
     // A plugin's manifest (its title, colours and parts) goes in the index, so Home Assistant can build its controls before fetching the .wasm.
     const m = (await loadAnim(readFileSync(wasm), {})).manifest;
     if (m && !m.error) row.manifest = m;
@@ -45,6 +42,5 @@ const items = await Promise.all(dirs.map(async d => {
   return row;
 }));
 const retired = readRetired().map(r => ({ ...r, versions: versionsOf(r.id) }));
-writeFileSync(join(out, "index.json"), JSON.stringify({ version: 2, built: new Date().toISOString(), next_id: nextId(items.map(i => i.id)),
-  items, retired }, null, 2) + "\n");
+writeFileSync(join(out, "index.json"), JSON.stringify({ version: 2, built: new Date().toISOString(), items, retired }, null, 2) + "\n");
 console.log(`${out}/index.json: ${items.length} item${items.length === 1 ? "" : "s"}, ${retired.length} retired`);

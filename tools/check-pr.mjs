@@ -8,9 +8,9 @@
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { check, crossCheck, nextId } from "./validate.mjs";
+import { check, crossCheck } from "./validate.mjs";
 import { preview } from "./preview.mjs";
-import { MAINTAINERS, compareVersions, fingerprint, fingerprintOf, isPlugin, listItems, partsOf, readRetired, sourceOf } from "./lib/items.mjs";
+import { MAINTAINERS, UUID, compareVersions, fingerprint, fingerprintOf, isPlugin, listItems, newId, partsOf, readRetired, sourceOf } from "./lib/items.mjs";
 
 const [, , changedFile, out = "out", base = "origin/main"] = process.argv;
 const AUTHOR = process.env.PR_AUTHOR || "";
@@ -20,39 +20,37 @@ const dirs = [...new Set(changed.filter(p => p.startsWith("items/") && p.split("
 const all = listItems(), seen = new Map(), cross = crossCheck(all), retired = readRetired();
 for (const d of all) if (!dirs.includes(d)) { try { seen.set(fingerprint(d, JSON.parse(readFileSync(join(d, "item.json"), "utf8"))), d); } catch { /* not ours to check */ } }
 
-/* What main has, by id: each item's folder, its item.json and its fingerprint, read out of git. Items from before ids have none and are skipped. */
+/* What main has, by id: each item's folder, its item.json and its fingerprint, read out of git. Items from before UUID ids have none and are skipped. */
 const git = (...a) => { try { return execFileSync("git", a, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }); } catch { return null; } };
 const onBase = new Map();
 for (const f of (git("ls-tree", "-r", "--name-only", base, "--", "items") || "").split("\n").filter(f => f.endsWith("/item.json"))) {
   let item; try { item = JSON.parse(git("show", `${base}:${f}`)); } catch { continue; }
-  if (!Number.isInteger(item.id)) continue;
+  if (typeof item.id !== "string" || !UUID.test(item.id)) continue;
   const dir = f.slice(0, -"/item.json".length), src = isPlugin(item) ? git("show", `${base}:${dir}/${sourceOf(item)}`) : null;
   onBase.set(item.id, { dir, item, fp: fingerprintOf(item, src) });
 }
 const headIds = new Map();
-for (const d of all) { try { const it = JSON.parse(readFileSync(join(d, "item.json"), "utf8")); if (Number.isInteger(it.id)) headIds.set(it.id, d); } catch { /* checked below */ } }
-let free = nextId([...onBase.keys(), ...[...headIds.keys()]], retired);
-const issued = Math.max(0, ...onBase.keys(), ...retired.map(r => r.id));
+for (const d of all) { try { const it = JSON.parse(readFileSync(join(d, "item.json"), "utf8")); if (typeof it.id === "string") headIds.set(it.id, d); } catch { /* checked below */ } }
 
-/* Id and version rules against main: an item keeps its id and kind, its version never goes back, and a change raises it. */
+/* Id and version rules against main: an item keeps its id and kind, nobody else's id moves to another namespace, its version never goes back, and a change raises it. */
 function againstBase(d, item) {
   const say = [], { ns } = partsOf(d);
-  if (!Number.isInteger(item.id)) { say.push(`Give it "id": ${free++} (the next free number).`); return say; }
-  let b = onBase.get(item.id);
-  // Still where main has it: then this folder is a different item taking a number that's in use, not that item moving.
+  if (typeof item.id !== "string" || !UUID.test(item.id)) { say.push(`Give it "id": "${newId()}" (a fresh UUID).`); return say; }
+  const b = onBase.get(item.id);
+  // Still where main has it: then this folder is a different item using an id that's taken, not that item moving.
   if (b && b.dir !== d && existsSync(join(b.dir, "item.json"))) {
     let still; try { still = JSON.parse(readFileSync(join(b.dir, "item.json"), "utf8")).id === item.id; } catch { still = false; }
-    if (still) { say.push(`id ${item.id} is already ${b.dir}'s; a new item takes "id": ${free++}.`); b = null; return say; }
+    if (still) { say.push(`id ${item.id} is already ${b.dir}'s; a new item takes its own: "id": "${newId()}".`); return say; }
   }
   if (b) {
     if (b.item.kind !== item.kind) say.push(`id ${item.id} is ${b.dir} on main, a ${b.item.kind}; an item's kind can't change.`);
+    if (partsOf(b.dir).ns !== ns && !MAINTAINERS.includes(AUTHOR)) say.push(`id ${item.id} belongs to ${partsOf(b.dir).name}; it can't move to another namespace.`);
     if (typeof item.version === "string" && typeof b.item.version === "string") {
       const c = compareVersions(item.version, b.item.version);
       if (c < 0) say.push(`"version" went back from ${b.item.version} to ${item.version}.`);
       else if (c === 0 && fingerprint(d, item) !== b.fp) say.push(`It changed, so raise "version" above ${b.item.version}.`);
     }
   } else {
-    if (item.id <= issued) say.push(`id ${item.id} was already issued; a new item takes "id": ${free++}.`);
     if (AUTHOR && !MAINTAINERS.includes(AUTHOR) && ns !== AUTHOR.toLowerCase()) say.push(`New items from @${AUTHOR} go in items/${item.kind}/${AUTHOR.toLowerCase()}/.`);
   }
   return say;
@@ -64,15 +62,15 @@ let bad = 0;
 const gone = [...onBase.entries()].filter(([id]) => !headIds.has(id) && !retired.some(r => r.id === id));
 for (const [id, b] of gone) {
   bad++; rows.push(`| \`${b.dir}\` | ${b.item.kind} | ✗ removed |`);
-  blocks.push(`### ${b.item.title}\n\`${b.dir}\`\n\n- It was removed, so add it to retired.json: \`{ "id": ${id}, "name": "${partsOf(b.dir).name}", "kind": "${b.item.kind}", "reason": "..." }\`.`);
+  blocks.push(`### ${b.item.title}\n\`${b.dir}\`\n\n- It was removed, so add it to retired.json: \`{ "id": "${id}", "name": "${partsOf(b.dir).name}", "kind": "${b.item.kind}", "reason": "..." }\`.`);
 }
 if (!dirs.length && !gone.length) blocks.push("This pull request doesn't add or change any items, so there's nothing to preview.");
 for (const d of dirs) {
   if (!existsSync(d)) { if (!gone.some(([, b]) => b.dir === d)) rows.push(`| \`${d}\` | | removed or moved |`); continue; }
   const r = check(d, seen), title = r.item && r.item.title ? r.item.title : d;
   if (r.item) {
-    const extra = againstBase(d, r.item);   // a missing id gets the exact number to use, in place of the general rule
-    if (!Number.isInteger(r.item.id)) r.problems = r.problems.filter(p => !p.startsWith('"id"'));
+    const extra = againstBase(d, r.item);   // a missing id gets a fresh UUID to paste in, in place of the general rule
+    if (typeof r.item.id !== "string" || !UUID.test(r.item.id)) r.problems = r.problems.filter(p => !p.startsWith('"id"'));
     r.problems.push(...(cross.get(d) || []), ...extra);
   }
   if (r.item && r.item.kind) kinds.add(r.item.kind);

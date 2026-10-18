@@ -1,6 +1,6 @@
 {
   "kind": "animation",
-  "id": 1,
+  "id": "76ee33d9-4e35-4b4e-9a1c-9321d96d737c",
   "version": "1.0.0",
   "title": "Hearts",
   "description": "Hearts float up in the notification's colours while the title drops in. The SDK's example.",
